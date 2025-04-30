@@ -1,0 +1,9 @@
+[submodule "Source/ThirdParty/spdlog"]
+	path = Source/ThirdParty/spdlog
+	url = git@github.com:chendebi/spdlog.git
+[submodule "Source/ThirdParty/fmt"]
+	path = Source/ThirdParty/fmt
+	url = git@github.com:chendebi/fmt.git
+[submodule "Source/ThirdParty/glm"]
+	path = Source/ThirdParty/glm
+	url = git@github.com:chendebi/glm.git
