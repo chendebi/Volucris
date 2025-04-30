@@ -30,6 +30,7 @@ target_sources(${TARGET} PRIVATE
     ${CORE_CODE_FILES}
 )
 
+set_target_properties(${TARGET} PROPERTIES FOLDER "Volucris")
 target_link_libraries(${TARGET} PUBLIC fmt glm)
 target_link_libraries(${TARGET} PRIVATE spdlog_header_only glad)
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine)
