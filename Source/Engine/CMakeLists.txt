@@ -25,13 +25,17 @@ function(volucris_engine_code FOLDER_NAME OUTPUT_LIST)
 endfunction()
 
 volucris_engine_code(Core CORE_CODE_FILES)
+volucris_engine_code(Application APPLICATION_CODE_FILES)
+volucris_engine_code(Renderer RENDERER_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${CORE_CODE_FILES}
+    ${APPLICATION_CODE_FILES}
+    ${RENDERER_CODE_FILES}
 )
 
 set_target_properties(${TARGET} PROPERTIES FOLDER "Volucris")
 target_link_libraries(${TARGET} PUBLIC fmt glm)
-target_link_libraries(${TARGET} PRIVATE spdlog_header_only glad)
-target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine)
+target_link_libraries(${TARGET} PRIVATE spdlog_header_only glad glfw)
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)

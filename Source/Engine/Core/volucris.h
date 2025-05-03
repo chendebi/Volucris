@@ -4,6 +4,6 @@
 #include "Core/logging.h"
 #include "assert.h"
 
-VOLUCRIS_DECLARE_LOG(Engine, Trace)
+VOLUCRIS_DEFINE_LOG(Engine)
 
 #endif // !__volucris_volucris_h__

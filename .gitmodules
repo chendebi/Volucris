@@ -7,3 +7,6 @@
 [submodule "Source/ThirdParty/glm"]
 	path = Source/ThirdParty/glm
 	url = git@github.com:chendebi/glm.git
+[submodule "Source/ThirdParty/glfw"]
+	path = Source/ThirdParty/glfw
+	url = git@github.com:chendebi/glfw.git

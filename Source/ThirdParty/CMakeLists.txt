@@ -12,6 +12,7 @@ add_subdirectory(spdlog)
 add_subdirectory(glad)
 add_subdirectory(glm)
 add_subdirectory(imgui)
+add_subdirectory(glfw)
 
 if (INDEPENDENT_VOLUCRIS)
 	set_target_properties(spdlog PROPERTIES FOLDER "ThirdParty")
