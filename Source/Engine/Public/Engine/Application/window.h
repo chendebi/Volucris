@@ -21,11 +21,17 @@ namespace volucris
 
 		void pollEvents();
 
+		void setTitle(const std::string& title);
+
+		void setSize(int width, int height);
+
 		bool initialize();
 
 		void destroy();
 
 		void* getHandle() const;
+
+		bool setupImGUI(const std::string& glslversion);
 
 	private:
 		struct Impl;

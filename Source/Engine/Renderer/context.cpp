@@ -17,6 +17,7 @@ namespace volucris
 		auto window = Application::Instance()->getWindow();
 		m_impl->window = static_cast<GLFWwindow*>(window->getHandle());
 		makeCurrent();
+		glfwSwapInterval(1); // Enable vsync
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	}
 
