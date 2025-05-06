@@ -12,6 +12,12 @@ namespace volucris
 		int w = 0;
 		int h = 0;
 
+		Rect() = default;
+
+		Rect(int px, int py, int width, int height)
+			: x(px), y(py), w(width), h(height)
+		{ }
+
 		void setPos(int x, int y)
 		{
 			this->x = x;
@@ -35,6 +41,12 @@ namespace volucris
 		}
 
 		bool isValid() const { return w > 0 && h > 0; }
+
+		bool contains(int px, int py) const
+		{
+			return px >= x && px <= x + w &&
+				py >= y && py <= y + h;
+		}
 
 		std::string toString() const
 		{

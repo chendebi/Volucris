@@ -17,13 +17,32 @@ namespace volucris
 	void onGLFWWindowClose(GLFWwindow* handle)
 	{
 		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-		window->onClose();
+		window->Close();
+	}
+
+	void onGLFWWindowResized(GLFWwindow* handle, int w, int h)
+	{
+		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+		window->WindowSizeChanged(w, h);
+	}
+
+	void onGLFWFrameResized(GLFWwindow* handle, int w, int h)
+	{
+		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+		window->FrameSizeChanged(w, h);
+	}
+
+	void onGLFWMouseMove(GLFWwindow* handle, double w, double h)
+	{
+		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+		window->MouseMove(w, h);
 	}
 
 	Window::Window()
 		: m_impl(new Impl)
-		, m_width(800)
-		, m_height(600)
+		, m_size(800, 600)
+		, m_frameSize(0,0)
+		, m_title()
 	{
 
 	}
@@ -46,8 +65,11 @@ namespace volucris
 
 	void Window::setSize(int width, int height)
 	{
-		m_width = width;
-		m_height = height;
+		m_size = { width, height };
+		if (m_impl->handle)
+		{
+			glfwSetWindowSize(m_impl->handle, width, height);
+		}
 	}
 
 	bool Window::initialize()
@@ -63,9 +85,21 @@ namespace volucris
 			return false;
 		}
 
-		m_impl->handle = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+		m_impl->handle = glfwCreateWindow(m_size.width, m_size.height, m_title.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(m_impl->handle, this);
 		glfwSetWindowCloseCallback(m_impl->handle, onGLFWWindowClose);
+		glfwSetWindowSizeCallback(m_impl->handle, onGLFWWindowResized);
+		glfwSetFramebufferSizeCallback(m_impl->handle, onGLFWFrameResized);
+		glfwSetCursorPosCallback(m_impl->handle, onGLFWMouseMove);
+
+		WindowSizeChanged.addLambda([this](int w, int h) {
+			m_size = { w, h };
+			});
+		FrameSizeChanged.addLambda([this](int w, int h) {
+			m_frameSize = { w, h };
+			});
+		glfwGetFramebufferSize(m_impl->handle, &m_frameSize.width, &m_frameSize.height);
+		FrameSizeChanged(m_frameSize.width, m_frameSize.height);
 		return true;
 	}
 

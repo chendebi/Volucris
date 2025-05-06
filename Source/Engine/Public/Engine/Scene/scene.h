@@ -7,6 +7,8 @@ namespace volucris
 	{
 	public:
 
+		void update();
+
 	private:
 	};
 }

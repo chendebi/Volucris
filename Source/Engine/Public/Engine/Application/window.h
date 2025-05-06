@@ -4,15 +4,22 @@
 #include <string>
 #include <memory>
 #include "Engine/Core/event.h"
+#include "Engine/Core/size.h"
 
 DECLARE_EVENT(OnClose)
+DECLARE_EVENT(OnSizeChanged, int, int)
+
+using OnMouseMove = OnSizeChanged;
 
 namespace volucris
 {
 	class Window
 	{
 	public:
-		OnClose onClose;
+		OnClose Close;
+		OnSizeChanged FrameSizeChanged;
+		OnSizeChanged WindowSizeChanged;
+		OnMouseMove MouseMove;
 
 	public:
 		Window();
@@ -33,11 +40,13 @@ namespace volucris
 
 		bool setupImGUI(const std::string& glslversion);
 
+		Size getFrameSize() const { return m_frameSize; }
+
 	private:
 		struct Impl;
 		Impl* m_impl;
-		int m_width;
-		int m_height;
+		Size m_size;
+		Size m_frameSize;
 		std::string m_title;
 	};
 }

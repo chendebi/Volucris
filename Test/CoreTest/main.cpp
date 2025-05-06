@@ -1,6 +1,9 @@
 #include <Engine/Core/logging.h>
 #include <Engine/Core/assert.h>
 #include <Engine/Application/application.h>
+#include <Engine/Application/window.h>
+#include <Engine/Application/viewport.h>
+#include <Engine/Application/client_viewport.h>
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
 
@@ -23,5 +26,8 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 {
 	auto config = Application::Config(argc, argv);
 	auto app = std::make_shared<Application>(config);
+
+	auto vp = std::make_shared<ClientViewport>();
+	app->addViewport(vp);
 	return app;
 }

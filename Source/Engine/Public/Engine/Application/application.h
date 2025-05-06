@@ -12,6 +12,8 @@ namespace volucris
 	class Context;
 	class Renderer;
 	class Widget;
+	class Viewport;
+	class Scene;
 
 	class Application
 	{
@@ -37,7 +39,7 @@ namespace volucris
 
 		bool initialize();
 
-		void shotdown();
+		void shutdown();
 
 		bool setWindow(const std::shared_ptr<Window>& window);
 
@@ -45,13 +47,21 @@ namespace volucris
 
 		void setMainWidget(const std::shared_ptr<Widget>& widget);
 
+		void setScene(const std::shared_ptr<Scene>& scene);
+
+		bool addViewport(const std::shared_ptr<Viewport>& viewport);
+
 		bool isInitialized() const { return m_initialized; }
 
 		bool isRunning() const { return m_running; }
 
-		Window* getWindow() const { return m_window.get(); }
+		Window* getWindow();
 
 		Context* getContext() const;
+
+		Renderer* getRenderer() const { return m_renderer.get(); }
+
+		Scene* getScene();
 
 		void quit();
 
@@ -64,6 +74,8 @@ namespace volucris
 		std::shared_ptr<Window> m_window;
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Widget> m_mainWidget;
+		std::shared_ptr<Scene> m_scene;
+		std::vector<std::shared_ptr<Viewport>> m_viewports;
 	};
 }
 

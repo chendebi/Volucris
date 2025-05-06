@@ -7,6 +7,8 @@
 #include "Application/widget.h"
 #include "Renderer/context.h"
 #include "Renderer/renderer.h"
+#include "Application/viewport.h"
+#include "Scene/scene.h"
 
 namespace volucris
 {
@@ -30,6 +32,8 @@ namespace volucris
 		, m_window(nullptr)
 		, m_renderer(nullptr)
 		, m_mainWidget(nullptr)
+		, m_scene(nullptr)
+		, m_viewports()
 	{
 		checkq(!Inst, Engine, "application already exist");
 		Inst = this;
@@ -53,14 +57,16 @@ namespace volucris
 
 		if (!m_window)
 		{
-			auto window = std::make_shared<Window>();
-			window->setTitle(m_config.appName);
-			window->setSize(1200, 800);
-			setWindow(window);
+			getWindow();
+		}
+
+		if (!m_scene)
+		{
+			getScene();
 		}
 
 		m_window->initialize();
-		m_window->onClose.addObject(this, &Application::quit);
+		m_window->Close.addObject(this, &Application::quit);
 
 		if (!m_renderer)
 		{
@@ -77,16 +83,19 @@ namespace volucris
 			return false;
 		}
 
+		m_window->FrameSizeChanged.addObject(m_renderer.get(), & Renderer::setWindowFrameSize);
+
 		m_initialized = true;
 		return true;
 	}
 
-	void Application::shotdown()
+	void Application::shutdown()
 	{
 		if (!m_initialized)
 		{
 			return;
 		}
+		m_window->FrameSizeChanged.removeAll(m_renderer.get());
 		m_window->destroy();
 		glfwTerminate();
 		m_initialized = false;
@@ -118,6 +127,40 @@ namespace volucris
 		m_mainWidget = widget;
 	}
 
+	void Application::setScene(const std::shared_ptr<Scene>& scene)
+	{
+		if (m_running)
+		{
+			V_LOG_WARN(Engine, "application is running, not support dynamic set scene");
+			return;
+		}
+
+		m_scene = scene;
+	}
+
+	bool Application::addViewport(const std::shared_ptr<Viewport>& viewport)
+	{
+		if (m_running)
+		{
+			V_LOG_WARN(Engine, "application is running, not support dynamic add viewport");
+			return false;
+		}
+
+		m_viewports.push_back(viewport);
+		return true;
+	}
+
+	Window* Application::getWindow()
+	{
+		if (!m_window)
+		{
+			m_window = std::make_shared<Window>();
+			m_window->setTitle(m_config.appName);
+			m_window->setSize(1200, 800);
+		}
+		return m_window.get();
+	}
+
 	Context* Application::getContext() const
 	{
 		if (m_renderer)
@@ -125,6 +168,15 @@ namespace volucris
 			return m_renderer->getContext();
 		}
 		return nullptr;
+	}
+
+	Scene* Application::getScene()
+	{
+		if (!m_scene)
+		{
+			m_scene = std::make_shared<Scene>();
+		}
+		return m_scene.get();
 	}
 
 	void Application::quit()
@@ -142,13 +194,25 @@ namespace volucris
 
 		m_running = true;
 
+		m_renderer->setViewports(m_viewports);
+
 		while (m_running)
 		{
 			m_window->pollEvents();
+
+			// TODO: tick
+
+			for (const auto& view: m_viewports)
+			{
+				view->update();
+			}
+			m_scene->update();
 
 			Widget::draw(m_mainWidget.get());
 
 			m_renderer->render();
 		}
+
+		shutdown();
 	}
 }

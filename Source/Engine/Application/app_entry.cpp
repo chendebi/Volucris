@@ -15,7 +15,5 @@ int main(int argc, char** argv)
 	}
 
 	app->exec();
-
-	app->shotdown();
 	return 0;
 }
