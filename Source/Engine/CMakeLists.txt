@@ -40,6 +40,9 @@ target_sources(${TARGET} PRIVATE
 
 set_target_properties(${TARGET} PROPERTIES FOLDER "Volucris")
 target_link_libraries(${TARGET} PUBLIC fmt glm imgui)
-target_link_libraries(${TARGET} PRIVATE spdlog_header_only glad glfw)
-target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${TARGET} PRIVATE spdlog_header_only glad glfw ${Assimp_LIBS})
+target_include_directories(${TARGET} PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)

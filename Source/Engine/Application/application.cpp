@@ -206,6 +206,7 @@ namespace volucris
 			{
 				view->update();
 			}
+
 			m_scene->update();
 
 			Widget::draw(m_mainWidget.get());
