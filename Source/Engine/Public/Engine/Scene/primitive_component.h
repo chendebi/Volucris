@@ -10,6 +10,8 @@ namespace volucris
 
 	};
 
+	class PrimitiveProxy;
+
 	class PrimitiveComponent : public SceneComponent
 	{
 	public:
@@ -28,12 +30,13 @@ namespace volucris
 
 		void setVertices(float* data, size_t size);
 
-		void setNormal(size_t idx, const glm::vec3& normal)
-		{
+		void setNormals(float* data, size_t size);
 
-		}
+	protected:
+		void updateRenderState() override;
 
 	private:
+		PrimitiveProxy* m_proxy;
 		std::vector<glm::vec3> m_vertices;
 		std::vector<glm::vec3> m_normals;
 		std::vector<glm::vec4> m_uvs;
