@@ -6,8 +6,7 @@
 namespace volucris
 {
 	SceneProxy::SceneProxy(Scene* scene)
-		: m_scene(scene)
-		, m_views()
+		: m_views()
 		, m_primitives()
 	{
 		
@@ -21,6 +20,14 @@ namespace volucris
 	void SceneProxy::update()
 	{
 
+	}
+
+	void SceneProxy::render()
+	{
+		for (const auto& view : m_views)
+		{
+			view->render();
+		}
 	}
 
 	void SceneProxy::addViewportProxy(const std::shared_ptr<ViewportProxy>& view)

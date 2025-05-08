@@ -10,27 +10,19 @@ namespace volucris
 	PrimitiveComponent::PrimitiveComponent()
 		: SceneComponent()
 		, m_proxy(nullptr)
-		, m_vertices()
+		, m_meshData(nullptr)
 	{
 	}
 
-	void PrimitiveComponent::setVertices(float* data, size_t size)
+	MeshResourceData* PrimitiveComponent::getMeshResourceData()
 	{
-		auto count = size / sizeof(glm::vec3);
-		checkf(count * sizeof(glm::vec3) == size, Engine, "vertex data invalid");
-		m_vertices.resize(count);
-		memcpy(m_vertices.data(), data, size);
-		markRenderStateDirty();
+		if (!m_meshData)
+		{
+			m_meshData = std::make_unique<MeshResourceData>();
+		}
+		return m_meshData.get();
 	}
 
-	void PrimitiveComponent::setNormals(float* data, size_t size)
-	{
-		auto count = size / sizeof(glm::vec3);
-		checkf(count * sizeof(glm::vec3) == size, Engine, "vertex data invalid");
-		m_normals.resize(count);
-		memcpy(m_normals.data(), data, size);
-		markRenderStateDirty();
-	}
 
 	void PrimitiveComponent::updateRenderState()
 	{
@@ -48,7 +40,7 @@ namespace volucris
 				});
 		}
 
-		if (isAttached())
+		if (isAttached() && m_meshData)
 		{
 			// 创建
 			m_proxy = renderer->createPrimitiveProxy(this);

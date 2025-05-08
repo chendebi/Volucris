@@ -5,6 +5,8 @@
 namespace volucris
 {
 	class Viewport;
+	class SceneProxy;
+
 	class ViewportProxy
 	{
 	public:
@@ -16,6 +18,7 @@ namespace volucris
 
 	private:
 		Rect m_viewport;
+		SceneProxy* m_scene;
 	};
 }
 

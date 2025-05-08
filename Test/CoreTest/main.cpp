@@ -5,6 +5,8 @@
 #include <Engine/Application/viewport.h>
 #include <Engine/Application/client_viewport.h>
 #include <Engine/Scene/scene.h>
+#include "Engine/Scene/actor.h"
+#include "Engine/Scene/primitive_component.h"
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
 
@@ -20,6 +22,15 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	auto vp = std::make_shared<ClientViewport>();
 	auto scene = std::make_shared<Scene>();
 	scene->addViewport(vp);
+
+	auto actor = std::make_shared<Actor>();
+	auto comp = std::make_shared<PrimitiveComponent>();
+	actor->setRootComponent(comp);
+	scene->addActor(actor);
+
+	auto data = comp->getMeshResourceData();
+	data->
+
 	app->addScene(scene);
 
 	return app;

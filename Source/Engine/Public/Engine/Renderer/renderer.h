@@ -32,7 +32,7 @@ namespace volucris
 
 		void setWindowFrameSize(int width, int height);
 
-		SceneProxy* addScene(Scene* scene);
+		void addScene(const std::shared_ptr<SceneProxy>& scene);
 
 		void removeScene(Scene* scene);
 

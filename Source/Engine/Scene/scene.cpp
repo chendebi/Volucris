@@ -61,6 +61,11 @@ namespace volucris
 
 	void Scene::update()
 	{
+		for (const auto& view : m_views)
+		{
+			view->update();
+		}
+
 		for (const auto& actor : m_actors)
 		{
 			actor->update();
@@ -69,16 +74,22 @@ namespace volucris
 
 	void Scene::attachToRenderer()
 	{
+		if (m_proxy)
+		{
+			V_LOG_ERROR(Engine, "scene has been attached");
+			return;
+		}
+
 		auto renderer = gApp->getRenderer();
 		auto sceneProxy = std::make_shared<SceneProxy>(this);
-
+		m_proxy = sceneProxy.get();
 		for (const auto& view : m_views)
 		{
 			auto proxy = std::make_shared<ViewportProxy>(view.get());
 			view->m_proxy = proxy.get();
 			sceneProxy->addViewportProxy(proxy);
 		}
-		m_proxy = renderer->addScene(this);
+		renderer->addScene(sceneProxy);
 		V_LOG_DEBUG(Engine, "scene attach to renderer");
 		RenderStateChanged.broadcast();
 	}

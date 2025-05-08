@@ -2,14 +2,10 @@
 #define __volucris_primitive_component_h__
 
 #include "Engine/Scene/scene_component.h"
+#include <Engine/Resource/mesh_resource_data.h>
 
 namespace volucris
 {
-	class Section
-	{
-
-	};
-
 	class PrimitiveProxy;
 
 	class PrimitiveComponent : public SceneComponent
@@ -17,29 +13,14 @@ namespace volucris
 	public:
 		PrimitiveComponent();
 
-		void addVertex(float x, float y, float z)
-		{
-			addVertex({ x, y, z });
-		}
-
-		void addVertex(const glm::vec3& vertex)
-		{
-			m_vertices.push_back(vertex);
-			markRenderStateDirty();
-		}
-
-		void setVertices(float* data, size_t size);
-
-		void setNormals(float* data, size_t size);
+		MeshResourceData* getMeshResourceData();
 
 	protected:
 		void updateRenderState() override;
 
 	private:
 		PrimitiveProxy* m_proxy;
-		std::vector<glm::vec3> m_vertices;
-		std::vector<glm::vec3> m_normals;
-		std::vector<glm::vec4> m_uvs;
+		std::unique_ptr<MeshResourceData> m_meshData;
 	};
 }
 

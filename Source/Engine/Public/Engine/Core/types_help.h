@@ -4,6 +4,7 @@
 namespace volucris
 {
 	using uint8 = unsigned char;
+	using uint32 = unsigned int;
 }
 
 #endif // !__volucris_types_help_h__

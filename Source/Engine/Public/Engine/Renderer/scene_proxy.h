@@ -17,14 +17,15 @@ namespace volucris
 
 		~SceneProxy();
 
-		void addViewportProxy(const std::shared_ptr<ViewportProxy>& view);
-
 		void update();
+
+		void render();
+
+		void addViewportProxy(const std::shared_ptr<ViewportProxy>& view);
 
 		void addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy);
 
 	private:
-		Scene* m_scene;
 		std::vector<std::shared_ptr<ViewportProxy>> m_views;
 		std::vector<std::shared_ptr<PrimitiveProxy>> m_primitives;
 	};

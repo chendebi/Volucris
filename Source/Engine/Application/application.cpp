@@ -94,6 +94,7 @@ namespace volucris
 		m_window->destroy();
 		glfwTerminate();
 		m_initialized = false;
+		V_LOG_INFO(Engine, "application quit success");
 	}
 
 	bool Application::setWindow(const std::shared_ptr<Window>& window)

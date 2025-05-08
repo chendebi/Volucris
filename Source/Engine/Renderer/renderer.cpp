@@ -34,9 +34,9 @@ namespace volucris
 			scene->update();
 		}
 
-		for (const auto& viewport : m_viewports)
+		for (const auto& scene : m_scenes)
 		{
-			viewport->render();
+			scene->render();
 		}
 
 		renderui();
@@ -55,14 +55,11 @@ namespace volucris
 			});
 	}
 
-	SceneProxy* Renderer::addScene(Scene* scene)
+	void Renderer::addScene(const std::shared_ptr<SceneProxy>& scene)
 	{
-		check(scene && scene->getProxy() == nullptr);
-		auto sceneProxy = std::make_shared<SceneProxy>(scene);
-		pushCommand([this, sceneProxy]() {
-			m_scenes.push_back(sceneProxy);
+		pushCommand([this, scene]() {
+			m_scenes.push_back(scene);
 			});
-		return sceneProxy.get();
 	}
 
 	void Renderer::removeScene(Scene* scene)
