@@ -33,6 +33,10 @@ namespace volucris
 	protected:
 		virtual void onUpdate() {}
 
+		void attached() override;
+
+		void disattached(Scene* scene) override;
+
 	private:
 		std::shared_ptr<Component> m_rootComponent;
 	};

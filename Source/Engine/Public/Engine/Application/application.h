@@ -47,7 +47,7 @@ namespace volucris
 
 		void setMainWidget(const std::shared_ptr<Widget>& widget);
 
-		void setScene(const std::shared_ptr<Scene>& scene);
+		void addScene(const std::shared_ptr<Scene>& scene);
 
 		bool addViewport(const std::shared_ptr<Viewport>& viewport);
 
@@ -61,8 +61,6 @@ namespace volucris
 
 		Renderer* getRenderer() const { return m_renderer.get(); }
 
-		Scene* getScene();
-
 		void quit();
 
 		void exec();
@@ -74,8 +72,7 @@ namespace volucris
 		std::shared_ptr<Window> m_window;
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Widget> m_mainWidget;
-		std::shared_ptr<Scene> m_scene;
-		std::vector<std::shared_ptr<Viewport>> m_viewports;
+		std::vector<std::shared_ptr<Scene>> m_scenes;
 	};
 }
 

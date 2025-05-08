@@ -3,6 +3,7 @@
 #include <Core/assert.h>
 #include <Application/application.h>
 #include <Renderer/renderer.h>
+#include "Scene/scene.h"
 
 namespace volucris
 {
@@ -34,7 +35,7 @@ namespace volucris
 	void PrimitiveComponent::updateRenderState()
 	{
 		auto renderer = gApp->getRenderer();
-		if (!renderer)
+		if (!renderer || !getScene()->getProxy())
 		{
 			m_proxy = nullptr;
 			return;
@@ -43,13 +44,15 @@ namespace volucris
 		if (m_proxy)
 		{
 			renderer->pushCommand([this]() {
-				// 删除
+				//delete m_proxy
 				});
 		}
 
-		// 创建
-
-
+		if (isAttached())
+		{
+			// 创建
+			m_proxy = renderer->createPrimitiveProxy(this);
+		}
 	}
 
 }

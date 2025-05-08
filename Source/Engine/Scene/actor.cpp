@@ -25,4 +25,14 @@ namespace volucris
 		m_rootComponent->update();
 		onUpdate();
 	}
+
+	void Actor::attached()
+	{
+		m_rootComponent->attach(getScene());
+	}
+
+	void Actor::disattached(Scene* scene)
+	{
+		m_rootComponent->disattach();
+	}
 }

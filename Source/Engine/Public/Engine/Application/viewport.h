@@ -4,12 +4,13 @@
 #include "Engine/Core/rect.h"
 #include "Engine/Core/types_help.h"
 #include <memory>
+#include "Engine/Scene/scene_object.h"
 
 namespace volucris
 {
 	class ViewportProxy;
 
-	class Viewport
+	class Viewport : public SceneObject
 	{
 	public:
 		Viewport();
@@ -20,14 +21,14 @@ namespace volucris
 
 		void update();
 
-		std::shared_ptr<ViewportProxy> createProxy();
-
-		std::shared_ptr<ViewportProxy> getProxy() const { return m_proxy; }
+		ViewportProxy* getProxy() const { return m_proxy; }
 
 	private:
+		friend class Scene;
+		friend class SceneProxy;
 		uint8 m_dirty;
 		Rect m_viewport;
-		std::shared_ptr<ViewportProxy> m_proxy;
+		ViewportProxy* m_proxy;
 	};
 }
 

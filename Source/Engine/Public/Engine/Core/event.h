@@ -22,6 +22,13 @@ namespace volucris
 			return id;
 		}
 
+		void clear()
+		{
+			m_callables.clear();
+			m_objectCallables.clear();
+			m_id = 0;
+		}
+
 		bool remove(size_t id)
 		{
 			auto it = std::find(m_callables.begin(), m_callables.end(), id);

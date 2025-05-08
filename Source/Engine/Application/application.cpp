@@ -32,8 +32,7 @@ namespace volucris
 		, m_window(nullptr)
 		, m_renderer(nullptr)
 		, m_mainWidget(nullptr)
-		, m_scene(nullptr)
-		, m_viewports()
+		, m_scenes()
 	{
 		checkq(!Inst, Engine, "application already exist");
 		Inst = this;
@@ -58,11 +57,6 @@ namespace volucris
 		if (!m_window)
 		{
 			getWindow();
-		}
-
-		if (!m_scene)
-		{
-			getScene();
 		}
 
 		m_window->initialize();
@@ -95,6 +89,7 @@ namespace volucris
 		{
 			return;
 		}
+
 		m_window->FrameSizeChanged.removeAll(m_renderer.get());
 		m_window->destroy();
 		glfwTerminate();
@@ -127,27 +122,14 @@ namespace volucris
 		m_mainWidget = widget;
 	}
 
-	void Application::setScene(const std::shared_ptr<Scene>& scene)
+	void Application::addScene(const std::shared_ptr<Scene>& scene)
 	{
-		if (m_running)
+		if (scene->getProxy())
 		{
-			V_LOG_WARN(Engine, "application is running, not support dynamic set scene");
+			V_LOG_ERROR(Engine, "Scene has already in use");
 			return;
 		}
-
-		m_scene = scene;
-	}
-
-	bool Application::addViewport(const std::shared_ptr<Viewport>& viewport)
-	{
-		if (m_running)
-		{
-			V_LOG_WARN(Engine, "application is running, not support dynamic add viewport");
-			return false;
-		}
-
-		m_viewports.push_back(viewport);
-		return true;
+		m_scenes.push_back(scene);
 	}
 
 	Window* Application::getWindow()
@@ -170,15 +152,6 @@ namespace volucris
 		return nullptr;
 	}
 
-	Scene* Application::getScene()
-	{
-		if (!m_scene)
-		{
-			m_scene = std::make_shared<Scene>();
-		}
-		return m_scene.get();
-	}
-
 	void Application::quit()
 	{
 		V_LOG_INFO(Engine, "quit application");
@@ -194,7 +167,10 @@ namespace volucris
 
 		m_running = true;
 
-		m_renderer->setViewports(m_viewports);
+		for (const auto& scene : m_scenes)
+		{
+			scene->attachToRenderer();
+		}
 
 		while (m_running)
 		{
@@ -202,17 +178,25 @@ namespace volucris
 
 			// TODO: tick
 
-			for (const auto& view: m_viewports)
+			for (const auto& scene: m_scenes)
 			{
-				view->update();
+				scene->update();
 			}
-
-			m_scene->update();
 
 			Widget::draw(m_mainWidget.get());
 
 			m_renderer->render();
 		}
+
+		m_renderer->release();
+
+		for (const auto& scene : m_scenes)
+		{
+			scene->disattachFromRenderer();
+		}
+		m_scenes.clear();
+
+		m_renderer->clearCommands();
 
 		shutdown();
 	}

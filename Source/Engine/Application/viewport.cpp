@@ -32,11 +32,4 @@ namespace volucris
 			m_dirty = false;
 		}
 	}
-
-	std::shared_ptr<ViewportProxy> Viewport::createProxy()
-	{
-		check(!m_proxy);
-		m_proxy = std::make_shared<ViewportProxy>(this);
-		return m_proxy;
-	}
 }

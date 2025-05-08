@@ -11,8 +11,11 @@ namespace volucris
 	using RenderCommand = std::function<void()>;
 
 	class Context;
-	class Viewport;
+	class Scene;
 	class ViewportProxy;
+	class SceneProxy;
+	class PrimitiveProxy;
+	class PrimitiveComponent;
 
 	class Renderer
 	{
@@ -29,11 +32,19 @@ namespace volucris
 
 		void setWindowFrameSize(int width, int height);
 
-		void setViewports(const std::vector<std::shared_ptr<Viewport>>& viewports);
+		SceneProxy* addScene(Scene* scene);
+
+		void removeScene(Scene* scene);
 
 		Size getFrameSize() const { return m_windowFrameSize; }
 
+		PrimitiveProxy* createPrimitiveProxy(PrimitiveComponent* primitive);
+
 		void pushCommand(RenderCommand command);
+
+		void release();
+
+		void clearCommands();
 
 	private:
 		void renderui();
@@ -42,6 +53,7 @@ namespace volucris
 		std::shared_ptr<Context> m_context;
 		CircleQueue<RenderCommand> m_commands;
 		std::vector<std::shared_ptr<ViewportProxy>> m_viewports;
+		std::vector<std::shared_ptr<SceneProxy>> m_scenes;
 		Size m_windowFrameSize;
 	};
 }

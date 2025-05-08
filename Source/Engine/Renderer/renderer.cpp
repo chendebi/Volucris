@@ -3,6 +3,12 @@
 #include "Renderer/context.h"
 #include "Renderer/viewport_proxy.h"
 #include "Application/viewport.h"
+#include "Renderer/primitive_proxy.h"
+#include "Scene/primitive_component.h"
+#include "Renderer/scene_proxy.h"
+#include "Scene/scene.h"
+#include <Core/assert.h>
+#include "Core/vector_help.h"
 
 namespace volucris
 {
@@ -21,6 +27,11 @@ namespace volucris
 		while (m_commands.pop(command))
 		{
 			command();
+		}
+
+		for (const auto& scene : m_scenes)
+		{
+			scene->update();
 		}
 
 		for (const auto& viewport : m_viewports)
@@ -44,25 +55,54 @@ namespace volucris
 			});
 	}
 
-	void Renderer::setViewports(const std::vector<std::shared_ptr<Viewport>>& viewports)
+	SceneProxy* Renderer::addScene(Scene* scene)
 	{
-		std::vector<std::shared_ptr<ViewportProxy>> viewProxies;
-		for (const auto& viewport : viewports)
-		{
-			viewport->createProxy();
-			auto proxy = viewport->getProxy();
-			viewProxies.push_back(proxy);
-		}
-
-		pushCommand([this, viewProxies]()
-			{
-				m_viewports = viewProxies;
+		check(scene && scene->getProxy() == nullptr);
+		auto sceneProxy = std::make_shared<SceneProxy>(scene);
+		pushCommand([this, sceneProxy]() {
+			m_scenes.push_back(sceneProxy);
 			});
+		return sceneProxy.get();
+	}
+
+	void Renderer::removeScene(Scene* scene)
+	{
+		check(scene && scene->getProxy() == nullptr);
+		auto proxy = scene->getProxy();
+		pushCommand([this, proxy]() {
+			VectorHelp::quickRemoveFirstIf<std::shared_ptr<SceneProxy>>(m_scenes, [proxy](const std::shared_ptr<SceneProxy>& scene)->bool {
+				return scene.get() == proxy;
+				});
+			});
+	}
+
+	PrimitiveProxy* Renderer::createPrimitiveProxy(PrimitiveComponent* primitive)
+	{
+		auto proxy = std::make_shared<PrimitiveProxy>(primitive);
+		auto scene = primitive->getScene()->getProxy();
+		pushCommand([scene, proxy]() {
+			scene->addPrimitiveProxy(proxy);
+			});
+		return proxy.get();
 	}
 
 	void Renderer::pushCommand(RenderCommand command)
 	{
 		m_commands.push(std::move(command));
+	}
+
+	void Renderer::release()
+	{
+		m_scenes.clear();
+	}
+
+	void Renderer::clearCommands()
+	{
+		RenderCommand command;
+		while (m_commands.pop(command))
+		{
+			
+		}
 	}
 
 	void Renderer::renderui()

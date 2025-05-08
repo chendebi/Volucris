@@ -1,6 +1,7 @@
 #include "Scene/component.h"
 #include "Core/vector_help.h"
 #include "Core/volucris.h"
+#include "Scene/scene.h"
 
 namespace volucris
 {
@@ -76,8 +77,21 @@ namespace volucris
 		}
 	}
 
+	void Component::attached()
+	{
+		auto scene = getScene();
+		scene->RenderStateChanged.addObject(this, &Component::markRenderStateDirty);
+
+		for (const auto& child : m_children)
+		{
+			child->attach(getScene());
+		}
+		markRenderStateDirty();
+	}
+
 	void Component::disattached(Scene* scene)
 	{
+		scene->RenderStateChanged.removeAll(this);
 		markRenderStateDirty();
 	}
 }
