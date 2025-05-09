@@ -14,12 +14,12 @@ namespace volucris
 			UTF_8 = 65001
 		};
 
-		inline std::string operator/(const std::string& lhs, const std::string& rhs)
-		{
-			return fmt::format("{}/{}", lhs, rhs);
-		}
-
 		std::wstring strToWideStr(const std::string& str, Encoding encode=ANSI);
+	}
+
+	inline std::string operator/(const std::string& lhs, const std::string& rhs)
+	{
+		return fmt::format("{}/{}", lhs, rhs);
 	}
 }
 

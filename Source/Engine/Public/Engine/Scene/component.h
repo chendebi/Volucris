@@ -1,10 +1,10 @@
 #ifndef __volucris_component_h__
 #define __volucris_component_h__
 
-#include "Core/types_help.h"
 #include <memory>
 #include <vector>
 #include "Engine/Scene/scene_object.h"
+#include "Engine/Core/types_help.h"
 
 namespace volucris
 {

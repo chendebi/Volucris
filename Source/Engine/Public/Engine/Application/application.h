@@ -65,6 +65,8 @@ namespace volucris
 
 		void exec();
 
+		
+
 	private:
 		Config m_config;
 		uint8 m_initialized;

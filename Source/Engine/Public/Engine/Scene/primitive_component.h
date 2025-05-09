@@ -2,7 +2,7 @@
 #define __volucris_primitive_component_h__
 
 #include "Engine/Scene/scene_component.h"
-#include <Engine/Resource/mesh_resource_data.h>
+#include "Engine/Renderer/mesh_render_data.h"
 
 namespace volucris
 {
@@ -13,6 +13,8 @@ namespace volucris
 	public:
 		PrimitiveComponent();
 
+		void setResourceData(const std::shared_ptr<MeshResourceData>& data);
+
 		MeshResourceData* getMeshResourceData();
 
 	protected:
@@ -20,7 +22,7 @@ namespace volucris
 
 	private:
 		PrimitiveProxy* m_proxy;
-		std::unique_ptr<MeshResourceData> m_meshData;
+		std::shared_ptr<MeshResourceData> m_meshData;
 	};
 }
 

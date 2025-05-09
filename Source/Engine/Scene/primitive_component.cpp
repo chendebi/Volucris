@@ -4,6 +4,7 @@
 #include <Application/application.h>
 #include <Renderer/renderer.h>
 #include "Scene/scene.h"
+#include "Engine/Resource/mesh_resource_data.h"
 
 namespace volucris
 {
@@ -14,11 +15,17 @@ namespace volucris
 	{
 	}
 
+	void PrimitiveComponent::setResourceData(const std::shared_ptr<MeshResourceData>& data)
+	{
+		m_meshData = data;
+		markRenderStateDirty();
+	}
+
 	MeshResourceData* PrimitiveComponent::getMeshResourceData()
 	{
 		if (!m_meshData)
 		{
-			m_meshData = std::make_unique<MeshResourceData>();
+			m_meshData = std::make_shared<MeshResourceData>();
 		}
 		return m_meshData.get();
 	}

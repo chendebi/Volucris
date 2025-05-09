@@ -1,7 +1,7 @@
 #ifndef __volucris_scene_component_h__
 #define __volucris_scene_component_h__
 
-#include "Scene/component.h"
+#include "Engine/Scene/component.h"
 #include <glm/glm.hpp>
 
 namespace volucris

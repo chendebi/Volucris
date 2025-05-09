@@ -1,0 +1,26 @@
+#ifndef __volucris_resource_path_h__
+#define __volucris_resource_path_h__
+
+#include <string>
+
+namespace volucris
+{
+	struct ResourcePath
+	{
+		std::string path;
+		std::string name;
+		std::string type;
+		std::string fullpath;
+
+		ResourcePath(const std::string& resoucePath);
+
+		bool isValid() const
+		{
+			return !path.empty();
+		}
+
+		std::string getSystemPath(const std::string& customExt = "");
+	};
+}
+
+#endif // !__volucris_resource_path_h__

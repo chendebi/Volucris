@@ -45,4 +45,5 @@ target_include_directories(${TARGET} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+target_compile_definitions(${TARGET} PRIVATE VOLUCRIS_ENGINE_ROOT="${VOLUCRIS_ENGINE_ROOT}")
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)
