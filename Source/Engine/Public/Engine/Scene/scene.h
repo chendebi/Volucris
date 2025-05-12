@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 #include "Engine/Core/event.h"
+#include "Engine/Scene/renderable_object.h"
 
 DECLARE_EVENT(OnRenderStateChanged)
 
@@ -13,7 +15,7 @@ namespace volucris
 	class SceneProxy;
 	class Viewport;
 
-	class Scene
+	class Scene : public RenderableObject
 	{
 	public:
 		OnRenderStateChanged RenderStateChanged;
@@ -35,18 +37,22 @@ namespace volucris
 
 		void disattachFromRenderer();
 
-		SceneProxy* getProxy() const { return m_proxy; }
+		SceneProxy* getSceneProxy() const { return (SceneProxy*)getProxy(); }
 
 		const std::vector<std::shared_ptr<Viewport>>& getViews() const
 		{
 			return m_views;
 		}
 
+		std::string getDefaultDisplayName(const std::string& key);
+
 	private:
 		friend class Renderer;
 		std::vector<std::shared_ptr<Actor>> m_actors;
 		std::vector<std::shared_ptr<Viewport>> m_views;
-		SceneProxy* m_proxy;
+		
+		std::unordered_map<std::string, int> m_ids;
+		std::unordered_map<std::string, std::vector<int>> m_recycledIds;
 	};
 }
 

@@ -2,13 +2,14 @@
 #define __volucris_primitive_proxy_h__
 
 #include <memory>
+#include "Engine/Renderer/proxy_object.h"
 
 namespace volucris
 {
 	class PrimitiveComponent;
 	class MeshRenderData;
 
-	class PrimitiveProxy
+	class PrimitiveProxy : public ProxyObject
 	{
 	public:
 		PrimitiveProxy(PrimitiveComponent* Primitive);

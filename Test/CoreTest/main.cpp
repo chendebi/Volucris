@@ -9,6 +9,7 @@
 #include "Engine/Scene/primitive_component.h"
 #include "Engine/Resource/mesh_resource_data.h"
 #include "Engine/Resource/resource_path.h"
+#include <Engine/Resource/resource_manager.h>
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
 
@@ -61,28 +62,20 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	auto actor = std::make_shared<Actor>();
 	auto comp = std::make_shared<PrimitiveComponent>();
+	comp->setDisplayName("PrimitiveComp");
 	actor->setRootComponent(comp);
 	scene->addActor(actor);
 
 	auto data = comp->getMeshResourceData();
+	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
 	data->setVertices(&vertices, sizeof(vertices));
+	data->setMaterial("", mat);
+	auto section = std::make_shared<Section>();
+	section->indices = 
+	data->addSection()
 	comp->markRenderStateDirty();
 
 	app->addScene(scene);
-
-	{
-		ResourcePath path("/Engine/Material/mesh_default.mat");
-		V_LOG_DEBUG(CoreTest, "{}", path.getSystemPath());
-	}
-	{
-		ResourcePath path("/Project/Material/mesh_default.mat");
-		V_LOG_DEBUG(CoreTest, "{}", path.getSystemPath("frag"));
-	}
-
-	{
-		ResourcePath path("/Material/mesh_default.mat");
-		V_LOG_DEBUG(CoreTest, "{}", path.getSystemPath("vert"));
-	}
 
 	return app;
 }

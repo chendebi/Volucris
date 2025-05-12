@@ -5,12 +5,13 @@
 #include "Engine/Core/types_help.h"
 #include <memory>
 #include "Engine/Scene/scene_object.h"
+#include "Engine/Scene/renderable_object.h"
 
 namespace volucris
 {
 	class ViewportProxy;
 
-	class Viewport : public SceneObject
+	class Viewport : public SceneObject, public RenderableObject
 	{
 	public:
 		Viewport();
@@ -21,14 +22,11 @@ namespace volucris
 
 		void update();
 
-		ViewportProxy* getProxy() const { return m_proxy; }
-
 	private:
 		friend class Scene;
 		friend class SceneProxy;
 		uint8 m_dirty;
 		Rect m_viewport;
-		ViewportProxy* m_proxy;
 	};
 }
 

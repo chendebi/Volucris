@@ -12,6 +12,8 @@ namespace volucris
 		std::string type;
 		std::string fullpath;
 
+		ResourcePath() = default;
+
 		ResourcePath(const std::string& resoucePath);
 
 		bool isValid() const
@@ -19,7 +21,7 @@ namespace volucris
 			return !path.empty();
 		}
 
-		std::string getSystemPath(const std::string& customExt = "");
+		std::string getSystemPath(const std::string& customExt = "") const;
 	};
 }
 

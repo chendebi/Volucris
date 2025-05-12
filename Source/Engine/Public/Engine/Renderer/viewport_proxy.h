@@ -1,13 +1,15 @@
-#include <Core/rect.h>
 #ifndef __volucris_viewport_proxy_h__
 #define __volucris_viewport_proxy_h__
+
+#include <Core/rect.h>
+#include "Engine/Renderer/proxy_object.h"
 
 namespace volucris
 {
 	class Viewport;
 	class SceneProxy;
 
-	class ViewportProxy
+	class ViewportProxy : public ProxyObject
 	{
 	public:
 		ViewportProxy(Viewport* viewport);

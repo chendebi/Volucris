@@ -1,6 +1,8 @@
 #ifndef __volucris_scene_object_h__
 #define __volucris_scene_object_h__
 
+#include <string>
+
 namespace volucris
 {
 	class Scene;
@@ -19,6 +21,10 @@ namespace volucris
 
 		void disattach();
 
+		void setDisplayName(const std::string& name) { m_displayName = name; }
+
+		std::string getDisplayName() const { return m_displayName; }
+
 	protected:
 		virtual void attached() {}
 
@@ -26,6 +32,7 @@ namespace volucris
 
 	private:
 		Scene* m_scene;
+		std::string m_displayName;
 	};
 }
 

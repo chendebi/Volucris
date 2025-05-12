@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include "Engine/Renderer/proxy_object.h"
 
 namespace volucris
 {
@@ -10,7 +11,7 @@ namespace volucris
 	class PrimitiveProxy;
 	class ViewportProxy;
 
-	class SceneProxy
+	class SceneProxy : public ProxyObject
 	{
 	public:
 		SceneProxy(Scene* scene);
@@ -20,6 +21,8 @@ namespace volucris
 		void update();
 
 		void render();
+
+		void markSceneObjectRemoved();
 
 		void addViewportProxy(const std::shared_ptr<ViewportProxy>& view);
 

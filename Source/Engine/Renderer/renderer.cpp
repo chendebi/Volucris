@@ -64,9 +64,10 @@ namespace volucris
 
 	void Renderer::removeScene(Scene* scene)
 	{
-		check(scene && scene->getProxy() == nullptr);
-		auto proxy = scene->getProxy();
+		check(scene && scene->getSceneProxy() != nullptr);
+		auto proxy = scene->getSceneProxy();
 		pushCommand([this, proxy]() {
+			proxy->markSceneObjectRemoved();
 			VectorHelp::quickRemoveFirstIf<std::shared_ptr<SceneProxy>>(m_scenes, [proxy](const std::shared_ptr<SceneProxy>& scene)->bool {
 				return scene.get() == proxy;
 				});
@@ -76,7 +77,7 @@ namespace volucris
 	PrimitiveProxy* Renderer::createPrimitiveProxy(PrimitiveComponent* primitive)
 	{
 		auto proxy = std::make_shared<PrimitiveProxy>(primitive);
-		auto scene = primitive->getScene()->getProxy();
+		auto scene = primitive->getScene()->getSceneProxy();
 		pushCommand([scene, proxy]() {
 			scene->addPrimitiveProxy(proxy);
 			});

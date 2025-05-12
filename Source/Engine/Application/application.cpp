@@ -33,6 +33,7 @@ namespace volucris
 		, m_renderer(nullptr)
 		, m_mainWidget(nullptr)
 		, m_scenes()
+		, m_queue(1024)
 	{
 		checkq(!Inst, Engine, "application already exist");
 		Inst = this;
@@ -173,8 +174,15 @@ namespace volucris
 			scene->attachToRenderer();
 		}
 
+		std::function<void()> command;
+
 		while (m_running)
 		{
+			while (m_queue.pop(command))
+			{
+				command();
+			}
+
 			m_window->pollEvents();
 
 			// TODO: tick
@@ -191,14 +199,20 @@ namespace volucris
 
 		m_renderer->release();
 
-		for (const auto& scene : m_scenes)
+		while (m_queue.pop(command))
 		{
-			scene->disattachFromRenderer();
+			command();
 		}
+
 		m_scenes.clear();
 
 		m_renderer->clearCommands();
 
 		shutdown();
+	}
+
+	void Application::pushCommand(const std::function<void()>& command)
+	{
+		m_queue.push(command);
 	}
 }

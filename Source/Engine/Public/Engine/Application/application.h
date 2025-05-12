@@ -5,6 +5,8 @@
 #include "Engine/Core/types_help.h"
 #include <memory>
 #include <vector>
+#include "Engine/Core/circle_queue.h"
+#include <functional>
 
 namespace volucris
 {
@@ -65,7 +67,7 @@ namespace volucris
 
 		void exec();
 
-		
+		void pushCommand(const std::function<void()>& command);
 
 	private:
 		Config m_config;
@@ -75,6 +77,7 @@ namespace volucris
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Widget> m_mainWidget;
 		std::vector<std::shared_ptr<Scene>> m_scenes;
+		CircleQueue<std::function<void()>> m_queue;
 	};
 }
 

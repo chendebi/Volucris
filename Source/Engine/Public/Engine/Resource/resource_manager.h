@@ -21,23 +21,13 @@ namespace volucris
 			return &inst;
 		}
 
-		std::shared_ptr<ResourceObject> getResourceObject(const std::string& assetPath);
-
-		template<typename T>
-		std::shared_ptr<T> getResource(const std::string& assetPath)
-		{
-			auto object = getResourceObject(assetPath);
-			return std::dynamic_pointer_cast<T>(object);
-		}
-
-	protected:
-		std::shared_ptr<Material> loadMaterial(const ResourcePath& path);
+		std::shared_ptr<Material> getMaterialFromPath(const ResourcePath& path);
 
 	private:
 		std::map<std::string, std::shared_ptr<ResourceObject>> m_resources;
 
 	protected:
-		ResourceManager();
+		ResourceManager() = default;
 
 		ResourceManager(const ResourceManager&) = delete;
 		ResourceManager(ResourceManager&&) = delete;

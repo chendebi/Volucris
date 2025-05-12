@@ -16,12 +16,14 @@ namespace volucris
 	struct Section
 	{
 		DrawMode mode;
-		std::vector<uint32> indices;
+		int count;
+		int offset;
 		std::string slot;
 
-		Section() : mode(DrawMode::TRIANGLES), indices(), slot() {}
-
-		Section(void* data, size_t size);
+		Section() : mode(DrawMode::TRIANGLES), count(0), offset(0), slot()
+		{
+			
+		}
 	};
 
 	class MeshResourceData
@@ -31,14 +33,15 @@ namespace volucris
 
 		void setVertices(void* vertices, size_t size);
 
-		void addSection(const std::shared_ptr<Section>& section)
-		{
-			m_sections.push_back(section);
-		}
+		void addSection(const std::vector<uint32>& indices, const std::string& slot, DrawMode mode = DrawMode::TRIANGLES);
+
+		void addSection(const Section& section);
+
+		Section addSectionData(const std::vector<uint32>& indices);
 
 		std::shared_ptr<MeshRenderData> build();
 
-		const std::vector<std::shared_ptr<Section>>& getSections() const { return m_sections; }
+		const std::vector<Section>& getSections() const { return m_sections; }
 
 		std::shared_ptr<Material> getMaterial(const std::string& slot) const
 		{
@@ -50,9 +53,15 @@ namespace volucris
 			return it->second;
 		}
 
+		void setMaterial(const std::string& slot, const std::shared_ptr<Material>& material)
+		{
+			m_materials[slot] = material;
+		}
+
 	private:
 		std::vector<glm::vec3> m_vertices;
-		std::vector<std::shared_ptr<Section>> m_sections;
+		std::vector<uint32> m_indices;
+		std::vector<Section> m_sections;
 		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 	};
 }

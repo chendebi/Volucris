@@ -3,10 +3,12 @@
 
 #include <vector>
 #include <Engine/Core/types_help.h>
+#include <unordered_map>
 
 namespace volucris
 {
 	class MeshResourceData;
+	class MaterialProxy;
 
 	enum class DrawMode
 	{
@@ -19,6 +21,7 @@ namespace volucris
 		DrawMode mode;
 		int count;
 		int offset;
+		std::shared_ptr<MaterialProxy> material;
 	};
 
 	class MeshRenderData
@@ -26,13 +29,9 @@ namespace volucris
 	public:
 		MeshRenderData() = default;
 
-		void build(MeshResourceData* data);
-
-	private:
-		friend class MeshResourceData;
-		std::vector<uint8> m_renderData;
-		std::vector<uint8> m_sectionData;
-		std::vector<SectionRenderData> m_sections;
+		std::vector<uint8> renderData;
+		std::vector<uint8> sectionData;
+		std::vector<SectionRenderData> sections;
 	};
 }
 

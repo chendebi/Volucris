@@ -11,7 +11,9 @@ namespace volucris
 {
 	Scene::Scene()
 		: m_actors()
-		, m_proxy(nullptr)
+		, m_views()
+		, m_ids()
+		, m_recycledIds()
 	{
 	}
 
@@ -74,7 +76,7 @@ namespace volucris
 
 	void Scene::attachToRenderer()
 	{
-		if (m_proxy)
+		if (getProxy())
 		{
 			V_LOG_ERROR(Engine, "scene has been attached");
 			return;
@@ -82,11 +84,9 @@ namespace volucris
 
 		auto renderer = gApp->getRenderer();
 		auto sceneProxy = std::make_shared<SceneProxy>(this);
-		m_proxy = sceneProxy.get();
 		for (const auto& view : m_views)
 		{
 			auto proxy = std::make_shared<ViewportProxy>(view.get());
-			view->m_proxy = proxy.get();
 			sceneProxy->addViewportProxy(proxy);
 		}
 		renderer->addScene(sceneProxy);
@@ -97,13 +97,38 @@ namespace volucris
 	void Scene::disattachFromRenderer()
 	{
 		auto renderer = gApp->getRenderer();
-		m_proxy = nullptr;
-		RenderStateChanged.broadcast();
+		setProxy(nullptr);
 		for (const auto& view : m_views)
 		{
-			view->m_proxy = nullptr;
+			view->setProxy(nullptr);
 		}
+		RenderStateChanged.broadcast();
 		renderer->removeScene(this);
 		V_LOG_DEBUG(Engine, "scene disattach from renderer");
+	}
+
+	std::string Scene::getDefaultDisplayName(const std::string& key)
+	{
+		std::string name;
+		{
+			auto it = m_recycledIds.find(key);
+			if (it != m_recycledIds.end() && !it->second.empty())
+			{
+				name = fmt::format("{}_{}", key, *it->second.rbegin());
+				it->second.pop_back();
+				return name;
+			}
+		}
+
+		auto it = m_ids.find(key);
+		size_t id = 0;
+		if (it != m_ids.end())
+		{
+			id = it->second;
+		}
+
+		name = fmt::format("{}_{}", key, id);
+		m_ids[key] = ++id;
+		return name;
 	}
 }

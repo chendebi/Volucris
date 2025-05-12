@@ -20,7 +20,7 @@ namespace volucris
 		}
 	}
 
-	std::string ResourcePath::getSystemPath(const std::string& customExt)
+	std::string ResourcePath::getSystemPath(const std::string& customExt) const
 	{
 		std::string ext = customExt.empty() ? type : customExt;
 
