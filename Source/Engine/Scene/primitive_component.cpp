@@ -5,6 +5,7 @@
 #include <Renderer/renderer.h>
 #include "Scene/scene.h"
 #include "Engine/Resource/mesh_resource_data.h"
+#include "Resource/material.h"
 
 namespace volucris
 {
@@ -34,7 +35,7 @@ namespace volucris
 	void PrimitiveComponent::updateRenderState()
 	{
 		auto renderer = gApp->getRenderer();
-		if (!renderer || !getScene()->getProxy())
+		if (!renderer || !getScene()->getSceneProxy())
 		{
 			m_proxy = nullptr;
 			return;

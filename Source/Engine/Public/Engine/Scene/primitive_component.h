@@ -3,13 +3,12 @@
 
 #include "Engine/Scene/scene_component.h"
 #include "Engine/Renderer/mesh_render_data.h"
-#include "Engine/Scene/renderable_object.h"
 
 namespace volucris
 {
 	class PrimitiveProxy;
 
-	class PrimitiveComponent : public SceneComponent, public RenderableObject
+	class PrimitiveComponent : public SceneComponent
 	{
 	public:
 		PrimitiveComponent();

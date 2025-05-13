@@ -1,34 +1,38 @@
 #ifndef __volucris_material_proxy_h__
 #define __volucris_material_proxy_h__
 
-#include "proxy_object.h"
 #include <memory>
+#include <string>
 
 namespace volucris
 {
 	class Material;
-	class MaterialResourceProxy : public std::enable_shared_from_this<MaterialResourceProxy>, public ProxyObject
+	class MaterialResource;
+
+	class MaterialResourceProxy
 	{
 	public:
 		MaterialResourceProxy(MaterialResource* resource);
-
-		std::shared_ptr<MaterialResourceProxy> getShared()
-		{
-			return shared_from_this();
-		}
 
 	private:
 		std::string m_vss;
 		std::string m_fss;
 	};
 
-	class MaterialProxy : public ProxyObject
+	class MaterialProxy
 	{
 	public:
 		MaterialProxy(Material* material);
 
+		~MaterialProxy();
+
+		void setResource(MaterialResourceProxy* resource)
+		{
+			m_resource = resource;
+		}
+
 	private:
-		std::shared_ptr<MaterialResourceProxy> m_resource;
+		MaterialResourceProxy* m_resource;
 	};
 }
 

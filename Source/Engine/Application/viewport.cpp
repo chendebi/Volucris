@@ -11,6 +11,7 @@ namespace volucris
 	Viewport::Viewport()
 		: m_dirty(0)
 		, m_viewport()
+		, m_proxy(nullptr)
 	{
 
 	}
@@ -23,10 +24,9 @@ namespace volucris
 
 	void Viewport::update()
 	{
-		auto proxy = (ViewportProxy*)getProxy();
-		if (m_dirty && proxy)
+		if (m_dirty && m_proxy)
 		{
-			gApp->getRenderer()->pushCommand([this, proxy]() {
+			gApp->getRenderer()->pushCommand([this, proxy= m_proxy]() {
 				proxy->setViewport(m_viewport);
 				});
 			m_dirty = false;

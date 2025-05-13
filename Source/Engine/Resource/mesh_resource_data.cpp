@@ -33,13 +33,17 @@ namespace volucris
 
 	Section MeshResourceData::addSectionData(const std::vector<uint32>& indices)
 	{
-		auto appendCount = indices.size();
-		auto currentCount = m_indices.size();
-		auto count = currentCount + appendCount;
-		auto offset = currentCount * sizeof(uint32);
-		auto size = appendCount * sizeof(uint32);
+		return addSectionData((void*)indices.data(), (size_t)indices.size() * sizeof(uint32));
+	}
+
+	Section MeshResourceData::addSectionData(void* indices, size_t size)
+	{
+		size_t appendCount = size / sizeof(uint32);
+		size_t currentCount = m_indices.size();
+		size_t count = currentCount + appendCount;
+		size_t offset = currentCount * sizeof(uint32);
 		m_indices.resize(count);
-		memcpy(m_indices.data() + offset, indices.data(), size);
+		memcpy(m_indices.data() + offset, indices, size);
 		Section data;
 		data.count = appendCount;
 		data.offset = offset;

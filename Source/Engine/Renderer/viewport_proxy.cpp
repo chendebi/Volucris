@@ -10,8 +10,6 @@ namespace volucris
 		: m_viewport()
 		, m_scene(viewport->getScene()->getSceneProxy())
 	{
-		setSceneObject(viewport);
-		viewport->setProxy(this);
 	}
 
 	void ViewportProxy::setViewport(const Rect& vp)

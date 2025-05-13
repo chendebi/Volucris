@@ -10,8 +10,7 @@ namespace volucris
 		: m_views()
 		, m_primitives()
 	{
-		setSceneObject(scene);
-		scene->setProxy(this);
+
 	}
 
 	SceneProxy::~SceneProxy()
@@ -29,20 +28,6 @@ namespace volucris
 		for (const auto& view : m_views)
 		{
 			view->render();
-		}
-	}
-
-	void SceneProxy::markSceneObjectRemoved()
-	{
-		setSceneObject(nullptr);
-		for (const auto& view : m_views)
-		{
-			view->setSceneObject(nullptr);
-		}
-
-		for (const auto& primitive : m_primitives)
-		{
-			primitive->setSceneObject(nullptr);
 		}
 	}
 

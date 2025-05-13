@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <vector>
-#include "Engine/Renderer/proxy_object.h"
 
 namespace volucris
 {
@@ -11,7 +10,7 @@ namespace volucris
 	class PrimitiveProxy;
 	class ViewportProxy;
 
-	class SceneProxy : public ProxyObject
+	class SceneProxy
 	{
 	public:
 		SceneProxy(Scene* scene);

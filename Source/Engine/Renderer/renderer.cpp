@@ -67,7 +67,6 @@ namespace volucris
 		check(scene && scene->getSceneProxy() != nullptr);
 		auto proxy = scene->getSceneProxy();
 		pushCommand([this, proxy]() {
-			proxy->markSceneObjectRemoved();
 			VectorHelp::quickRemoveFirstIf<std::shared_ptr<SceneProxy>>(m_scenes, [proxy](const std::shared_ptr<SceneProxy>& scene)->bool {
 				return scene.get() == proxy;
 				});

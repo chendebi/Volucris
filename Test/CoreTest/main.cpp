@@ -51,6 +51,15 @@ glm::vec3 vertices[] =
 		{-0.5, -0.5, 0.5},
 };
 
+unsigned int indices[] = {
+		0, 1, 2, 0, 2, 3,
+		4, 5, 6, 4, 6, 7,
+		8, 9, 10, 8, 10, 11,
+		12, 13, 14, 12, 14, 15,
+		16, 17, 18, 16, 18, 19,
+		20, 21, 22, 20, 22, 23
+};
+
 std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 {
 	auto config = Application::Config(argc, argv);
@@ -70,9 +79,8 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
 	data->setVertices(&vertices, sizeof(vertices));
 	data->setMaterial("", mat);
-	auto section = std::make_shared<Section>();
-	section->indices = 
-	data->addSection()
+	data->addSectionData(indices, sizeof(indices));
+	data->addSection({DrawMode::TRIANGLES, 36, 0, ""});
 	comp->markRenderStateDirty();
 
 	app->addScene(scene);

@@ -8,11 +8,8 @@
 namespace volucris
 {
 	PrimitiveProxy::PrimitiveProxy(PrimitiveComponent* primitive)
-		: ProxyObject()
-		, m_renderData(primitive->getMeshResourceData()->build())
+		: m_renderData(primitive->getMeshResourceData()->build())
 	{
-		primitive->setProxy(this);
-		setSceneObject(primitive);
 		auto meshData = primitive->getMeshResourceData();
 		std::vector<SectionRenderData> sections;
 		for (const auto& section : meshData->getSections())
@@ -21,16 +18,10 @@ namespace volucris
 			sectionRenderData.mode = section.mode;
 			sectionRenderData.count = section.count;
 			sectionRenderData.offset = section.offset;
-			std::shared_ptr<Material> mat = nullptr;
 			auto mat = meshData->getMaterial(section.slot);
 
 			check(mat != nullptr);
-			if (auto proxy = mat->getProxy())
-			{
-				std::make_shared(this);
-			}
-
-			sectionRenderData.material = std::make_shared<MaterialProxy>(mat.get());
+			sectionRenderData.material = mat->attachProxy();
 			sections.push_back(sectionRenderData);
 		}
 	}

@@ -18,10 +18,10 @@ namespace volucris
 	// type默认都是unsigned int
 	struct SectionRenderData
 	{
-		DrawMode mode;
-		int count;
-		int offset;
-		std::shared_ptr<MaterialProxy> material;
+		DrawMode mode = DrawMode::TRIANGLES;
+		int count = 0;
+		int offset = 0;
+		MaterialProxy* material = nullptr;
 	};
 
 	class MeshRenderData

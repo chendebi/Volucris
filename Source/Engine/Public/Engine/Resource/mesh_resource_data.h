@@ -24,6 +24,12 @@ namespace volucris
 		{
 			
 		}
+
+		Section(DrawMode drawMode, int idxCount, int off, const std::string& matSlot)
+			: mode(drawMode), count(idxCount), offset(off), slot(matSlot)
+		{
+
+		}
 	};
 
 	class MeshResourceData
@@ -38,6 +44,8 @@ namespace volucris
 		void addSection(const Section& section);
 
 		Section addSectionData(const std::vector<uint32>& indices);
+		
+		Section addSectionData(void* indices, size_t size);
 
 		std::shared_ptr<MeshRenderData> build();
 
@@ -57,6 +65,8 @@ namespace volucris
 		{
 			m_materials[slot] = material;
 		}
+
+		const std::unordered_map<std::string, std::shared_ptr<Material>>& getMaterials() const { return m_materials; }
 
 	private:
 		std::vector<glm::vec3> m_vertices;

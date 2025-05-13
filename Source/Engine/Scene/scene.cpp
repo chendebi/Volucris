@@ -14,6 +14,7 @@ namespace volucris
 		, m_views()
 		, m_ids()
 		, m_recycledIds()
+		, m_proxy(nullptr)
 	{
 	}
 
@@ -76,7 +77,7 @@ namespace volucris
 
 	void Scene::attachToRenderer()
 	{
-		if (getProxy())
+		if (m_proxy)
 		{
 			V_LOG_ERROR(Engine, "scene has been attached");
 			return;
@@ -87,6 +88,7 @@ namespace volucris
 		for (const auto& view : m_views)
 		{
 			auto proxy = std::make_shared<ViewportProxy>(view.get());
+			view->m_proxy = proxy.get();
 			sceneProxy->addViewportProxy(proxy);
 		}
 		renderer->addScene(sceneProxy);
@@ -97,13 +99,13 @@ namespace volucris
 	void Scene::disattachFromRenderer()
 	{
 		auto renderer = gApp->getRenderer();
-		setProxy(nullptr);
+		renderer->removeScene(this);
+		m_proxy = nullptr;
 		for (const auto& view : m_views)
 		{
-			view->setProxy(nullptr);
+			view->m_proxy = nullptr;
 		}
 		RenderStateChanged.broadcast();
-		renderer->removeScene(this);
 		V_LOG_DEBUG(Engine, "scene disattach from renderer");
 	}
 

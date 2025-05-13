@@ -126,7 +126,7 @@ namespace volucris
 
 	void Application::addScene(const std::shared_ptr<Scene>& scene)
 	{
-		if (scene->getProxy())
+		if (scene->getSceneProxy())
 		{
 			V_LOG_ERROR(Engine, "Scene has already in use");
 			return;
