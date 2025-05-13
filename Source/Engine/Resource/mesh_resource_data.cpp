@@ -52,16 +52,18 @@ namespace volucris
 
 	std::shared_ptr<MeshRenderData> MeshResourceData::build()
 	{
+		auto renderData = std::make_shared<MeshRenderData>();
 		auto vertexBufferSize = m_vertices.size() * sizeof(glm::vec3);
 		std::vector<uint8> vertexBufferData;
 		vertexBufferData.resize(vertexBufferSize);
 		memcpy(vertexBufferData.data(), m_vertices.data(), vertexBufferSize);
+		BlockDescription vertexBlock = { BlockType::VERTEX,0 };
+		renderData->blocks.push_back(vertexBlock);
 
 		std::vector<uint8> indexBufferData;
 		indexBufferData.resize(sizeof(uint32) * m_indices.size());
 		memcpy(indexBufferData.data(), m_indices.data(), indexBufferData.size());
 
-		auto renderData = std::make_shared<MeshRenderData>();
 		renderData->renderData = std::move(vertexBufferData);
 		renderData->sectionData = std::move(indexBufferData);
 		return renderData;

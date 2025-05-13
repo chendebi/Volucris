@@ -27,6 +27,7 @@ endfunction()
 volucris_engine_code(Core CORE_CODE_FILES)
 volucris_engine_code(Application APPLICATION_CODE_FILES)
 volucris_engine_code(Renderer RENDERER_CODE_FILES)
+volucris_engine_code(Renderer/OpenGL RENDERER_OPENGL_CODE_FILES)
 volucris_engine_code(Scene SCENE_CODE_FILES)
 volucris_engine_code(Resource RESOURCE_CODE_FILES)
 
@@ -34,6 +35,7 @@ target_sources(${TARGET} PRIVATE
     ${CORE_CODE_FILES}
     ${APPLICATION_CODE_FILES}
     ${RENDERER_CODE_FILES}
+    ${RENDERER_OPENGL_CODE_FILES}
     ${SCENE_CODE_FILES}
     ${RESOURCE_CODE_FILES}
 )

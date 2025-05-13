@@ -24,11 +24,24 @@ namespace volucris
 		MaterialProxy* material = nullptr;
 	};
 
+	enum BlockType
+	{
+		VERTEX,
+		NORMAL
+	};
+
+	struct BlockDescription
+	{
+		BlockType type;
+		size_t offset;
+	};
+
 	class MeshRenderData
 	{
 	public:
 		MeshRenderData() = default;
 
+		std::vector<BlockDescription> blocks;
 		std::vector<uint8> renderData;
 		std::vector<uint8> sectionData;
 		std::vector<SectionRenderData> sections;

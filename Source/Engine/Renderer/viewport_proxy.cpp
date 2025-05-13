@@ -3,6 +3,7 @@
 #include "Core/volucris.h"
 #include "Application/viewport.h"
 #include "Scene/scene.h"
+#include "Renderer/primitive_proxy.h"
 
 namespace volucris
 {
@@ -18,10 +19,23 @@ namespace volucris
 		V_LOG_DEBUG(Engine, "viewport set to: {}", m_viewport.toString())
 	}
 
+	void ViewportProxy::update(const std::vector<std::shared_ptr<PrimitiveProxy>>& primitives)
+	{
+		for (const auto& primitive : primitives)
+		{
+			
+		}
+	}
+
 	void ViewportProxy::render()
 	{
 		glViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
 		glClearColor(0.2, 0.6, 0.8, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		for (const auto& primitive : m_primitives)
+		{
+			primitive
+		}
 	}
 }
