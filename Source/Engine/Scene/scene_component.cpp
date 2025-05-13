@@ -29,6 +29,7 @@ namespace volucris
 
 	void SceneComponent::attached()
 	{
+		Component::attached();
 		auto comp = getParentComponent();
 		while (comp)
 		{

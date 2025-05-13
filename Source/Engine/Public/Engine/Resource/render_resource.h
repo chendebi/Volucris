@@ -12,14 +12,11 @@ namespace volucris
 	public:
 		void addRenderRef() { ++m_renderRef; }
 
-		void removeRenderRef()
-		{
-			--m_renderRef;
-			if (m_renderRef <= 0)
-			{
-				releaseRenderProxy();
-			}
-		}
+		~RenderResource() override;
+
+		void removeRenderRef();
+
+		size_t getRenderRefCount() const { return m_renderRef; }
 
 	protected:
 		virtual void releaseRenderProxy() {  }

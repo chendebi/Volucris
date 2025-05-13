@@ -21,11 +21,11 @@ namespace volucris
 
 		void render();
 
-		void markSceneObjectRemoved();
-
 		void addViewportProxy(const std::shared_ptr<ViewportProxy>& view);
 
 		void addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy);
+
+		void removePrimitiveProxy(PrimitiveProxy* proxy);
 
 	private:
 		std::vector<std::shared_ptr<ViewportProxy>> m_views;

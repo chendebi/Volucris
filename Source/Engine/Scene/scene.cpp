@@ -85,6 +85,7 @@ namespace volucris
 
 		auto renderer = gApp->getRenderer();
 		auto sceneProxy = std::make_shared<SceneProxy>(this);
+		m_proxy = sceneProxy.get();
 		for (const auto& view : m_views)
 		{
 			auto proxy = std::make_shared<ViewportProxy>(view.get());
@@ -96,16 +97,17 @@ namespace volucris
 		RenderStateChanged.broadcast();
 	}
 
-	void Scene::disattachFromRenderer()
+	void Scene::deattachFromRenderer()
 	{
 		auto renderer = gApp->getRenderer();
 		renderer->removeScene(this);
 		m_proxy = nullptr;
+		RenderStateChanged.broadcast();
+		update();
 		for (const auto& view : m_views)
 		{
 			view->m_proxy = nullptr;
 		}
-		RenderStateChanged.broadcast();
 		V_LOG_DEBUG(Engine, "scene disattach from renderer");
 	}
 

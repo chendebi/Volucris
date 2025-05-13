@@ -34,6 +34,8 @@ namespace volucris
 
 		virtual void updateRenderState() {}
 
+		virtual void releaseRenderData() {}
+
 		void attached() override;
 
 		void disattached(Scene* scene) override;

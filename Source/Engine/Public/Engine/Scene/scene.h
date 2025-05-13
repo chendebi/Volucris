@@ -34,7 +34,7 @@ namespace volucris
 
 		void attachToRenderer();
 
-		void disattachFromRenderer();
+		void deattachFromRenderer();
 
 		SceneProxy* getSceneProxy() const { return m_proxy; }
 

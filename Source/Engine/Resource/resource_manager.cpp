@@ -120,6 +120,7 @@ namespace volucris
 
 			resource = std::make_shared<MaterialResource>(vss, fss);
 			resource->setParameters(map);
+			resource->setResourcePath(path);
 
 			m_resources[path.fullpath] = resource;
 			V_LOG_DEBUG(Engine, "load material success.")

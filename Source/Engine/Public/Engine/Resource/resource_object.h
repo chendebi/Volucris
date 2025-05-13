@@ -14,6 +14,10 @@ namespace volucris
 
 		const ResourcePath& getResourcePath() const { return m_path; }
 
+		const std::string getResourceFullPath() const { return m_path.fullpath; }
+
+		void setResourcePath(const ResourcePath& path) { m_path = path; }
+
 	private:
 		friend class ResourceManager;
 		ResourcePath m_path;

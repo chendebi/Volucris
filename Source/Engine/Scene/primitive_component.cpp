@@ -6,6 +6,7 @@
 #include "Scene/scene.h"
 #include "Engine/Resource/mesh_resource_data.h"
 #include "Resource/material.h"
+#include "Renderer/scene_proxy.h"
 
 namespace volucris
 {
@@ -35,17 +36,26 @@ namespace volucris
 	void PrimitiveComponent::updateRenderState()
 	{
 		auto renderer = gApp->getRenderer();
-		if (!renderer || !getScene()->getSceneProxy())
-		{
-			m_proxy = nullptr;
-			return;
-		}
-
+		auto sceneProxy = getScene()->getSceneProxy();
 		if (m_proxy)
 		{
-			renderer->pushCommand([this]() {
-				//delete m_proxy
-				});
+			if (sceneProxy)
+			{
+				renderer->pushCommand([sceneProxy, proxy = m_proxy]() {
+					sceneProxy->removePrimitiveProxy(proxy);
+					});
+			}
+
+			for (const auto& [slot, mat] : m_meshData->getMaterials())
+			{
+				mat->deattachProxy();
+			}
+			m_proxy = nullptr;
+		}
+
+		if (!getScene()->getSceneProxy())
+		{
+			return;
 		}
 
 		if (isAttached() && m_meshData)

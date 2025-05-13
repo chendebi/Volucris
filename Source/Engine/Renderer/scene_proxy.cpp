@@ -3,6 +3,7 @@
 #include "Renderer/viewport_proxy.h"
 #include "Application/viewport.h"
 #include "Renderer/primitive_proxy.h"
+#include "Core/vector_help.h"
 
 namespace volucris
 {
@@ -39,5 +40,12 @@ namespace volucris
 	void SceneProxy::addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy)
 	{
 		m_primitives.push_back(proxy);
+	}
+
+	void SceneProxy::removePrimitiveProxy(PrimitiveProxy* proxy)
+	{
+		VectorHelp::quickRemoveFirstIf<std::shared_ptr<PrimitiveProxy>>(m_primitives, [proxy](const std::shared_ptr<PrimitiveProxy>& p)->bool {
+			return p.get() == proxy;
+			});
 	}
 }

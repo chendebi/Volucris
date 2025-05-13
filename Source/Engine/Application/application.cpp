@@ -197,15 +197,16 @@ namespace volucris
 			m_renderer->render();
 		}
 
-		m_renderer->release();
-
 		while (m_queue.pop(command))
 		{
 			command();
 		}
 
-		m_scenes.clear();
-
+		for (const auto& scene : m_scenes)
+		{
+			scene->deattachFromRenderer();
+		}
+		m_renderer->render();
 		m_renderer->clearCommands();
 
 		shutdown();

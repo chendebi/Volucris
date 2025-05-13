@@ -3,6 +3,7 @@
 #include "Renderer/material_proxy.h"
 #include <Application/application.h>
 #include "Renderer/renderer.h"
+#include "Core/assert.h"
 
 namespace volucris
 {
@@ -28,17 +29,21 @@ namespace volucris
 
 	MaterialResourceProxy* MaterialResource::attachProxy()
 	{
-		addRenderRef();
 		if (!m_proxy)
 		{
 			m_proxy = new MaterialResourceProxy(this);
 		}
+		addRenderRef();
+		V_LOG_DEBUG(Engine, "attach to material resource: {}, {}", getResourceFullPath(), getRenderRefCount())
 		return m_proxy;
 	}
 
 	void MaterialResource::deattachProxy()
 	{
-		removeRenderRef();
+		if (m_proxy)
+		{
+			removeRenderRef();
+		}
 	}
 
 	void MaterialResource::releaseRenderProxy()
@@ -48,7 +53,7 @@ namespace volucris
 			gApp->getRenderer()->pushCommand([proxy = m_proxy]() {
 				delete proxy;
 				});
-			removeRenderRef();
+			V_LOG_DEBUG(Engine, "release material resource proxy: {}", getResourceFullPath())
 		}
 		m_proxy = nullptr;
 	}
@@ -76,7 +81,6 @@ namespace volucris
 
 	Material::~Material()
 	{
-		m_resource->deattachProxy();
 	}
 
 	MaterialProxy* Material::attachProxy()
@@ -87,12 +91,16 @@ namespace volucris
 			m_proxy->setResource(m_resource->attachProxy());
 		}
 		addRenderRef();
+		V_LOG_DEBUG(Engine, "attach to material: {}, {}", getResourceFullPath(), getRenderRefCount())
 		return m_proxy;
 	}
 
 	void Material::deattachProxy()
 	{
-		removeRenderRef();
+		if (m_proxy)
+		{
+			removeRenderRef();
+		}
 	}
 
 	void Material::releaseRenderProxy()
@@ -103,6 +111,7 @@ namespace volucris
 				delete proxy;
 				});
 			m_resource->deattachProxy();
+			V_LOG_DEBUG(Engine, "release material: {}", getResourceFullPath())
 			m_proxy = nullptr;
 		}
 	}
