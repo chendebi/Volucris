@@ -5,9 +5,27 @@
 #include "Application/window.h"
 #include "Renderer/OpenGL/ogl_buffer_object.h"
 #include "Renderer/OpenGL/ogl_vertex_array_object.h"
+#include "Renderer/OpenGL/ogl_program_object.h"
+#include "Core/volucris.h"
+#include "Core/assert.h"
+#include "Renderer/material_proxy.h"
+#include "Renderer/primitive_proxy.h"
 
 namespace volucris
 {
+	GLenum getDrawMode(const DrawMode& mode)
+	{
+		switch (mode)
+		{
+		case DrawMode::TRIANGLES:
+			return GL_TRIANGLES;
+		default:
+			break;
+		}
+		check(false);
+		return GL_NONE;
+	}
+
 	struct Context::Impl
 	{
 		GLFWwindow* window;
@@ -40,7 +58,7 @@ namespace volucris
 
 	void Context::bindVertexBufferObject(OGLBufferObject* vbo)
 	{
-		if (m_renderState.vbo == vbo)
+		if (!vbo || m_renderState.vbo == vbo)
 		{
 			return;
 		}
@@ -59,13 +77,48 @@ namespace volucris
 		}
 	}
 
+	void Context::bindElementBufferObjct(OGLBufferObject* ebo)
+	{
+		if (!ebo || m_renderState.drawState.ebo == ebo)
+		{
+			return;
+		}
+
+		auto target = ebo->getTarget();
+		if (target != GL_ELEMENT_ARRAY_BUFFER)
+		{
+			return;
+		}
+
+		auto id = ebo->getID();
+		if (id > 0)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+			m_renderState.drawState.ebo = ebo;
+		}
+	}
+
 	void Context::bindVertexArrayObject(OGLVertexArrayObject* vao)
 	{
 		auto id = vao->getID();
 		if (id > 0)
 		{
 			glBindVertexArray(id);
-			m_renderState.vao = vao;
+			m_renderState.drawState.vao = vao;
+		}
+	}
+
+	void Context::setViewport(int x, int y, int w, int h)
+	{
+		setViewport({ x, y, w, h });
+	}
+
+	void Context::setViewport(const Rect& rect)
+	{
+		if (rect != m_viewport)
+		{
+			glViewport(rect.x, rect.y, rect.w, rect.h);
+			m_viewport = rect;
 		}
 	}
 
@@ -96,5 +149,61 @@ namespace volucris
 		{
 			glClear(flags);
 		}
+	}
+
+	void Context::draw(const OGLDrawState& state, const SectionRenderData& section)
+	{
+		if (!prepareDrawState(state))
+		{
+			V_LOG_WARN(Engine, "draw call failed");
+			return;
+		}
+		if (state.programState.program != m_renderState.drawState.programState.program)
+		{
+			m_renderState.drawState.programState.program = state.programState.program;
+			glUseProgram(state.programState.program->getID());
+			if (state.programState.uploader)
+			{
+				state.programState.uploader();
+			}
+		}
+
+		bindVertexArrayObject(state.vao);
+		bindElementBufferObjct(state.ebo);
+		glDrawArrays(getDrawMode(section.mode), section.offset, section.count);
+	}
+
+	void Context::draw2(const MaterialProxy* material, const SectionDrawData& section)
+	{
+		OGLDrawState state;
+		state.programState = material->getState();
+		state.ebo = section.renderInfo->ebo.get();
+		state.vao = section.renderInfo->vao.get();
+		draw(state, *section.section);
+	}
+
+	bool Context::prepareDrawState(const OGLDrawState& state)
+	{
+		if (!state.ebo || !state.programState.program || !state.vao)
+		{
+			return false;
+		}
+
+		if (!state.vao->valid() && (!state.vao->create() || !state.vao->initialize(this)))
+		{
+			return false;
+		}
+
+		if (!state.ebo->valid() && (!state.ebo->create() || !state.ebo->initialize(this)))
+		{
+			return false;
+		}
+
+		if (!state.programState.program->valid() && !state.programState.program->initialize())
+		{
+			return false;
+		}
+
+		return true;
 	}
 }

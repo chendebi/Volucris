@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <string>
+#include "Engine/Renderer/OpenGL/ogl_program_object.h"
+#include "Engine/Renderer/OpenGL/ogl_render_state.h"
 
 namespace volucris
 {
@@ -15,8 +17,10 @@ namespace volucris
 		MaterialResourceProxy(MaterialResource* resource);
 
 	private:
+		friend class MaterialProxy;
 		std::string m_vss;
 		std::string m_fss;
+		std::unique_ptr<OGLProgramObject> m_program;
 	};
 
 	class MaterialProxy
@@ -26,13 +30,13 @@ namespace volucris
 
 		~MaterialProxy();
 
-		void setResource(MaterialResourceProxy* resource)
-		{
-			m_resource = resource;
-		}
+		void setResource(MaterialResourceProxy* resource);
+
+		const OGLProgramState& getState() const { return m_state; }
 
 	private:
 		MaterialResourceProxy* m_resource;
+		OGLProgramState m_state;
 	};
 }
 

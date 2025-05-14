@@ -10,6 +10,8 @@
 #include "Engine/Resource/mesh_resource_data.h"
 #include "Engine/Resource/resource_path.h"
 #include <Engine/Resource/resource_manager.h>
+#include <Engine/Renderer/renderer.h>
+#include "simple_pass.h"
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
 
@@ -79,11 +81,16 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
 	data->setVertices(&vertices, sizeof(vertices));
 	data->setMaterial("", mat);
-	data->addSectionData(indices, sizeof(indices));
-	data->addSection({DrawMode::TRIANGLES, 36, 0, ""});
+	auto section = data->addSectionData(indices, sizeof(indices) / sizeof(uint32));
+	section.mode = DrawMode::TRIANGLES;
+	section.slot = "";
+	data->addSection(section);
 	comp->markRenderStateDirty();
 
 	app->addScene(scene);
 
+	auto renderer = std::make_shared<Renderer>();
+	renderer->addRenderPass(std::make_shared<SimplePass>());
+	app->setRenderer(renderer);
 	return app;
 }

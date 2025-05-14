@@ -39,7 +39,7 @@ namespace volucris
 	{
 		if (m_id > 0)
 		{
-			return false;
+			return true;
 		}
 
 		glGenBuffers(1, &m_id);
@@ -74,7 +74,18 @@ namespace volucris
 			return false;
 		}
 
-		ctx->bindVertexBufferObject(this);
+		if (m_target == GL_ARRAY_BUFFER)
+		{
+			ctx->bindVertexBufferObject(this);
+		}
+		else if (m_target == GL_ELEMENT_ARRAY_BUFFER)
+		{
+			ctx->bindElementBufferObjct(this);
+		}
+		else
+		{
+			check(false);
+		}
 		glBufferData(m_target, m_size, m_data, m_usage);
 		GL_CHECK();
 		m_valid = true;

@@ -9,6 +9,7 @@
 #include "Scene/scene.h"
 #include <Core/assert.h>
 #include "Core/vector_help.h"
+#include <Renderer/render_pass.h>
 
 namespace volucris
 {
@@ -31,12 +32,7 @@ namespace volucris
 
 		for (const auto& scene : m_scenes)
 		{
-			scene->update();
-		}
-
-		for (const auto& scene : m_scenes)
-		{
-			scene->render();
+			scene->render(m_context.get());
 		}
 
 		renderui();
@@ -59,6 +55,21 @@ namespace volucris
 	{
 		pushCommand([this, scene]() {
 			m_scenes.push_back(scene);
+			for (const auto& pass : m_passes)
+			{
+				scene->addRenderPass(pass->clone());
+			}
+			});
+	}
+
+	void Renderer::addRenderPass(const std::shared_ptr<RenderPass>& pass)
+	{
+		pushCommand([this, pass = pass->clone()]() {
+			m_passes.push_back(pass);
+			for (const auto& scene : m_scenes)
+			{
+				scene->addRenderPass(pass->clone());
+			}
 			});
 	}
 

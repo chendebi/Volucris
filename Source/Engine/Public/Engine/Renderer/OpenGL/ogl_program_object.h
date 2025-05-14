@@ -47,12 +47,27 @@ namespace volucris
 			m_shaders.push_back(shader);
 		}
 
+		void setAutoReleaseShader(bool enabled)
+		{
+			m_autoReleaseShader = enabled;
+		}
+
 		bool initialize();
 
 		void release();
 
+		bool valid() const { return m_id > 0; }
+
+		void updateUniforms();
+
+		uint32 getID() const { return m_id; }
+
+	protected:
+		void autoReleaseShaders();
+
 	private:
 		uint32 m_id;
+		uint8 m_autoReleaseShader;
 		std::vector<std::shared_ptr<OGLShaderObject>> m_shaders;
 	};
 }

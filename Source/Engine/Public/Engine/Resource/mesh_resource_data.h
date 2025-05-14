@@ -45,7 +45,7 @@ namespace volucris
 
 		Section addSectionData(const std::vector<uint32>& indices);
 		
-		Section addSectionData(void* indices, size_t size);
+		Section addSectionData(const uint32* indices, size_t count);
 
 		std::shared_ptr<MeshRenderData> build();
 

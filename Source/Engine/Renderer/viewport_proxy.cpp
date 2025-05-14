@@ -4,6 +4,7 @@
 #include "Application/viewport.h"
 #include "Scene/scene.h"
 #include "Renderer/primitive_proxy.h"
+#include "Renderer/render_pass.h"
 
 namespace volucris
 {
@@ -23,19 +24,35 @@ namespace volucris
 	{
 		for (const auto& primitive : primitives)
 		{
-			
+			for (const auto& batch : primitive->getDrawBatch())
+			{
+				for (const auto& pass : m_passes)
+				{
+					pass->addBatch(batch);
+				}
+			}
 		}
 	}
 
-	void ViewportProxy::render()
+	void ViewportProxy::addRenderPass(const std::shared_ptr<RenderPass>& pass)
 	{
-		glViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
-		glClearColor(0.2, 0.6, 0.8, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		m_passes.push_back(pass);
+		pass->initialize(this);
+	}
 
-		for (const auto& primitive : m_primitives)
+	void ViewportProxy::render(Context* context)
+	{
+		for (const auto& pass : m_passes)
 		{
-			primitive
+			pass->render(context);
+		}
+	}
+
+	void ViewportProxy::clear()
+	{
+		for (const auto& pass : m_passes)
+		{
+			pass->clear();
 		}
 	}
 }

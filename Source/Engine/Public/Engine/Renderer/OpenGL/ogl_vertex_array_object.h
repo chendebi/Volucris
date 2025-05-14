@@ -31,6 +31,11 @@ namespace volucris
 
 		void release();
 
+		void addDescription(const BufferDescription& description)
+		{
+			m_descriptions.push_back(description);
+		}
+
 		void setDescriptions(const std::vector<BufferDescription>& descriptions)
 		{
 			m_descriptions = descriptions;

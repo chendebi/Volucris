@@ -16,6 +16,7 @@ namespace volucris
 	class SceneProxy;
 	class PrimitiveProxy;
 	class PrimitiveComponent;
+	class RenderPass;
 
 	class Renderer
 	{
@@ -33,6 +34,8 @@ namespace volucris
 		void setWindowFrameSize(int width, int height);
 
 		void addScene(const std::shared_ptr<SceneProxy>& scene);
+
+		void addRenderPass(const std::shared_ptr<RenderPass>& pass);
 
 		void removeScene(Scene* scene);
 
@@ -54,6 +57,7 @@ namespace volucris
 		CircleQueue<RenderCommand> m_commands;
 		std::vector<std::shared_ptr<ViewportProxy>> m_viewports;
 		std::vector<std::shared_ptr<SceneProxy>> m_scenes;
+		std::vector<std::shared_ptr<RenderPass>> m_passes;
 		Size m_windowFrameSize;
 	};
 }

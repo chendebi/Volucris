@@ -1,8 +1,10 @@
 #ifndef __volucris_viewport_proxy_h__
 #define __volucris_viewport_proxy_h__
 
-#include <Core/rect.h>
+#include <Engine/Core/rect.h>
 #include <vector>
+#include "Engine/Renderer/mesh_render_data.h"
+#include <memory>
 
 namespace volucris
 {
@@ -10,13 +12,8 @@ namespace volucris
 	class SceneProxy;
 	class PrimitiveProxy;
 	class MaterialProxy;
-
-	struct RenderBatch
-	{
-		MaterialProxy* material;
-		std::vector<SectionRenderData> sections;
-		std::shared_ptr<MeshRenderData> renderData;
-	};
+	class RenderPass;
+	class Context;
 
 	class ViewportProxy
 	{
@@ -27,12 +24,20 @@ namespace volucris
 
 		void update(const std::vector<std::shared_ptr<PrimitiveProxy>>& primitives);
 
-		void render();
+		void addRenderPass(const std::shared_ptr<RenderPass>& pass);
+
+		const std::vector<std::shared_ptr<RenderPass>>& getPasses() const { return m_passes; }
+
+		void render(Context* context);
+
+		void clear();
+
+		Rect getViewport() const { return m_viewport; }
 
 	private:
 		Rect m_viewport;
 		SceneProxy* m_scene;
-		std::vector<RenderBatch> m_batches;
+		std::vector<std::shared_ptr<RenderPass>> m_passes;
 	};
 }
 

@@ -19,16 +19,20 @@ namespace volucris
 		
 	}
 
-	void SceneProxy::update()
-	{
-
-	}
-
-	void SceneProxy::render()
+	void SceneProxy::render(Context* context)
 	{
 		for (const auto& view : m_views)
 		{
-			view->render();
+			view->update(m_primitives);
+			view->render(context);
+		}
+
+		// todo: 合并渲染结果
+
+		// 清理这一帧的数据
+		for (const auto& view : m_views)
+		{
+			view->clear();
 		}
 	}
 
@@ -47,5 +51,13 @@ namespace volucris
 		VectorHelp::quickRemoveFirstIf<std::shared_ptr<PrimitiveProxy>>(m_primitives, [proxy](const std::shared_ptr<PrimitiveProxy>& p)->bool {
 			return p.get() == proxy;
 			});
+	}
+
+	void SceneProxy::addRenderPass(const std::shared_ptr<RenderPass>& pass)
+	{
+		for (const auto& view : m_views)
+		{
+			view->addRenderPass(pass);
+		}
 	}
 }

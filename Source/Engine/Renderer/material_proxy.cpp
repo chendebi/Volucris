@@ -1,5 +1,6 @@
 #include "Renderer/material_proxy.h"
 #include "Resource/material.h"
+#include "Renderer/OpenGL/ogl_program_object.h"
 
 namespace volucris
 {
@@ -7,8 +8,15 @@ namespace volucris
 	MaterialResourceProxy::MaterialResourceProxy(MaterialResource* resource)
 		: m_vss(resource->getVertexShaderSource())
 		, m_fss(resource->getFragmentShaderSource())
+		, m_program(std::make_unique<OGLProgramObject>())
 	{
-
+		auto vs = std::make_shared<OGLShaderObject>(GL_VERTEX_SHADER);
+		vs->setSource(m_vss);
+		auto fs = std::make_shared<OGLShaderObject>(GL_FRAGMENT_SHADER);
+		fs->setSource(m_fss);
+		m_program->attach(vs);
+		m_program->attach(fs);
+		m_program->setAutoReleaseShader(true);
 	}
 
 	MaterialProxy::MaterialProxy(Material* material)
@@ -20,5 +28,11 @@ namespace volucris
 	MaterialProxy::~MaterialProxy()
 	{
 
+	}
+
+	void MaterialProxy::setResource(MaterialResourceProxy* resource)
+	{
+		m_resource = resource;
+		m_state.program = resource->m_program.get();
 	}
 }

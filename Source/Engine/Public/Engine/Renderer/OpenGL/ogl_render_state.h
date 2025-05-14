@@ -2,11 +2,13 @@
 #define __volucris_ogl_render_state_h__
 
 #include <glm/glm.hpp>
+#include <functional>
 
 namespace volucris
 {
 	class OGLBufferObject;
 	class OGLVertexArrayObject;
+	class OGLProgramObject;
 
 	struct OGLClearState
 	{
@@ -23,11 +25,23 @@ namespace volucris
 		float depth = 1.0;
 	};
 
+	struct OGLProgramState
+	{
+		OGLProgramObject* program = nullptr;
+		std::function<void()> uploader = nullptr;
+	};
+
+	struct OGLDrawState
+	{
+		OGLBufferObject* ebo = nullptr;
+		OGLVertexArrayObject* vao = nullptr;
+		OGLProgramState programState;
+	};
+
 	struct OGLRenderState
 	{
 		OGLBufferObject* vbo = nullptr;
-		OGLBufferObject* ebo = nullptr;
-		OGLVertexArrayObject* vao = nullptr;
+		OGLDrawState drawState;
 	};
 }
 

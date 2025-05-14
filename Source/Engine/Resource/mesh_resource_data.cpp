@@ -33,21 +33,20 @@ namespace volucris
 
 	Section MeshResourceData::addSectionData(const std::vector<uint32>& indices)
 	{
-		return addSectionData((void*)indices.data(), (size_t)indices.size() * sizeof(uint32));
+		return addSectionData(indices.data(), indices.size());
 	}
 
-	Section MeshResourceData::addSectionData(void* indices, size_t size)
+	Section MeshResourceData::addSectionData(const uint32* indices, size_t count)
 	{
-		size_t appendCount = size / sizeof(uint32);
 		size_t currentCount = m_indices.size();
-		size_t count = currentCount + appendCount;
+		size_t newcount = currentCount + count;
 		size_t offset = currentCount * sizeof(uint32);
-		m_indices.resize(count);
-		memcpy(m_indices.data() + offset, indices, size);
-		Section data;
-		data.count = appendCount;
-		data.offset = offset;
-		return data;
+		m_indices.resize(newcount);
+		memcpy(m_indices.data() + currentCount, indices, count * sizeof(uint32));
+		Section section;
+		section.count = count;
+		section.offset = currentCount;
+		return section;
 	}
 
 	std::shared_ptr<MeshRenderData> MeshResourceData::build()
@@ -57,7 +56,7 @@ namespace volucris
 		std::vector<uint8> vertexBufferData;
 		vertexBufferData.resize(vertexBufferSize);
 		memcpy(vertexBufferData.data(), m_vertices.data(), vertexBufferSize);
-		BlockDescription vertexBlock = { BlockType::VERTEX,0 };
+		BlockDescription vertexBlock = { BlockType::VERTEX, 0};
 		renderData->blocks.push_back(vertexBlock);
 
 		std::vector<uint8> indexBufferData;

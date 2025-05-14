@@ -21,7 +21,6 @@ namespace volucris
 		DrawMode mode = DrawMode::TRIANGLES;
 		int count = 0;
 		int offset = 0;
-		MaterialProxy* material = nullptr;
 	};
 
 	enum BlockType
@@ -44,7 +43,7 @@ namespace volucris
 		std::vector<BlockDescription> blocks;
 		std::vector<uint8> renderData;
 		std::vector<uint8> sectionData;
-		std::vector<SectionRenderData> sections;
+		std::unordered_map<MaterialProxy*, std::vector<SectionRenderData>> sections;
 	};
 }
 

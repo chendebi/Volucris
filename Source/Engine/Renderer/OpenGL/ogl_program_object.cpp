@@ -47,6 +47,7 @@ namespace volucris
 
     OGLProgramObject::OGLProgramObject()
         : m_id(0)
+        , m_autoReleaseShader(false)
         , m_shaders()
     {
     }
@@ -60,7 +61,7 @@ namespace volucris
     {
         for (const auto& shader : m_shaders)
         {
-            if (shader->getID() == 0)
+            if (shader->getID() == 0 && !shader->initialize())
             {
                 V_LOG_WARN(Engine, "initialize program failed. some shader invalid.");
                 return false;
@@ -88,15 +89,36 @@ namespace volucris
             release();
             return false;
         }
+        autoReleaseShaders();
         GL_CHECK();
         return true;
     }
 
     void OGLProgramObject::release()
     {
+        autoReleaseShaders();
         if (m_id > 0)
         {
             glDeleteProgram(m_id);
+        }
+    }
+
+    void OGLProgramObject::updateUniforms()
+    {
+        V_LOG_DEBUG(Engine, "osg program object need complete function [updateUniforms]");
+    }
+
+    void OGLProgramObject::autoReleaseShaders()
+    {
+        if (m_autoReleaseShader)
+        {
+            for (const auto& shader : m_shaders)
+            {
+                if (shader.use_count() == 1)
+                {
+                    shader->release();
+                }
+            }
         }
     }
 }

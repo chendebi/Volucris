@@ -19,9 +19,11 @@ namespace volucris
 
 	PrimitiveProxy::PrimitiveProxy(PrimitiveComponent* primitive)
 		: m_renderData(primitive->getMeshResourceData()->build())
+		, m_renderInfo()
+		, m_batches()
 	{
 		auto meshData = primitive->getMeshResourceData();
-		std::vector<SectionRenderData> sections;
+		std::unordered_map<MaterialProxy*, std::vector<SectionRenderData>> sections;
 		for (const auto& section : meshData->getSections())
 		{
 			SectionRenderData sectionRenderData;
@@ -31,11 +33,19 @@ namespace volucris
 			auto mat = meshData->getMaterial(section.slot);
 
 			check(mat != nullptr);
-			sectionRenderData.material = mat->attachProxy();
-			sections.push_back(sectionRenderData);
+
+			auto matProxy = mat->attachProxy();
+			auto sectionIt = sections.find(matProxy);
+			if (sectionIt == sections.end())
+			{
+				sections[matProxy] = { sectionRenderData };
+			}
+			else
+			{
+				sectionIt->second.push_back(sectionRenderData);
+			}
 		}
 		m_renderData->sections = sections;
-
 		m_renderInfo.vbo->setData(m_renderData->renderData.data(), m_renderData->renderData.size());
 		m_renderInfo.ebo->setData(m_renderData->sectionData.data(), m_renderData->sectionData.size());
 		m_renderInfo.vao->setVertexBufferObject(m_renderInfo.vbo);
@@ -50,14 +60,29 @@ namespace volucris
 				desc.type = GL_FLOAT;
 				desc.normalized = false;
 				desc.size = 3;
-				desc.offset = 0;
-				desc.stride = block;
+				desc.offset = block.offset;
+				desc.stride = 3 * sizeof(float);
 			}
+			break;
 			default:
 				break;
 			}
+			m_renderInfo.vao->addDescription(desc);
 		}
 
-		m_renderInfo.vao->setDescriptions();
+		m_batches.reserve(m_renderData->sections.size());
+		for (auto& [material, sections] : m_renderData->sections)
+		{
+			PrimitiveDrawBatch batch;
+			batch.material = material;
+			for (auto& section : sections)
+			{
+				SectionDrawData drawData;
+				drawData.section = &section;
+				drawData.renderInfo = &m_renderInfo;
+				batch.sections.push_back(drawData);
+			}
+			m_batches.push_back(batch);
+		}
 	}
 }

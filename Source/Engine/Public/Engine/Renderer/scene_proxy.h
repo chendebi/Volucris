@@ -9,6 +9,8 @@ namespace volucris
 	class Scene;
 	class PrimitiveProxy;
 	class ViewportProxy;
+	class RenderPass;
+	class Context;
 
 	class SceneProxy
 	{
@@ -17,15 +19,15 @@ namespace volucris
 
 		~SceneProxy();
 
-		void update();
-
-		void render();
+		void render(Context* context);
 
 		void addViewportProxy(const std::shared_ptr<ViewportProxy>& view);
 
 		void addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy);
 
 		void removePrimitiveProxy(PrimitiveProxy* proxy);
+
+		void addRenderPass(const std::shared_ptr<RenderPass>& pass);
 
 	private:
 		std::vector<std::shared_ptr<ViewportProxy>> m_views;
