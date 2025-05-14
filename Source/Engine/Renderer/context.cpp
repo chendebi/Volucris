@@ -10,6 +10,7 @@
 #include "Core/assert.h"
 #include "Renderer/material_proxy.h"
 #include "Renderer/primitive_proxy.h"
+#include "Renderer/OpenGL/ogl_uniform.h"
 
 namespace volucris
 {
@@ -162,10 +163,11 @@ namespace volucris
 		{
 			m_renderState.drawState.programState.program = state.programState.program;
 			glUseProgram(state.programState.program->getID());
-			if (state.programState.uploader)
-			{
-				state.programState.uploader();
-			}
+		}
+
+		for (const auto& uniform : state.programState.uniforms)
+		{
+			uniform->upload();
 		}
 
 		bindVertexArrayObject(state.vao);
@@ -173,7 +175,7 @@ namespace volucris
 		glDrawArrays(getDrawMode(section.mode), section.offset, section.count);
 	}
 
-	void Context::draw2(const MaterialProxy* material, const SectionDrawData& section)
+	void Context::draw(const MaterialProxy* material, const SectionDrawData& section)
 	{
 		OGLDrawState state;
 		state.programState = material->getState();

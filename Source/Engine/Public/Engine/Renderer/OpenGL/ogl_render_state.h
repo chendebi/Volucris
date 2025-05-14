@@ -2,13 +2,14 @@
 #define __volucris_ogl_render_state_h__
 
 #include <glm/glm.hpp>
-#include <functional>
+#include <memory>
 
 namespace volucris
 {
 	class OGLBufferObject;
 	class OGLVertexArrayObject;
 	class OGLProgramObject;
+	class Uniform;
 
 	struct OGLClearState
 	{
@@ -28,7 +29,7 @@ namespace volucris
 	struct OGLProgramState
 	{
 		OGLProgramObject* program = nullptr;
-		std::function<void()> uploader = nullptr;
+		std::vector<std::shared_ptr<Uniform>> uniforms;
 	};
 
 	struct OGLDrawState

@@ -63,19 +63,18 @@ namespace volucris
 		, m_parameters()
 		, m_proxy(nullptr)
 	{
-		for(const auto& [type, names] : resource->m_parameters)
+		size_t size = 0;
+		for(const auto& desc : resource->getParameterDescriptions())
 		{
-			for (const auto& name : names)
-			{
-				if (auto parameter = MaterialParameter::create(type, name))
-				{
-					m_parameters[name] = std::move(parameter);
-				}
-				else
-				{
-					V_LOG_WARN(Engine, "find invalid parameter[{}], type: {}", name, (int)type);
-				}
-			}
+			size += MaterialParameterDesc::sizeOfType(desc.type);
+		}
+
+		m_parameterData.resize(size);
+		size_t offset = 0;
+		for (const auto& desc : resource->getParameterDescriptions())
+		{
+			auto parameter = std::make_unique<MaterialParameter>(desc, m_parameterData.data());
+			m_parameters.push_back(std::move(parameter));
 		}
 	}
 
@@ -101,6 +100,18 @@ namespace volucris
 		{
 			removeRenderRef();
 		}
+	}
+
+	MaterialParameter* Material::getParameterByName(const std::string& name)
+	{
+		for (const auto& parameter : m_parameters)
+		{
+			if (parameter->getDescription().name == name)
+			{
+				return parameter.get();
+			}
+		}
+		return nullptr;
 	}
 
 	void Material::releaseRenderProxy()

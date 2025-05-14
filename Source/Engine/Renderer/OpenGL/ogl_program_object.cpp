@@ -1,5 +1,6 @@
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include "Renderer/OpenGL/ogl_check.h"
+#include "Renderer/OpenGL/ogl_uniform.h"
 
 namespace volucris
 {
@@ -89,6 +90,12 @@ namespace volucris
             release();
             return false;
         }
+
+        for (auto& desc : m_uniformDescriptions)
+        {
+            desc->location = glGetUniformLocation(m_id, desc->desc.name.c_str());
+        }
+
         autoReleaseShaders();
         GL_CHECK();
         return true;
@@ -101,11 +108,6 @@ namespace volucris
         {
             glDeleteProgram(m_id);
         }
-    }
-
-    void OGLProgramObject::updateUniforms()
-    {
-        V_LOG_DEBUG(Engine, "osg program object need complete function [updateUniforms]");
     }
 
     void OGLProgramObject::autoReleaseShaders()

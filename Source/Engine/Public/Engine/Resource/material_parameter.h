@@ -4,53 +4,28 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
+#include <Engine/Core/types_help.h>
+#include <Engine/Renderer/material_parameter_description.h>
 
 namespace volucris
 {
 	class MaterialParameter
 	{
 	public:
-		enum Type
-		{
-			UNKNOWN,
-			FLOAT,
-			VEC3
-		};
+		MaterialParameter(const MaterialParameterDesc& desc, uint8* table);
 
-	public:
-		MaterialParameter(Type type);
-
-		virtual ~MaterialParameter() = default;
-
-		static std::unique_ptr<MaterialParameter> create(Type type, const std::string& name);
+		~MaterialParameter() = default;
 
 		void setValue(float value);
 
 		void setValue(const glm::vec3& value);
 
+		const MaterialParameterDesc& getDescription() const { return m_desc; }
+
 	private:
-		Type m_type;
-		std::string m_name;
+		uint8* m_dataTable;
+		MaterialParameterDesc m_desc;
 	};
-
-	template<typename T>
-	class MaterialParameterTemplate : public MaterialParameter
-	{
-		T m_value;
-	public:
-		MaterialParameterTemplate() : MaterialParameter(UNKNOWN), m_value() {}
-	};
-
-	template<>
-	MaterialParameterTemplate<float>::MaterialParameterTemplate()
-		: MaterialParameter(FLOAT), m_value(0.f) { }
-
-	template<>
-	MaterialParameterTemplate<glm::vec3>::MaterialParameterTemplate()
-		: MaterialParameter(VEC3), m_value() {}
-
-	using MaterialParameterFloat = MaterialParameterTemplate<float>;
-	using MaterialParameterVec3 = MaterialParameterTemplate<glm::vec3>;
 }
 
 #endif // !__volucris_material_parameter_h__

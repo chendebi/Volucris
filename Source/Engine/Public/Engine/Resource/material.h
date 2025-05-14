@@ -16,17 +16,15 @@ namespace volucris
 	class MaterialResource : public RenderResource
 	{
 	public:
-		using MaterialParameterMap = std::unordered_map<MaterialParameter::Type, std::vector<std::string>>;
-
 		MaterialResource();
 
 		MaterialResource(const std::string& vss, const std::string& fss);
 
 		void setSource(const std::string& vss, const std::string& fss);
 
-		void setParameters(const MaterialParameterMap& parameters)
+		void setParameters(const std::vector<MaterialParameterDesc>& parameters)
 		{
-			m_parameters = parameters;
+			m_descriptions = parameters;
 		}
 
 		MaterialResourceProxy* getProxy() const { return m_proxy; }
@@ -38,6 +36,8 @@ namespace volucris
 		std::string getVertexShaderSource() const { return m_vss; }
 		std::string getFragmentShaderSource() const { return m_fss; }
 
+		const std::vector<MaterialParameterDesc>& getParameterDescriptions() const { return m_descriptions; }
+
 	protected:
 		void releaseRenderProxy() override;
 
@@ -45,7 +45,7 @@ namespace volucris
 		friend class Material;
 		std::string m_vss;
 		std::string m_fss;
-		MaterialParameterMap m_parameters;
+		std::vector<MaterialParameterDesc> m_descriptions;
 		MaterialResourceProxy* m_proxy;
 	};
 
@@ -64,12 +64,17 @@ namespace volucris
 
 		std::shared_ptr<MaterialResource> getResource() const { return m_resource; }
 
+		std::vector<uint8> getParameterData() const { return  m_parameterData; }
+
+		MaterialParameter* getParameterByName(const std::string& name);
+
 	protected:
 		void releaseRenderProxy() override;
 
 	private:
 		std::shared_ptr<MaterialResource> m_resource;
-		std::unordered_map<std::string, std::unique_ptr<MaterialParameter>> m_parameters;
+		std::vector<std::unique_ptr<MaterialParameter>> m_parameters;
+		std::vector<uint8> m_parameterData;
 		MaterialProxy* m_proxy;
 	};
 }

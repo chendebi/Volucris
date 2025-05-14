@@ -9,6 +9,9 @@
 
 namespace volucris
 {
+	class Uniform;
+	class UniformDescription;
+
 	class OGLShaderObject
 	{
 	public:
@@ -58,9 +61,12 @@ namespace volucris
 
 		bool valid() const { return m_id > 0; }
 
-		void updateUniforms();
-
 		uint32 getID() const { return m_id; }
+
+		void setUniformDescriptions(const std::vector<std::shared_ptr<UniformDescription>>& descritions)
+		{
+			m_uniformDescriptions = descritions;
+		}
 
 	protected:
 		void autoReleaseShaders();
@@ -69,6 +75,7 @@ namespace volucris
 		uint32 m_id;
 		uint8 m_autoReleaseShader;
 		std::vector<std::shared_ptr<OGLShaderObject>> m_shaders;
+		std::vector<std::shared_ptr<UniformDescription>> m_uniformDescriptions;
 	};
 }
 

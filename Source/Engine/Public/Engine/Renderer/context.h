@@ -35,7 +35,7 @@ namespace volucris
 
 		void draw(const OGLDrawState& state, const SectionRenderData& section);
 
-		void draw2(const MaterialProxy* material, const SectionDrawData& section);
+		void draw(const MaterialProxy* material, const SectionDrawData& section);
 
 	protected:
 		bool prepareDrawState(const OGLDrawState& state);

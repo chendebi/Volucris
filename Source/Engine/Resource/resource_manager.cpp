@@ -7,20 +7,22 @@
 
 namespace volucris
 {
-	MaterialParameter::Type getTypeByString(const std::string& name)
+	MaterialParameterDesc::Type getTypeByString(const std::string& name)
 	{
-		MaterialParameter::Type type = MaterialParameter::UNKNOWN;
-		if (name == "float") { type = MaterialParameter::FLOAT; }
-		else if (name == "vec3") { type = MaterialParameter::VEC3; }
+		MaterialParameterDesc::Type type = MaterialParameterDesc::UNKNOWN;
+		if (name == "float") { type = MaterialParameterDesc::FLOAT; }
+		else if (name == "vec3") { type = MaterialParameterDesc::VEC3; }
 
-		if (type == MaterialParameter::UNKNOWN)
+		if (type == MaterialParameterDesc::UNKNOWN)
 		{
 			V_LOG_WARN(Engine, "load material with unsupported uniform type: {}", name);
 		}
 		return type;
 	}
 
-	static bool getShaderSource(const std::string& filePath, std::string& source, MaterialResource::MaterialParameterMap& map)
+	using MaterialParameterMap = std::unordered_map<MaterialParameterDesc::Type, std::vector<std::string>>;
+
+	static bool getShaderSource(const std::string& filePath, std::string& source, MaterialParameterMap& map)
 	{
 		V_LOG_DEBUG(Engine, "load shader source: {}", filePath)
 		std::ifstream file(filePath);
@@ -67,7 +69,7 @@ namespace volucris
 					return false;
 				}
 
-				if (type != MaterialParameter::UNKNOWN)
+				if (type != MaterialParameterDesc::UNKNOWN)
 				{
 					V_LOG_DEBUG(Engine, "find material parameter: {} - {}", tokens[1], name)
 					map[type].push_back(name);
@@ -110,7 +112,7 @@ namespace volucris
 			V_LOG_DEBUG(Engine, " vertex shader:   {}", vsf)
 			V_LOG_DEBUG(Engine, " fragment shader: {}", fsf)
 
-			MaterialResource::MaterialParameterMap map;
+			MaterialParameterMap map;
 			std::string vss, fss;
 			if (!getShaderSource(vsf, vss, map) || !getShaderSource(fsf, fss, map))
 			{
@@ -118,8 +120,29 @@ namespace volucris
 				return nullptr;
 			}
 
+			std::vector<MaterialParameterDesc> descs;
+			size_t offset = 0;
+			for (const auto& [type, names] : map)
+			{
+				if (type == MaterialParameterDesc::UNKNOWN)
+				{
+					continue;
+				}
+
+				auto typeSize = MaterialParameterDesc::sizeOfType(type);
+				for (const auto& name : names)
+				{
+					MaterialParameterDesc desc;
+					desc.name = name;
+					desc.type = type;
+					desc.offset = offset;
+					descs.push_back(desc);
+					offset += typeSize;
+				}
+			}
+
 			resource = std::make_shared<MaterialResource>(vss, fss);
-			resource->setParameters(map);
+			resource->setParameters(descs);
 			resource->setResourcePath(path);
 
 			m_resources[path.fullpath] = resource;

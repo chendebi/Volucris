@@ -16,7 +16,7 @@ void SimplePass::render(Context* context)
 		auto material = batch.material;
 		for (const auto& section : batch.sections)
 		{
-			context->draw2(material, section);
+			context->draw(material, section);
 		}
 	}
 }

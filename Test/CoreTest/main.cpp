@@ -11,6 +11,8 @@
 #include "Engine/Resource/resource_path.h"
 #include <Engine/Resource/resource_manager.h>
 #include <Engine/Renderer/renderer.h>
+#include "Engine/Resource/material.h"
+#include "Engine/Resource/material_parameter.h"
 #include "simple_pass.h"
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
@@ -79,6 +81,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	auto data = comp->getMeshResourceData();
 	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
+	mat->getParameterByName("fcolor")->setValue(glm::vec3(0.1, 1.0, 0.0));
 	data->setVertices(&vertices, sizeof(vertices));
 	data->setMaterial("", mat);
 	auto section = data->addSectionData(indices, sizeof(indices) / sizeof(uint32));
