@@ -5,6 +5,7 @@
 #include <vector>
 #include "Engine/Renderer/mesh_render_data.h"
 #include <memory>
+#include <glm/glm.hpp>
 
 namespace volucris
 {
@@ -34,10 +35,28 @@ namespace volucris
 
 		Rect getViewport() const { return m_viewport; }
 
+		void setViewMatrix(const glm::mat4& mat)
+		{
+			m_viewMatrix = mat;
+		}
+
+		void setProjectionMatrix(const glm::mat4& mat)
+		{
+			m_projectionMatrix = mat;
+		}
+
+		void setProjectionViewMatrix(const glm::mat4& mat)
+		{
+			m_projectionViewMatrix = mat;
+		}
+
 	private:
 		Rect m_viewport;
 		SceneProxy* m_scene;
 		std::vector<std::shared_ptr<RenderPass>> m_passes;
+		glm::mat4 m_viewMatrix;
+		glm::mat4 m_projectionMatrix;
+		glm::mat4 m_projectionViewMatrix;
 	};
 }
 

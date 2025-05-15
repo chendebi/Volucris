@@ -14,7 +14,8 @@ namespace volucris
 		{
 			UNKNOWN,
 			FLOAT,
-			VEC3
+			VEC3,
+			MAT4
 		};
 
 		static size_t sizeOfType(Type type)
@@ -27,6 +28,8 @@ namespace volucris
 				return sizeof(float);
 			case VEC3:
 				return sizeof(glm::vec3);
+			case MAT4:
+				return sizeof(glm::mat4);
 			default:
 				break;
 			}

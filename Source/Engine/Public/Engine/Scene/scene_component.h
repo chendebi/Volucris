@@ -23,6 +23,8 @@ namespace volucris
 
 		const glm::mat4& getWorldTransform() const { return m_worldTransform; }
 
+		const glm::mat4& getRortationTransform() const { return m_rotationTransform; }
+
 	protected:
 		void updateTransform();
 
@@ -34,6 +36,7 @@ namespace volucris
 		glm::vec3 m_position;
 		glm::vec3 m_rotation;
 		glm::vec3 m_scale;
+		glm::mat4 m_rotationTransform;
 		glm::mat4 m_relativeTransform;
 		glm::mat4 m_worldTransform;
 		SceneComponent* m_parentSceneComponent;

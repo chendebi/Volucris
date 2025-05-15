@@ -1,7 +1,7 @@
 #ifndef __volucris_client_viewport_h__
 #define __volucris_client_viewport_h__
 
-#include "Engine/Application/viewport.h"
+#include "Engine/Scene/viewport.h"
 #include "Engine/Application/window.h"
 
 namespace volucris

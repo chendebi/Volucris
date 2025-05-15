@@ -11,7 +11,7 @@ namespace volucris
 	class OGLBufferObject
 	{
 	public:
-		OGLBufferObject(GLenum target);
+		OGLBufferObject(GLenum target, GLenum usage=GL_STATIC_DRAW);
 
 		virtual ~OGLBufferObject();
 
@@ -42,6 +42,31 @@ namespace volucris
 		void* m_data;
 		size_t m_size;
 		uint8 m_valid;
+	};
+
+	class OGLUniformBufferObject : public OGLBufferObject
+	{
+	public:
+		struct BlockID
+		{
+			size_t offset;
+			size_t size;
+		};
+
+	public:
+		OGLUniformBufferObject(size_t size);
+
+		BlockID addBlock(void* data, size_t size);
+
+		void updateBlock(BlockID id, void* data);
+
+	private:
+		struct DirtyBlock
+		{
+			size_t start;
+			size_t end;
+		};
+		DirtyBlock m_dirtyBlock;
 	};
 }
 

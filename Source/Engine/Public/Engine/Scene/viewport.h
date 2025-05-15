@@ -21,6 +21,8 @@ namespace volucris
 
 		void update();
 
+		ViewportProxy* getProxy() const { return m_proxy; }
+
 	private:
 		friend class Scene;
 		friend class SceneProxy;

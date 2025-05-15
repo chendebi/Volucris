@@ -1,7 +1,7 @@
 #include "Renderer/viewport_proxy.h"
 #include "glad/glad.h"
 #include "Core/volucris.h"
-#include "Application/viewport.h"
+#include "Scene/viewport.h"
 #include "Scene/scene.h"
 #include "Renderer/primitive_proxy.h"
 #include "Renderer/render_pass.h"
@@ -42,6 +42,8 @@ namespace volucris
 
 	void ViewportProxy::render(Context* context)
 	{
+		//
+
 		for (const auto& pass : m_passes)
 		{
 			pass->render(context);

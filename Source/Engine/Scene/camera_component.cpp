@@ -1,0 +1,66 @@
+#include "Scene/camera_component.h"
+#include <glm/ext.hpp>
+#include "Scene/viewport.h"
+#include <Application/application.h>
+#include "Renderer/renderer.h"
+#include "Renderer/viewport_proxy.h"
+
+namespace volucris
+{
+	CameraComponent::CameraComponent(Mode mode, Viewport* viewport)
+		: SceneComponent()
+		, m_mode(mode)
+		, m_aspect(1.777777)
+		, m_fov(90.f)
+		, m_nearDist(0.1f)
+		, m_farDist(10000.f)
+		, m_viewMatrix()
+		, m_projectionMatrix()
+		, m_projectionViewMatrix()
+		, m_viewport(viewport)
+	{
+
+	}
+
+	void CameraComponent::updateProjectionMatrix()
+	{
+		if (m_mode == PERSPECTIVE)
+		{
+			m_projectionMatrix = glm::perspective(m_fov, m_aspect, m_nearDist, m_farDist);
+		}
+		else
+		{
+			
+		}
+		m_projectionViewMatrix = m_projectionMatrix * m_viewMatrix;
+		markRenderTransformDirty();
+	}
+
+	void CameraComponent::onTransformChanged()
+	{
+		const auto& rot = getRortationTransform();
+		auto right = glm::vec3(rot * glm::vec4(1.0, 0.0, 0.0, 1.0));
+		auto forward = glm::vec3(rot * glm::vec4(0.0, 0.0, -1.0, 1.0));
+		auto eye = getPosition();
+		auto center = eye + forward * 0.1f;
+		auto up = glm::cross(-forward, right);
+		m_viewMatrix = glm::lookAt(eye, center, up);
+		m_projectionViewMatrix = m_projectionMatrix * m_viewMatrix;
+	}
+
+	void CameraComponent::updateTransform()
+	{
+		auto proxy = m_viewport->getProxy();
+		gApp->getRenderer()->pushCommand([proxy, viewMat = m_viewMatrix, projMat=m_projectionMatrix, pv = m_projectionViewMatrix] {
+			proxy->setViewMatrix(viewMat);
+			proxy->setProjectionMatrix(projMat);
+			proxy->setProjectionViewMatrix(pv);
+			});
+	}
+
+	void CameraComponent::updateRenderState()
+	{
+		updateTransform();
+	}
+
+}

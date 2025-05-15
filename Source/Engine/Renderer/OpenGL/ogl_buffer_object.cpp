@@ -4,9 +4,9 @@
 
 namespace volucris
 {
-	OGLBufferObject::OGLBufferObject(GLenum target)
+	OGLBufferObject::OGLBufferObject(GLenum target, GLenum usage)
 		: m_target(target)
-		, m_usage(GL_STATIC_DRAW)
+		, m_usage(usage)
 		, m_id(0)
 		, m_data(nullptr)
 		, m_size(0)
@@ -141,6 +141,34 @@ namespace volucris
 		for (auto idx = 0; idx < ids.size(); ++idx)
 		{
 			buffers[idx]->m_id = 0;
+		}
+	}
+
+	OGLUniformBufferObject::OGLUniformBufferObject(size_t size)
+		: OGLBufferObject(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW)
+		, m_dirtyBlock()
+	{
+		setData(nullptr, size);
+	}
+
+	OGLUniformBufferObject::BlockID OGLUniformBufferObject::addBlock(void* data, size_t size)
+	{
+		/*auto offset = m_data.size();
+		m_data.resize(offset + size);
+		memcpy(m_data.data() + offset, data, size);*/
+		//return { offset, size };
+	}
+
+	void OGLUniformBufferObject::updateBlock(BlockID id, void* data)
+	{
+		if (id.offset < m_dirtyBlock.start)
+		{
+			m_dirtyBlock.start = id.offset;
+		}
+
+		if (m_dirtyBlock.end <= id.offset)
+		{
+			m_dirtyBlock.end = id.offset + id.size;
 		}
 	}
 }

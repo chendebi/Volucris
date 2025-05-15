@@ -28,7 +28,15 @@ namespace volucris
 		void upload(int32 location, uint8* addr) override
 		{
 			glUniform3fv(location, 1, reinterpret_cast<float*>(addr));
-			GL_CHECK()
+		}
+	};
+
+	class Mat4Uploader : public Uniform::Uploader
+	{
+	public:
+		void upload(int32 location, uint8* addr) override
+		{
+			glUniformMatrix4fv(location, 1, false, reinterpret_cast<float*>(addr));
 		}
 	};
 
@@ -45,6 +53,9 @@ namespace volucris
 		case MaterialParameterDesc::VEC3:
 			m_uploader = std::make_shared<Vec3Uploader>();
 			break;
+		case MaterialParameterDesc::MAT4:
+			m_uploader = std::make_shared<Mat4Uploader>();
+			break;
 		default:
 			break;
 		}
@@ -54,7 +65,6 @@ namespace volucris
 	{
 		if (valid())
 		{
-			float* x = reinterpret_cast<float*>(m_table + m_desc->desc.offset) + 1;
 			m_uploader->upload(m_desc->location, m_table + m_desc->desc.offset);
 		}
 	}
