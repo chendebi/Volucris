@@ -9,15 +9,17 @@ namespace volucris
 	class SceneComponent : public Component
 	{
 	public:
-		void setPosition(const glm::vec3& pos) { m_position = pos; updateTransform(); }
+		SceneComponent();
+
+		void setPosition(const glm::vec3& pos) { m_position = pos; transformChanged(); }
 
 		glm::vec3 getPosition() const { return m_position; }
 
-		void setRotation(const glm::vec3& rot) { m_rotation = rot; updateTransform(); }
+		void setRotation(const glm::vec3& rot) { m_rotation = rot; transformChanged(); }
 
 		glm::vec3 getRotation() const { return m_rotation; }
 
-		void setScale(const glm::vec3& scale) { m_scale = scale; updateTransform(); }
+		void setScale(const glm::vec3& scale) { m_scale = scale; transformChanged(); }
 
 		glm::vec3 getScale() const { return m_scale; }
 
@@ -26,7 +28,7 @@ namespace volucris
 		const glm::mat4& getRortationTransform() const { return m_rotationTransform; }
 
 	protected:
-		void updateTransform();
+		void transformChanged();
 
 		virtual void onTransformChanged() {}
 

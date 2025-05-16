@@ -7,7 +7,7 @@
 #include "Application/widget.h"
 #include "Renderer/context.h"
 #include "Renderer/renderer.h"
-#include "Application/viewport.h"
+#include "Scene/viewport.h"
 #include "Scene/scene.h"
 
 namespace volucris
@@ -175,7 +175,8 @@ namespace volucris
 		}
 
 		std::function<void()> command;
-
+		auto time = glfwGetTime();
+		double delta = 0.0;
 		while (m_running)
 		{
 			while (m_queue.pop(command))
@@ -186,6 +187,12 @@ namespace volucris
 			m_window->pollEvents();
 
 			// TODO: tick
+			tick(delta);
+
+			for (const auto& scene : m_scenes)
+			{
+				scene->tick(delta);
+			}
 
 			for (const auto& scene: m_scenes)
 			{
@@ -195,6 +202,10 @@ namespace volucris
 			Widget::draw(m_mainWidget.get());
 
 			m_renderer->render();
+
+			auto now = glfwGetTime();
+			delta = now - time;
+			time = now;
 		}
 
 		while (m_queue.pop(command))

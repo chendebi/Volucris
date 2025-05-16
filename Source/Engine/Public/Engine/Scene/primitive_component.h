@@ -7,6 +7,7 @@
 namespace volucris
 {
 	class PrimitiveProxy;
+	class MaterialParameter;
 
 	class PrimitiveComponent : public SceneComponent
 	{
@@ -20,9 +21,14 @@ namespace volucris
 	protected:
 		void updateRenderState() override;
 
+		void onTransformChanged() override;
+
+		void updateTransform() override;
+
 	private:
 		PrimitiveProxy* m_proxy;
 		std::shared_ptr<MeshResourceData> m_meshData;
+		std::vector<MaterialParameter*> m_modelMatParameters;
 	};
 }
 

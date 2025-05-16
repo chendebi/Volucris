@@ -6,6 +6,7 @@
 #include "Engine/Renderer/mesh_render_data.h"
 #include <memory>
 #include <glm/glm.hpp>
+#include "OpenGL/ogl_render_state.h"
 
 namespace volucris
 {
@@ -15,6 +16,13 @@ namespace volucris
 	class MaterialProxy;
 	class RenderPass;
 	class Context;
+
+	struct CameraInfo
+	{
+		glm::mat4 viewMatrix;
+		glm::mat4 projMatrix;
+		glm::mat4 projViewMatrix;
+	};
 
 	class ViewportProxy
 	{
@@ -37,26 +45,29 @@ namespace volucris
 
 		void setViewMatrix(const glm::mat4& mat)
 		{
-			m_viewMatrix = mat;
+			m_cameraInfo.viewMatrix = mat;
+			m_cameraInfoDirty = true;
 		}
 
 		void setProjectionMatrix(const glm::mat4& mat)
 		{
-			m_projectionMatrix = mat;
+			m_cameraInfo.projMatrix = mat;
+			m_cameraInfoDirty = true;
 		}
 
 		void setProjectionViewMatrix(const glm::mat4& mat)
 		{
-			m_projectionViewMatrix = mat;
+			m_cameraInfo.projViewMatrix = mat;
+			m_cameraInfoDirty = true;
 		}
 
 	private:
 		Rect m_viewport;
 		SceneProxy* m_scene;
 		std::vector<std::shared_ptr<RenderPass>> m_passes;
-		glm::mat4 m_viewMatrix;
-		glm::mat4 m_projectionMatrix;
-		glm::mat4 m_projectionViewMatrix;
+		CameraInfo m_cameraInfo;
+		uint8 m_cameraInfoDirty;
+		UniformBlock m_cameraInfoBlock;
 	};
 }
 

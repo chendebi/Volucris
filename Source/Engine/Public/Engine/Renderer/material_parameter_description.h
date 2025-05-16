@@ -15,7 +15,9 @@ namespace volucris
 			UNKNOWN,
 			FLOAT,
 			VEC3,
-			MAT4
+			MAT4,
+			MODEL_INFO,
+			CAMERA_INFO
 		};
 
 		static size_t sizeOfType(Type type)
@@ -29,11 +31,17 @@ namespace volucris
 			case VEC3:
 				return sizeof(glm::vec3);
 			case MAT4:
+			case MODEL_INFO:
 				return sizeof(glm::mat4);
 			default:
 				break;
 			}
 			return 0;
+		}
+
+		bool isUniformBlockBinding() const
+		{
+			return type == CAMERA_INFO;
 		}
 
 		Type type = UNKNOWN;

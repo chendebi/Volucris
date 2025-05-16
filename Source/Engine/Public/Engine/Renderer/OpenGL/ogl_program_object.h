@@ -63,9 +63,13 @@ namespace volucris
 
 		uint32 getID() const { return m_id; }
 
-		void setUniformDescriptions(const std::vector<std::shared_ptr<UniformDescription>>& descritions)
+		void setUniformDescriptions(
+			const std::vector<std::shared_ptr<UniformDescription>>& descritions,
+			const std::vector<UniformDescription>& uniformBlockDescriptions);
+
+		const std::vector<UniformDescription>& getUniformBlockDescriptions() const
 		{
-			m_uniformDescriptions = descritions;
+			return m_uniformBlockDescriptions;
 		}
 
 	protected:
@@ -76,6 +80,7 @@ namespace volucris
 		uint8 m_autoReleaseShader;
 		std::vector<std::shared_ptr<OGLShaderObject>> m_shaders;
 		std::vector<std::shared_ptr<UniformDescription>> m_uniformDescriptions;
+		std::vector<UniformDescription> m_uniformBlockDescriptions;
 	};
 }
 

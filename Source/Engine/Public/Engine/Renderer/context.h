@@ -21,11 +21,15 @@ namespace volucris
 
 		void swapBuffers();
 
-		void bindVertexBufferObject(OGLBufferObject* vbo);
+		void bindBuffer(OGLBufferObject* buffer);
 
-		void bindElementBufferObjct(OGLBufferObject* ebo);
+		void bindUniformBuffer(OGLBufferObject* buffer, uint32 index=0);
+
+		void bindUniformBlock(const UniformBlock& block, uint32 index);
 
 		void bindVertexArrayObject(OGLVertexArrayObject* vao);
+
+		void setCameraInfoBlock(const UniformBlock& block);
 
 		void setViewport(int x, int y, int w, int h);
 
@@ -40,12 +44,15 @@ namespace volucris
 	protected:
 		bool prepareDrawState(const OGLDrawState& state);
 
+		bool prepareUniformBlock(const UniformBlock& block);
+
 	private:
 		struct Impl;
 		Impl* m_impl;
 		OGLRenderState m_renderState;
 		OGLClearState m_clearState;
 		Rect m_viewport;
+		UniformBlock m_cameraInfoBlock;
 	};
 }
 

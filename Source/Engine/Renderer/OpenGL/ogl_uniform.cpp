@@ -54,6 +54,7 @@ namespace volucris
 			m_uploader = std::make_shared<Vec3Uploader>();
 			break;
 		case MaterialParameterDesc::MAT4:
+		case MaterialParameterDesc::MODEL_INFO:
 			m_uploader = std::make_shared<Mat4Uploader>();
 			break;
 		default:

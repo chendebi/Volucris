@@ -69,6 +69,9 @@ namespace volucris
 
 		void pushCommand(const std::function<void()>& command);
 
+	protected:
+		virtual void tick(double delta) {}
+
 	private:
 		Config m_config;
 		uint8 m_initialized;

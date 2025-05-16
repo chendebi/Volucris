@@ -10,7 +10,7 @@ namespace volucris
 	CameraComponent::CameraComponent(Mode mode, Viewport* viewport)
 		: SceneComponent()
 		, m_mode(mode)
-		, m_aspect(1.777777)
+		, m_aspect(1200.0/800.0)
 		, m_fov(90.f)
 		, m_nearDist(0.1f)
 		, m_farDist(10000.f)
@@ -19,7 +19,8 @@ namespace volucris
 		, m_projectionViewMatrix()
 		, m_viewport(viewport)
 	{
-
+		updateProjectionMatrix();
+		onTransformChanged();
 	}
 
 	void CameraComponent::updateProjectionMatrix()
@@ -38,13 +39,14 @@ namespace volucris
 
 	void CameraComponent::onTransformChanged()
 	{
+		// todo: 修复这里的bug
 		const auto& rot = getRortationTransform();
-		auto right = glm::vec3(rot * glm::vec4(1.0, 0.0, 0.0, 1.0));
-		auto forward = glm::vec3(rot * glm::vec4(0.0, 0.0, -1.0, 1.0));
+		auto right = glm::vec3(glm::vec4(1.0, 0.0, 0.0, 1.0));
+		auto forward = glm::vec3(glm::vec4(0.0, 0.0, -1.0, 1.0));
 		auto eye = getPosition();
 		auto center = eye + forward * 0.1f;
 		auto up = glm::cross(-forward, right);
-		m_viewMatrix = glm::lookAt(eye, center, up);
+		m_viewMatrix = glm::lookAt(eye, {0,0,0}, {0, 1, 0});
 		m_projectionViewMatrix = m_projectionMatrix * m_viewMatrix;
 	}
 

@@ -19,12 +19,18 @@ namespace volucris
 	public:
 		MaterialResourceProxy(MaterialResource* resource);
 
+		const std::vector<std::shared_ptr<UniformDescription>>& getUniformDescrptions() const { return m_descriptions; }
+
+		const std::vector<UniformDescription> getUniformBlockDescriptions() const { return m_uniformBlockDescriptions; }
+
+		OGLProgramObject* getProgramObject() const { return m_program.get(); }
+
 	private:
-		friend class MaterialProxy;
 		std::string m_vss;
 		std::string m_fss;
 		std::unique_ptr<OGLProgramObject> m_program;
 		std::vector<std::shared_ptr<UniformDescription>> m_descriptions;
+		std::vector<UniformDescription> m_uniformBlockDescriptions;
 	};
 
 	class MaterialProxy
@@ -35,6 +41,8 @@ namespace volucris
 		~MaterialProxy();
 
 		void setResource(MaterialResourceProxy* resource);
+
+		void updateParameters(const std::vector<uint8>& data);
 
 		const OGLProgramState& getState() const { return m_state; }
 

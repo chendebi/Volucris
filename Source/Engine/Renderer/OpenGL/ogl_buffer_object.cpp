@@ -8,11 +8,13 @@ namespace volucris
 		: m_target(target)
 		, m_usage(usage)
 		, m_id(0)
-		, m_data(nullptr)
-		, m_size(0)
+		, m_bufferSize(0)
 		, m_valid(false)
+		, m_shouldReallocate(true)
+		, m_dirtyBlock()
+		, m_data()
 	{
-		
+		markShouldReallocateAtGPU();
 	}
 
 	OGLBufferObject::~OGLBufferObject()
@@ -27,12 +29,58 @@ namespace volucris
 			return;
 		}
 		m_usage = usage;
+		markShouldReallocateAtGPU();
 	}
 
-	void OGLBufferObject::setData(void* data, size_t size)
+	void OGLBufferObject::reserve(size_t size)
 	{
-		m_data = data;
-		m_size = size;
+		m_data.reserve(size);
+		m_bufferSize = size;
+		markShouldReallocateAtGPU();
+	}
+
+	void OGLBufferObject::setData(uint8* data, size_t size)
+	{
+		m_data.clear();
+		addData(data, size);
+	}
+
+	OGLBufferObject::BlockID OGLBufferObject::addData(uint8* data, size_t size)
+	{
+		auto currSize = m_data.size();
+		auto newSize = currSize + size;
+		if (size != m_bufferSize)
+		{
+			reserve(size);
+			m_data.resize(size);
+		}
+		memcpy(m_data.data() + currSize, data, size);
+		return { currSize, size };
+	}
+
+	void OGLBufferObject::setBlockData(const BlockID& id, uint8* data)
+	{
+		if (id.offset + id.size > m_bufferSize)
+		{
+			V_LOG_WARN(Engine, "block id of buffer is invalid");
+			return;
+		}
+		memcpy(m_data.data() + id.offset, data, id.size);
+		dirtyBlock(id);
+	}
+
+	void OGLBufferObject::dirtyBlock(const BlockID& id)
+	{
+		if (id.offset < m_dirtyBlock.offset)
+		{
+			m_dirtyBlock.offset = id.offset;
+		}
+
+		auto dirtySize = id.offset + id.size - m_dirtyBlock.offset;
+		if (dirtySize > m_dirtyBlock.size)
+		{
+			m_dirtyBlock.size = dirtySize;
+		}
 	}
 
 	bool OGLBufferObject::create()
@@ -68,28 +116,34 @@ namespace volucris
 			return false;
 		}
 
-		if (m_size == 0)
+		if (m_bufferSize == 0)
 		{
-			V_LOG_WARN(Engine, "initialize gl buffer failed. because not buffer size is 0");
+			V_LOG_WARN(Engine, "initialize gl buffer failed. because buffer size is 0");
 			return false;
 		}
 
-		if (m_target == GL_ARRAY_BUFFER)
+		ctx->bindBuffer(this);
+
+		if (m_shouldReallocate)
 		{
-			ctx->bindVertexBufferObject(this);
-		}
-		else if (m_target == GL_ELEMENT_ARRAY_BUFFER)
-		{
-			ctx->bindElementBufferObjct(this);
+			glBufferData(m_target, m_bufferSize, m_data.data(), m_usage);
 		}
 		else
 		{
-			check(false);
+			glBufferSubData(m_target, m_dirtyBlock.offset, m_dirtyBlock.size, m_data.data() + m_dirtyBlock.offset);
 		}
-		glBufferData(m_target, m_size, m_data, m_usage);
+		m_dirtyBlock.offset = 0;
+		m_dirtyBlock.size = 0;
 		GL_CHECK();
 		m_valid = true;
+		m_shouldReallocate = false;
 		return m_valid;
+	}
+
+	void OGLBufferObject::markShouldReallocateAtGPU()
+	{
+		m_shouldReallocate = true;
+		m_valid = false;
 	}
 
 	bool OGLBufferObject::createBuffers(const std::vector<OGLBufferObject*>& buffers)
@@ -141,34 +195,6 @@ namespace volucris
 		for (auto idx = 0; idx < ids.size(); ++idx)
 		{
 			buffers[idx]->m_id = 0;
-		}
-	}
-
-	OGLUniformBufferObject::OGLUniformBufferObject(size_t size)
-		: OGLBufferObject(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW)
-		, m_dirtyBlock()
-	{
-		setData(nullptr, size);
-	}
-
-	OGLUniformBufferObject::BlockID OGLUniformBufferObject::addBlock(void* data, size_t size)
-	{
-		/*auto offset = m_data.size();
-		m_data.resize(offset + size);
-		memcpy(m_data.data() + offset, data, size);*/
-		//return { offset, size };
-	}
-
-	void OGLUniformBufferObject::updateBlock(BlockID id, void* data)
-	{
-		if (id.offset < m_dirtyBlock.start)
-		{
-			m_dirtyBlock.start = id.offset;
-		}
-
-		if (m_dirtyBlock.end <= id.offset)
-		{
-			m_dirtyBlock.end = id.offset + id.size;
 		}
 	}
 }

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <Engine/Renderer/OpenGL/ogl_render_state.h>
 
 namespace volucris
 {
@@ -29,9 +30,14 @@ namespace volucris
 
 		void addRenderPass(const std::shared_ptr<RenderPass>& pass);
 
+		UniformBlock addSceneData(uint8* data, size_t size);
+
+		void setSceneData(const UniformBlock& block, uint8* data);
+
 	private:
 		std::vector<std::shared_ptr<ViewportProxy>> m_views;
 		std::vector<std::shared_ptr<PrimitiveProxy>> m_primitives;
+		std::shared_ptr<OGLBufferObject> m_ubo; // 存储场景数据
 	};
 }
 

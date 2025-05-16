@@ -18,6 +18,8 @@ namespace volucris
 	public:
 		MaterialResource();
 
+		~MaterialResource();
+
 		MaterialResource(const std::string& vss, const std::string& fss);
 
 		void setSource(const std::string& vss, const std::string& fss);
@@ -62,11 +64,15 @@ namespace volucris
 
 		void deattachProxy();
 
+		void updateParametersToRenderer();
+
 		std::shared_ptr<MaterialResource> getResource() const { return m_resource; }
 
 		std::vector<uint8> getParameterData() const { return  m_parameterData; }
 
 		MaterialParameter* getParameterByName(const std::string& name);
+
+		MaterialParameter* getParameterByType(MaterialParameterDesc::Type type);
 
 	protected:
 		void releaseRenderProxy() override;

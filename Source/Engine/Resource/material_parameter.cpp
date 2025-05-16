@@ -6,10 +6,17 @@
 namespace volucris
 {
 
-	MaterialParameter::MaterialParameter(const MaterialParameterDesc& desc, uint8* table)
-		: m_desc(desc)
+	MaterialParameter::MaterialParameter(Material* material, const MaterialParameterDesc& desc, uint8* table)
+		: m_material(material)
+		, m_desc(desc)
 		, m_dataTable(table)
 	{
+
+	}
+
+	MaterialParameter::~MaterialParameter()
+	{
+		//V_LOG_DEBUG(Engine, "destroy material parameter: {}", m_desc.name);
 	}
 
 	void MaterialParameter::setValue(float value)
@@ -24,5 +31,10 @@ namespace volucris
 		memcpy(m_dataTable+m_desc.offset, glm::value_ptr(value), sizeof(glm::vec3));
 	}
 
+	void MaterialParameter::setValue(const glm::mat4& value)
+	{
+		//check(m_desc.type == MaterialParameterDesc::MAT4 && m_dataTable);
+		memcpy(m_dataTable + m_desc.offset, glm::value_ptr(value), sizeof(glm::mat4));
+	}
 
 }

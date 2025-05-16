@@ -7,6 +7,8 @@
 #include "Engine/Resource/mesh_resource_data.h"
 #include "Resource/material.h"
 #include "Renderer/scene_proxy.h"
+#include "Resource/material_parameter.h"
+#include "Renderer/material_proxy.h"
 
 namespace volucris
 {
@@ -60,8 +62,38 @@ namespace volucris
 
 		if (isAttached() && m_meshData)
 		{
+			for (const auto& [slot, mat] : m_meshData->getMaterials())
+			{
+				const auto& param = mat->getParameterByType(MaterialParameterDesc::MODEL_INFO);
+				if (!param)
+				{
+					V_LOG_WARN(Engine, "material with no model uniform for primitive component.");
+				}
+				else
+				{
+					m_modelMatParameters.push_back(param);
+				}
+			}
+			onTransformChanged();
 			// 创建
 			m_proxy = renderer->createPrimitiveProxy(this);
+		}
+	}
+
+	void PrimitiveComponent::onTransformChanged()
+	{
+		const auto& modelMat = getWorldTransform();
+		for (const auto& parameter : m_modelMatParameters)
+		{
+			parameter->setValue(modelMat);
+		}
+	}
+
+	void PrimitiveComponent::updateTransform()
+	{
+		for (const auto& parameter : m_modelMatParameters)
+		{
+			parameter->getMaterial()->updateParametersToRenderer();
 		}
 	}
 

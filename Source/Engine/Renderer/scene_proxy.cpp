@@ -1,9 +1,11 @@
 #include "Renderer/scene_proxy.h"
 #include "Scene/scene.h"
 #include "Renderer/viewport_proxy.h"
-#include "Application/viewport.h"
+#include "Scene/viewport.h"
 #include "Renderer/primitive_proxy.h"
 #include "Core/vector_help.h"
+#include <Renderer/OpenGL/ogl_render_state.h>
+
 
 namespace volucris
 {
@@ -11,7 +13,7 @@ namespace volucris
 		: m_views()
 		, m_primitives()
 	{
-
+		m_ubo = std::make_shared<OGLBufferObject>(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 	}
 
 	SceneProxy::~SceneProxy()
@@ -59,5 +61,16 @@ namespace volucris
 		{
 			view->addRenderPass(pass);
 		}
+	}
+
+	UniformBlock SceneProxy::addSceneData(uint8* data, size_t size)
+	{
+		auto block = m_ubo->addData(data, size);
+		return { m_ubo.get(), block };
+	}
+
+	void SceneProxy::setSceneData(const UniformBlock& block, uint8* data)
+	{
+		m_ubo->setBlockData(block.block, data);
 	}
 }

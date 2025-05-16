@@ -15,6 +15,10 @@ namespace volucris
 	{
 	}
 
+	MaterialResource::~MaterialResource()
+	{
+	}
+
 	MaterialResource::MaterialResource(const std::string& vss, const std::string& fss)
 		: MaterialResource()
 	{
@@ -63,18 +67,23 @@ namespace volucris
 		, m_parameters()
 		, m_proxy(nullptr)
 	{
-		size_t size = 0;
-		for(const auto& desc : resource->getParameterDescriptions())
+		size_t tableSize = 0;
+		std::vector<MaterialParameterDesc> descriptions;
+		for(auto desc : resource->getParameterDescriptions())
 		{
-			size += MaterialParameterDesc::sizeOfType(desc.type);
+			auto size = MaterialParameterDesc::sizeOfType(desc.type);
+			if (size > 0)
+			{
+				desc.offset = tableSize;
+				tableSize += size;
+			}
+			descriptions.push_back(desc);
 		}
 
-		m_parameterData.resize(size);
-		size_t offset = 0;
-		for (const auto& desc : resource->getParameterDescriptions())
+		m_parameterData.resize(tableSize);
+		for (const auto& desc : descriptions)
 		{
-			auto parameter = std::make_unique<MaterialParameter>(desc, m_parameterData.data());
-			m_parameters.push_back(std::move(parameter));
+			m_parameters.push_back(std::make_unique<MaterialParameter>(this, desc, m_parameterData.data()));
 		}
 	}
 
@@ -102,11 +111,33 @@ namespace volucris
 		}
 	}
 
+	void Material::updateParametersToRenderer()
+	{
+		if (m_proxy)
+		{
+			gApp->getRenderer()->pushCommand([proxy = m_proxy, data = m_parameterData]() {
+				proxy->updateParameters(data);
+				});
+		}
+	}
+
 	MaterialParameter* Material::getParameterByName(const std::string& name)
 	{
 		for (const auto& parameter : m_parameters)
 		{
 			if (parameter->getDescription().name == name)
+			{
+				return parameter.get();
+			}
+		}
+		return nullptr;
+	}
+
+	MaterialParameter* Material::getParameterByType(MaterialParameterDesc::Type type)
+	{
+		for (const auto& parameter : m_parameters)
+		{
+			if (parameter->getDescription().type == type)
 			{
 				return parameter.get();
 			}

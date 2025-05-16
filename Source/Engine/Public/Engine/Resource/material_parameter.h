@@ -9,20 +9,27 @@
 
 namespace volucris
 {
+	class Material;
+
 	class MaterialParameter
 	{
 	public:
-		MaterialParameter(const MaterialParameterDesc& desc, uint8* table);
+		MaterialParameter(Material* material, const MaterialParameterDesc& desc, uint8* table);
 
-		~MaterialParameter() = default;
+		~MaterialParameter();
 
 		void setValue(float value);
 
 		void setValue(const glm::vec3& value);
 
+		void setValue(const glm::mat4& value);
+
+		Material* getMaterial() const { return m_material; }
+
 		const MaterialParameterDesc& getDescription() const { return m_desc; }
 
 	private:
+		Material* m_material;
 		uint8* m_dataTable;
 		MaterialParameterDesc m_desc;
 	};

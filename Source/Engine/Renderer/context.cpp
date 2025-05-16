@@ -11,6 +11,7 @@
 #include "Renderer/material_proxy.h"
 #include "Renderer/primitive_proxy.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
+#include <Renderer/OpenGL/ogl_check.h>
 
 namespace volucris
 {
@@ -57,46 +58,47 @@ namespace volucris
 		glfwSwapBuffers(m_impl->window);
 	}
 
-	void Context::bindVertexBufferObject(OGLBufferObject* vbo)
+	void Context::bindBuffer(OGLBufferObject* buffer)
 	{
-		if (!vbo || m_renderState.vbo == vbo)
+		if (!buffer || buffer->getID() == 0)
 		{
 			return;
 		}
+		auto target = buffer->getTarget();
 
-		auto target = vbo->getTarget();
-		if (target != GL_ARRAY_BUFFER)
-		{
-			return;
-		}
-
-		auto id = vbo->getID();
-		if (id > 0)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, id);
-			m_renderState.vbo = vbo;
-		}
+		if (target == GL_ARRAY_BUFFER && m_renderState.vbo == buffer) return;
+		else if (target == GL_ELEMENT_ARRAY_BUFFER && m_renderState.drawState.ebo == buffer) return;
+		else if (target == GL_UNIFORM_BUFFER && m_renderState.ubo == buffer) return;
+		glBindBuffer(target, buffer->getID());
 	}
 
-	void Context::bindElementBufferObjct(OGLBufferObject* ebo)
+	void Context::bindUniformBuffer(OGLBufferObject* buffer, uint32 index)
 	{
-		if (!ebo || m_renderState.drawState.ebo == ebo)
+		if (!buffer || buffer->getTarget()!=GL_UNIFORM_BUFFER || buffer->getID() == 0)
 		{
 			return;
 		}
 
-		auto target = ebo->getTarget();
-		if (target != GL_ELEMENT_ARRAY_BUFFER)
+		auto it = m_renderState.ubos.find(index);
+		if (it != m_renderState.ubos.end())
 		{
-			return;
+			if (m_renderState.ubo == buffer)
+			{
+				return;
+			}
+			it->second = buffer;
 		}
+		else
+		{
+			m_renderState.ubos[index] = buffer;
+		}
+		m_renderState.ubo = buffer;
+		glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer->getID());
+	}
 
-		auto id = ebo->getID();
-		if (id > 0)
-		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
-			m_renderState.drawState.ebo = ebo;
-		}
+	void Context::bindUniformBlock(const UniformBlock& block, uint32 index)
+	{
+		glBindBufferRange(GL_UNIFORM_BUFFER, index, block.ubo->getID(), block.block.offset, block.block.size);
 	}
 
 	void Context::bindVertexArrayObject(OGLVertexArrayObject* vao)
@@ -107,6 +109,11 @@ namespace volucris
 			glBindVertexArray(id);
 			m_renderState.drawState.vao = vao;
 		}
+	}
+
+	void Context::setCameraInfoBlock(const UniformBlock& block)
+	{
+		m_cameraInfoBlock = block;
 	}
 
 	void Context::setViewport(int x, int y, int w, int h)
@@ -171,8 +178,8 @@ namespace volucris
 		}
 
 		bindVertexArrayObject(state.vao);
-		bindElementBufferObjct(state.ebo);
-		glDrawArrays(getDrawMode(section.mode), section.offset, section.count);
+		bindBuffer(state.ebo);
+		glDrawElements(getDrawMode(section.mode), section.count, GL_UNSIGNED_INT, (void*)section.offset);
 	}
 
 	void Context::draw(const MaterialProxy* material, const SectionDrawData& section)
@@ -196,7 +203,11 @@ namespace volucris
 			return false;
 		}
 
-		if (!state.ebo->valid() && (!state.ebo->create() || !state.ebo->initialize(this)))
+		if (!state.ebo->valid() && 
+			(state.ebo->getTarget() != GL_ELEMENT_ARRAY_BUFFER 
+				|| !state.ebo->create() 
+				|| !state.ebo->initialize(this))
+		   )
 		{
 			return false;
 		}
@@ -206,6 +217,35 @@ namespace volucris
 			return false;
 		}
 
+		uint32 slot = 0;
+		for (const auto& uniformBlock : state.programState.program->getUniformBlockDescriptions())
+		{
+			glUniformBlockBinding(state.programState.program->getID(), uniformBlock.location, slot);
+			switch (uniformBlock.desc.type)
+			{
+			case MaterialParameterDesc::CAMERA_INFO:
+				if (!prepareUniformBlock(m_cameraInfoBlock))
+				{
+					return false;
+				}
+				bindUniformBlock(m_cameraInfoBlock, slot);
+				break;
+			default:
+				break;
+			}
+			++slot;
+		}
+
+		return true;
+	}
+
+	bool Context::prepareUniformBlock(const UniformBlock& block)
+	{
+		auto ubo = m_cameraInfoBlock.ubo;
+		if (!ubo || (!ubo->valid() && (!ubo->create() || !ubo->initialize(this))))
+		{
+			return false;
+		}
 		return true;
 	}
 }

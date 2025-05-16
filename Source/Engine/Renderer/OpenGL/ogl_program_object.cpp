@@ -96,6 +96,11 @@ namespace volucris
             desc->location = glGetUniformLocation(m_id, desc->desc.name.c_str());
         }
 
+        for (auto& desc : m_uniformBlockDescriptions)
+        {
+            desc.location = glGetUniformBlockIndex(m_id, desc.desc.name.c_str());
+        }
+
         autoReleaseShaders();
         GL_CHECK();
         return true;
@@ -108,6 +113,12 @@ namespace volucris
         {
             glDeleteProgram(m_id);
         }
+    }
+
+    void OGLProgramObject::setUniformDescriptions(const std::vector<std::shared_ptr<UniformDescription>>& descritions, const std::vector<UniformDescription>& uniformBlockDescriptions)
+    {
+        m_uniformDescriptions = descritions;
+        m_uniformBlockDescriptions = uniformBlockDescriptions;
     }
 
     void OGLProgramObject::autoReleaseShaders()

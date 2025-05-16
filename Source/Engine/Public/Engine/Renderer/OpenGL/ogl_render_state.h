@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include "Engine/Core/types_help.h"
+#include "Engine/Renderer/OpenGL/ogl_buffer_object.h"
 
 namespace volucris
 {
@@ -26,6 +28,12 @@ namespace volucris
 		float depth = 1.0;
 	};
 
+	struct UniformBlock
+	{
+		OGLBufferObject* ubo = nullptr;
+		OGLBufferObject::BlockID block;
+	};
+
 	struct OGLProgramState
 	{
 		OGLProgramObject* program = nullptr;
@@ -42,6 +50,8 @@ namespace volucris
 	struct OGLRenderState
 	{
 		OGLBufferObject* vbo = nullptr;
+		OGLBufferObject* ubo = nullptr;
+		std::unordered_map<uint32, OGLBufferObject*> ubos;
 		OGLDrawState drawState;
 	};
 }

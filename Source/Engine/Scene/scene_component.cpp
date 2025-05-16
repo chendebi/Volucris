@@ -3,7 +3,20 @@
 
 namespace volucris
 {
-	void SceneComponent::updateTransform()
+	SceneComponent::SceneComponent()
+		: Component()
+		, m_position()
+		, m_rotation()
+		, m_scale()
+		, m_rotationTransform()
+		, m_relativeTransform()
+		, m_worldTransform()
+		, m_parentSceneComponent(nullptr)
+	{
+		setScale({ 1.f, 1.f, 1.f });
+	}
+
+	void SceneComponent::transformChanged()
 	{
 		const glm::vec3 xasix = { 1.0, 0.0, 0.0 };
 		const glm::vec3 yasix = { 0.0, 1.0, 0.0 };
@@ -14,7 +27,7 @@ namespace volucris
 		glm::rotate(m_rotationTransform, glm::radians(m_rotation.y), yasix);
 		glm::rotate(m_rotationTransform, glm::radians(m_rotation.z), zasix);
 		m_relativeTransform = m_rotationTransform;
-		glm::translate(m_relativeTransform, m_position);
+		m_relativeTransform = glm::translate(m_relativeTransform, m_position);
 
 		if (m_parentSceneComponent)
 		{
@@ -24,7 +37,7 @@ namespace volucris
 		{
 			m_worldTransform = m_relativeTransform;
 		}
-
+		onTransformChanged();
 		markRenderTransformDirty();
 	}
 

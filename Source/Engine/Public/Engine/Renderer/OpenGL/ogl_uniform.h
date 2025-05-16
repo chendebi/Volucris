@@ -39,9 +39,13 @@ namespace volucris
 
 		~Uniform() = default;
 
+		void setDataTable(uint8* table) { m_table = table; }
+
 		void upload();
 
 		bool valid() const { return m_desc->valid() && m_table; }
+
+		UniformDescription* getDescription() const { return m_desc.get(); }
 
 	protected:
 		std::shared_ptr<UniformDescription> m_desc;

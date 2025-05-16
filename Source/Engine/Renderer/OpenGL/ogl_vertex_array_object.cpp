@@ -60,7 +60,7 @@ namespace volucris
 			}
 		}
 
-		ctx->bindVertexBufferObject(m_vbo.get());
+		ctx->bindBuffer(m_vbo.get());
 		ctx->bindVertexArrayObject(this);
 		
 		auto idx = 0;

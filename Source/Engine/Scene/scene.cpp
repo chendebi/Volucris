@@ -1,7 +1,7 @@
 #include "Scene/scene.h"
 #include "Scene/actor.h"
 #include "Core/volucris.h"
-#include "Application/viewport.h"
+#include "Scene/viewport.h"
 #include <Application/application.h>
 #include "Renderer/renderer.h"
 #include "Renderer/scene_proxy.h"

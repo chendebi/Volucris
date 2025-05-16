@@ -2,7 +2,7 @@
 #include <Engine/Core/assert.h>
 #include <Engine/Application/application.h>
 #include <Engine/Application/window.h>
-#include <Engine/Application/viewport.h>
+#include <Engine/Scene/viewport.h>
 #include <Engine/Application/client_viewport.h>
 #include <Engine/Scene/scene.h>
 #include "Engine/Scene/actor.h"
@@ -14,6 +14,8 @@
 #include "Engine/Resource/material.h"
 #include "Engine/Resource/material_parameter.h"
 #include "simple_pass.h"
+#include "Engine/Scene/primitive_component.h"
+#include <Engine/Scene/camera_component.h>
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
 
@@ -64,10 +66,44 @@ unsigned int indices[] = {
 		20, 21, 22, 20, 22, 23
 };
 
+class MyApplication : public volucris::Application
+{
+public:
+	MyApplication(const Config& config)
+		: Application(config)
+	{ }
+
+	void setPrimitiveComp(std::shared_ptr<PrimitiveComponent> comp)
+	{
+		m_primitive = comp;
+	}
+
+protected:
+	void tick(double delta) override
+	{
+		x += (m_dir * delta);
+		if (x > 1.0)
+		{
+			m_dir = -0.1;
+		}
+		else if (x < -1.0)
+		{
+			m_dir = 0.1;
+		}
+		m_primitive->setPosition({ x, 0.0, 0.0 });
+
+	}
+
+private:
+	float x = 0.0;
+	float m_dir = 0.1;
+	std::shared_ptr<PrimitiveComponent> m_primitive;
+};
+
 std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 {
 	auto config = Application::Config(argc, argv);
-	auto app = std::make_shared<Application>(config);
+	auto app = std::make_shared<MyApplication>(config);
 
 	auto vp = std::make_shared<ClientViewport>();
 	auto scene = std::make_shared<Scene>();
@@ -78,6 +114,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	comp->setDisplayName("PrimitiveComp");
 	actor->setRootComponent(comp);
 	scene->addActor(actor);
+	app->setPrimitiveComp(comp);
 
 	auto data = comp->getMeshResourceData();
 	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
@@ -91,6 +128,13 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	comp->markRenderStateDirty();
 
 	app->addScene(scene);
+
+	auto camera = std::make_shared<CameraComponent>(CameraComponent::PERSPECTIVE, vp.get());
+	auto cameraActor = std::make_shared<Actor>();
+	cameraActor->setRootComponent(camera);
+	scene->addActor(cameraActor);
+	camera->setPosition({ 0, 3, 1 });
+	camera->setRotation({-60.0, 0.0, 0.0});
 
 	auto renderer = std::make_shared<Renderer>();
 	renderer->addRenderPass(std::make_shared<SimplePass>());

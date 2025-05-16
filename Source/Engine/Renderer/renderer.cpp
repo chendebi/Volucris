@@ -2,7 +2,7 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "Renderer/context.h"
 #include "Renderer/viewport_proxy.h"
-#include "Application/viewport.h"
+#include "Scene/viewport.h"
 #include "Renderer/primitive_proxy.h"
 #include "Scene/primitive_component.h"
 #include "Renderer/scene_proxy.h"

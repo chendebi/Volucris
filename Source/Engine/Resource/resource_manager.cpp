@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <regex>
 #include <Resource/material.h>
 
 namespace volucris
@@ -12,6 +13,7 @@ namespace volucris
 		MaterialParameterDesc::Type type = MaterialParameterDesc::UNKNOWN;
 		if (name == "float") { type = MaterialParameterDesc::FLOAT; }
 		else if (name == "vec3") { type = MaterialParameterDesc::VEC3; }
+		else if (name == "mat4") { type = MaterialParameterDesc::MAT4; }
 
 		if (type == MaterialParameterDesc::UNKNOWN)
 		{
@@ -37,44 +39,56 @@ namespace volucris
 		size_t lineCount = 1;
 		while (std::getline(file, line))
 		{
-			std::istringstream iss(line);
-			std::vector<std::string> tokens;
-			std::string token;
+			std::regex uboPattern(R"(uniform\s+(\w+)(?:\s*\{|\s*;)?)");
+			std::regex uniformattern(R"(uniform\s+(\w+)\s+(\w+)\s*;)");
 
-			while (iss >> token)
+			std::smatch matches;
+
+			if (std::regex_search(line, matches, uniformattern)) 
 			{
-				tokens.push_back(token);
-			}
+				MaterialParameterDesc::Type type = MaterialParameterDesc::UNKNOWN;    // "mat4"
+				std::string name = matches[2];    // "v_modelMat"
 
-			if (!tokens.empty() && tokens[0] == "uniform")
-			{
-				if (tokens.size() < 3)
+				if (name == MODEL_MATRIX_UNIFORM_NAME)
 				{
-					V_LOG_WARN(Engine, "shader source parase failed. line: {}", lineCount);
-					return false;
+					type = MaterialParameterDesc::MODEL_INFO;
 				}
-
-				auto type = getTypeByString(tokens[1]);
-				auto name = tokens[2];
-
-				
-				if (!name.empty() && name[name.length() - 1] == ';')
+				else
 				{
-					name = name.substr(0, name.length() - 1);
-				}
-
-				if (name.empty())
-				{
-					V_LOG_WARN(Engine, "shader source parase failed. line: {}", lineCount);
-					return false;
+					type = getTypeByString(matches[1]);
 				}
 
 				if (type != MaterialParameterDesc::UNKNOWN)
 				{
-					V_LOG_DEBUG(Engine, "find material parameter: {} - {}", tokens[1], name)
+					V_LOG_DEBUG(Engine, "find material parameter: {} - {}", matches[1].str(), name);
 					map[type].push_back(name);
 				}
 			}
+			else if (std::regex_search(line, matches, uboPattern))
+			{
+				MaterialParameterDesc::Type type = MaterialParameterDesc::UNKNOWN;    // "mat4"
+				std::string name = matches[1];    // "v_modelMat"
+
+				if (name == CAMERA_INFO_BLOCK_NAME)
+				{
+					type = MaterialParameterDesc::CAMERA_INFO;
+				}
+				else
+				{
+					type = MaterialParameterDesc::UNKNOWN;
+				}
+
+				if (type != MaterialParameterDesc::UNKNOWN)
+				{
+					V_LOG_DEBUG(Engine, "find material uniform block: {}", name);
+					map[type].push_back(name);
+				}
+				else
+				{
+					V_LOG_DEBUG(Engine, "find unsupported uniform block: {}", name);
+				}
+			}
+
 			++lineCount;
 			res += line + "\n";
 		}
