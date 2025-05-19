@@ -60,7 +60,7 @@ glm::vec3 vertices[] =
 unsigned int indices[] = {
 		0, 1, 2, 0, 2, 3,
 		4, 5, 6, 4, 6, 7,
-		8, 9, 10, 8, 10, 11,
+		8, 9, 10, 9, 10, 11,
 		12, 13, 14, 12, 14, 15,
 		16, 17, 18, 16, 18, 19,
 		20, 21, 22, 20, 22, 23
@@ -81,7 +81,7 @@ public:
 protected:
 	void tick(double delta) override
 	{
-		x += (m_dir * delta);
+		x += (m_dir * delta * 10.0);
 		if (x > 1.0)
 		{
 			m_dir = -0.1;
@@ -124,6 +124,8 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	auto section = data->addSectionData(indices, sizeof(indices) / sizeof(uint32));
 	section.mode = DrawMode::TRIANGLES;
 	section.slot = "";
+	section.offset = 12 * sizeof(uint32);
+	section.count = 6;
 	data->addSection(section);
 	comp->markRenderStateDirty();
 

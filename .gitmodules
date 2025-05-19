@@ -10,3 +10,6 @@
 [submodule "Source/ThirdParty/glfw"]
 	path = Source/ThirdParty/glfw
 	url = git@github.com:chendebi/glfw.git
+[submodule "Source/ThirdParty/assimp"]
+	path = Source/ThirdParty/assimp
+	url = git@github.com:chendebi/assimp.git
