@@ -6,31 +6,24 @@
 #include "Resource/material.h"
 #include "Renderer/OpenGL/ogl_buffer_object.h"
 #include "Renderer/OpenGL/ogl_vertex_array_object.h"
+#include "Resource/mesh_resource.h"
+#include "Renderer/mesh_proxy.h"
 
 namespace volucris
 {
-	PrimitiveRenderInfo::PrimitiveRenderInfo()
-		: vbo(nullptr), ebo(nullptr), vao(nullptr)
-	{
-		vbo = std::make_shared<OGLBufferObject>(GL_ARRAY_BUFFER);
-		ebo = std::make_shared<OGLBufferObject>(GL_ELEMENT_ARRAY_BUFFER);
-		vao = std::make_shared<OGLVertexArrayObject>();
-	}
-
 	PrimitiveProxy::PrimitiveProxy(PrimitiveComponent* primitive)
-		: m_renderData(primitive->getMeshResourceData()->build())
-		, m_renderInfo()
+		: m_meshProxy(primitive->getResource()->attachProxy())
 		, m_batches()
 	{
-		auto meshData = primitive->getMeshResourceData();
+		auto resource = primitive->getResource();
 		std::unordered_map<MaterialProxy*, std::vector<SectionRenderData>> sections;
-		for (const auto& section : meshData->getSections())
+		for (const auto& section : resource->getResourceData()->getSections())
 		{
 			SectionRenderData sectionRenderData;
 			sectionRenderData.mode = section.mode;
 			sectionRenderData.count = section.count;
 			sectionRenderData.offset = section.offset;
-			auto mat = meshData->getMaterial(section.slot);
+			auto mat = primitive->getMaterial(section.slot);
 
 			check(mat != nullptr);
 
@@ -45,33 +38,11 @@ namespace volucris
 				sectionIt->second.push_back(sectionRenderData);
 			}
 		}
-		m_renderData->sections = sections;
-		m_renderInfo.vbo->setData(m_renderData->renderData.data(), m_renderData->renderData.size());
-		m_renderInfo.ebo->setData(m_renderData->sectionData.data(), m_renderData->sectionData.size());
-		m_renderInfo.vao->setVertexBufferObject(m_renderInfo.vbo);
+		
+		m_sections = sections;
 
-		for (const auto& block : m_renderData->blocks)
-		{
-			BufferDescription desc;
-			switch (block.type)
-			{
-			case BlockType::VERTEX:
-			{
-				desc.type = GL_FLOAT;
-				desc.normalized = false;
-				desc.size = 3;
-				desc.offset = block.offset;
-				desc.stride = 3 * sizeof(float);
-			}
-			break;
-			default:
-				break;
-			}
-			m_renderInfo.vao->addDescription(desc);
-		}
-
-		m_batches.reserve(m_renderData->sections.size());
-		for (auto& [material, sections] : m_renderData->sections)
+		m_batches.reserve(m_sections.size());
+		for (auto& [material, sections] : m_sections)
 		{
 			PrimitiveDrawBatch batch;
 			batch.material = material;
@@ -79,7 +50,7 @@ namespace volucris
 			{
 				SectionDrawData drawData;
 				drawData.section = &section;
-				drawData.renderInfo = &m_renderInfo;
+				drawData.renderInfo = m_meshProxy->getRenderInfo();
 				batch.sections.push_back(drawData);
 			}
 			m_batches.push_back(batch);

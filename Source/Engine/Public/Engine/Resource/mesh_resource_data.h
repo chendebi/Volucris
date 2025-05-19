@@ -51,28 +51,10 @@ namespace volucris
 
 		const std::vector<Section>& getSections() const { return m_sections; }
 
-		std::shared_ptr<Material> getMaterial(const std::string& slot) const
-		{
-			auto it = m_materials.find(slot);
-			if (it == m_materials.end())
-			{
-				return nullptr;
-			}
-			return it->second;
-		}
-
-		void setMaterial(const std::string& slot, const std::shared_ptr<Material>& material)
-		{
-			m_materials[slot] = material;
-		}
-
-		const std::unordered_map<std::string, std::shared_ptr<Material>>& getMaterials() const { return m_materials; }
-
 	private:
 		std::vector<glm::vec3> m_vertices;
 		std::vector<uint32> m_indices;
 		std::vector<Section> m_sections;
-		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 	};
 }
 

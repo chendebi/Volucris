@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 namespace volucris
 {
@@ -10,22 +11,14 @@ namespace volucris
 	class MeshRenderData;
 	class SectionRenderData;
 	class MaterialProxy;
+	class MeshProxy;
 
-	class OGLBufferObject;
-	class OGLVertexArrayObject;
+	class MeshRenderInfo;
 
-	struct PrimitiveRenderInfo
-	{
-		std::shared_ptr<OGLBufferObject> vbo;
-		std::shared_ptr<OGLBufferObject> ebo;
-		std::shared_ptr<OGLVertexArrayObject> vao;
-
-		PrimitiveRenderInfo();
-	};
 
 	struct SectionDrawData
 	{
-		PrimitiveRenderInfo* renderInfo = nullptr;
+		MeshRenderInfo* renderInfo = nullptr;
 		SectionRenderData* section = nullptr;
 	};
 
@@ -54,14 +47,12 @@ namespace volucris
 	public:
 		PrimitiveProxy(PrimitiveComponent* Primitive);
 
-		PrimitiveRenderInfo getRenderInfo() const { return m_renderInfo; }
-
 		std::vector<PrimitiveDrawBatch> getDrawBatch() const { return m_batches; }
 
 	private:
-		std::shared_ptr<MeshRenderData> m_renderData;
-		PrimitiveRenderInfo m_renderInfo;
+		MeshProxy* m_meshProxy;
 		std::vector<PrimitiveDrawBatch> m_batches;
+		std::unordered_map<MaterialProxy*, std::vector<SectionRenderData>> m_sections;
 	};
 }
 

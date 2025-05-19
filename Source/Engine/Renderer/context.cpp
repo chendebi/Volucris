@@ -12,6 +12,7 @@
 #include "Renderer/primitive_proxy.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
 #include <Renderer/OpenGL/ogl_check.h>
+#include "Renderer/mesh_proxy.h"
 
 namespace volucris
 {

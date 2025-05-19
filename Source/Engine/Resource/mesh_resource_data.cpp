@@ -7,7 +7,6 @@ namespace volucris
 	MeshResourceData::MeshResourceData()
 		: m_vertices()
 		, m_sections()
-		, m_materials()
 	{
 	}
 

@@ -6,6 +6,8 @@
 
 namespace volucris
 {
+	class Material;
+	class MeshResource;
 	class PrimitiveProxy;
 	class MaterialParameter;
 
@@ -14,9 +16,15 @@ namespace volucris
 	public:
 		PrimitiveComponent();
 
-		void setResourceData(const std::shared_ptr<MeshResourceData>& data);
+		void setMeshResource(const std::shared_ptr<MeshResource>& resource);
 
-		MeshResourceData* getMeshResourceData();
+		bool setMaterial(const std::string& slot, const std::shared_ptr<Material>& mat);
+
+		void setMaterials(const std::unordered_map < std::string, std::shared_ptr<Material>>& mats);
+
+		MeshResource* getResource() const { return m_resource.get(); }
+
+		Material* getMaterial(const std::string& mat) const;
 
 	protected:
 		void updateRenderState() override;
@@ -27,7 +35,8 @@ namespace volucris
 
 	private:
 		PrimitiveProxy* m_proxy;
-		std::shared_ptr<MeshResourceData> m_meshData;
+		std::shared_ptr<MeshResource> m_resource;
+		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 		std::vector<MaterialParameter*> m_modelMatParameters;
 	};
 }

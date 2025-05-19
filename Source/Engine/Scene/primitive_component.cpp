@@ -9,31 +9,57 @@
 #include "Renderer/scene_proxy.h"
 #include "Resource/material_parameter.h"
 #include "Renderer/material_proxy.h"
+#include "Resource/mesh_resource.h"
+#include "Resource/material.h"
 
 namespace volucris
 {
 	PrimitiveComponent::PrimitiveComponent()
 		: SceneComponent()
 		, m_proxy(nullptr)
-		, m_meshData(nullptr)
+		, m_resource(nullptr)
 	{
 	}
 
-	void PrimitiveComponent::setResourceData(const std::shared_ptr<MeshResourceData>& data)
+	void PrimitiveComponent::setMeshResource(const std::shared_ptr<MeshResource>& resource)
 	{
-		m_meshData = data;
+		if (m_proxy)
+		{
+			V_LOG_WARN(Engine, "not support set mesh resource while rendering");
+			return;
+		}
+
+		m_resource = resource;
+		std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+
+		for (const auto& section : m_resource->getResourceData()->getSections())
+		{
+			materials[section.slot] = m_materials[section.slot];
+		}
+		m_materials = materials;
 		markRenderStateDirty();
 	}
 
-	MeshResourceData* PrimitiveComponent::getMeshResourceData()
+	bool PrimitiveComponent::setMaterial(const std::string& slot, const std::shared_ptr<Material>& mat)
 	{
-		if (!m_meshData)
-		{
-			m_meshData = std::make_shared<MeshResourceData>();
-		}
-		return m_meshData.get();
+		m_materials[slot] = mat;
+		return true;
 	}
 
+	void PrimitiveComponent::setMaterials(const std::unordered_map<std::string, std::shared_ptr<Material>>& mats)
+	{
+		m_materials = mats;
+	}
+
+	Material* PrimitiveComponent::getMaterial(const std::string& slot) const
+	{
+		auto it = m_materials.find(slot);
+		if (it != m_materials.end())
+		{
+			return it->second.get();
+		}
+		return nullptr;
+	}
 
 	void PrimitiveComponent::updateRenderState()
 	{
@@ -48,10 +74,11 @@ namespace volucris
 					});
 			}
 
-			for (const auto& [slot, mat] : m_meshData->getMaterials())
+			for (const auto& [slot, mat] : m_materials)
 			{
 				mat->deattachProxy();
 			}
+			m_resource->deattachProxy();
 			m_proxy = nullptr;
 		}
 
@@ -60,9 +87,9 @@ namespace volucris
 			return;
 		}
 
-		if (isAttached() && m_meshData)
+		if (isAttached() && m_resource)
 		{
-			for (const auto& [slot, mat] : m_meshData->getMaterials())
+			for (const auto& [slot, mat] : m_materials)
 			{
 				const auto& param = mat->getParameterByType(MaterialParameterDesc::MODEL_INFO);
 				if (!param)

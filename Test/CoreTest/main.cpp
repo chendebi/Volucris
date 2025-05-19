@@ -15,6 +15,8 @@
 #include "Engine/Resource/material_parameter.h"
 #include "simple_pass.h"
 #include "Engine/Scene/primitive_component.h"
+#include "Engine/Resource/mesh_resource.h"
+#include "Engine/Resource/mesh_resource_data.h"
 #include <Engine/Scene/camera_component.h>
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
@@ -116,19 +118,21 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	scene->addActor(actor);
 	app->setPrimitiveComp(comp);
 
-	auto data = comp->getMeshResourceData();
 	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
 	mat->getParameterByName("fcolor")->setValue(glm::vec3(0.1, 1.0, 0.0));
+
+	auto data = std::make_shared<MeshResourceData>();
 	data->setVertices(&vertices, sizeof(vertices));
-	data->setMaterial("", mat);
 	auto section = data->addSectionData(indices, sizeof(indices) / sizeof(uint32));
 	section.mode = DrawMode::TRIANGLES;
 	section.slot = "";
 	section.offset = 12 * sizeof(uint32);
 	section.count = 6;
 	data->addSection(section);
-	comp->markRenderStateDirty();
 
+	auto resource = std::make_shared<MeshResource>(data);
+	comp->setMeshResource(resource);
+	comp->setMaterial("", mat);
 	app->addScene(scene);
 
 	auto camera = std::make_shared<CameraComponent>(CameraComponent::PERSPECTIVE, vp.get());
