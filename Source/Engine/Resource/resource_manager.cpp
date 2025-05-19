@@ -5,6 +5,8 @@
 #include <vector>
 #include <regex>
 #include <Resource/material.h>
+#include <Resource/mesh_resource.h>
+#include <Resource/mesh_resource_data.h>
 
 namespace volucris
 {
@@ -165,5 +167,26 @@ namespace volucris
 
 		auto mat = std::make_shared<Material>(resource);
 		return mat;
+	}
+
+	std::shared_ptr<MeshResource> ResourceManager::getMeshFromPath(const ResourcePath& path)
+	{
+		std::shared_ptr<MeshResource> resource = nullptr;
+		{
+			auto it = m_resources.find(path.fullpath);
+			if (it != m_resources.end())
+			{
+				resource = std::dynamic_pointer_cast<MeshResource>(it->second);
+			}
+		}
+
+		if (!resource)
+		{
+			auto data = std::make_shared<MeshResourceData>();
+			
+			resource = std::make_shared<MeshResource>();
+		}
+
+		return resource;
 	}
 }

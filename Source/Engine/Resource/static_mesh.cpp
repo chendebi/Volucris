@@ -10,7 +10,7 @@
 namespace volucris
 {
 	StaticMesh::StaticMesh()
-		: RenderResource()
+		: ResourceObject()
 		, m_resource(nullptr)
 	{
 

@@ -9,6 +9,7 @@
 namespace volucris
 {
 	class Material;
+	class MeshResource;
 
 	class ResourceManager
 	{
@@ -22,6 +23,8 @@ namespace volucris
 		}
 
 		std::shared_ptr<Material> getMaterialFromPath(const ResourcePath& path);
+
+		std::shared_ptr<MeshResource> getMeshFromPath(const ResourcePath& path);
 
 	private:
 		std::map<std::string, std::shared_ptr<ResourceObject>> m_resources;

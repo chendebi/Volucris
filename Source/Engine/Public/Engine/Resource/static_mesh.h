@@ -11,7 +11,7 @@ namespace volucris
 	class MeshResource;
 	class MeshResourceData;
 
-	class StaticMesh : public RenderResource
+	class StaticMesh : public ResourceObject
 	{
 	public:
 		StaticMesh();
@@ -23,8 +23,6 @@ namespace volucris
 		const std::unordered_map<std::string, std::shared_ptr<Material>>& getMaterials() const { return m_materials; }
 
 		std::shared_ptr<MeshResource> getResource() const;
-
-	protected:
 
 	private:
 		std::shared_ptr<MeshResource> m_resource;
