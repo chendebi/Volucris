@@ -1,5 +1,6 @@
 #include "Renderer/material_proxy.h"
 #include "Resource/material.h"
+#include "Resource/material_resource.h"
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
 

@@ -51,8 +51,6 @@ namespace volucris
 
 		void addScene(const std::shared_ptr<Scene>& scene);
 
-		bool addViewport(const std::shared_ptr<Viewport>& viewport);
-
 		bool isInitialized() const { return m_initialized; }
 
 		bool isRunning() const { return m_running; }

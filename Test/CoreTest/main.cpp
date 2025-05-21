@@ -9,7 +9,6 @@
 #include "Engine/Scene/primitive_component.h"
 #include "Engine/Resource/mesh_resource_data.h"
 #include "Engine/Resource/resource_path.h"
-#include <Engine/Resource/resource_manager.h>
 #include <Engine/Renderer/renderer.h>
 #include "Engine/Resource/material.h"
 #include "Engine/Resource/material_parameter.h"
@@ -18,6 +17,7 @@
 #include "Engine/Resource/mesh_resource.h"
 #include "Engine/Resource/mesh_resource_data.h"
 #include <Engine/Scene/camera_component.h>
+#include "Engine/Resource/resource_registry.h"
 
 VOLUCRIS_DECLARE_LOG(CoreTest, Trace)
 
@@ -92,7 +92,7 @@ protected:
 		{
 			m_dir = 0.1;
 		}
-		m_primitive->setPosition({ x, 0.0, 0.0 });
+		//m_primitive->setPosition({ x, 0.0, 0.0 });
 
 	}
 
@@ -111,6 +111,13 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	auto scene = std::make_shared<Scene>();
 	scene->addViewport(vp);
 
+	auto mat = ResourceRegistry::Instance().loadResource<Material>(GUID("test"));
+
+	if (!mat)
+	{
+		V_LOG_WARN(CoreTest, "load material failed");
+	}
+
 	auto actor = std::make_shared<Actor>();
 	auto comp = std::make_shared<PrimitiveComponent>();
 	comp->setDisplayName("PrimitiveComp");
@@ -118,7 +125,6 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	scene->addActor(actor);
 	app->setPrimitiveComp(comp);
 
-	auto mat = gResources->getMaterialFromPath(ResourcePath("/Engine/Content/Material/default_mesh.mat"));
 	mat->getParameterByName("fcolor")->setValue(glm::vec3(0.1, 1.0, 0.0));
 
 	auto data = std::make_shared<MeshResourceData>();

@@ -10,51 +10,13 @@
 
 namespace volucris
 {
+	class MaterialResource;
 	class MaterialProxy;
-	class MaterialResourceProxy;
-
-	class MaterialResource : public RenderResource
-	{
-	public:
-		MaterialResource();
-
-		~MaterialResource();
-
-		MaterialResource(const std::string& vss, const std::string& fss);
-
-		void setSource(const std::string& vss, const std::string& fss);
-
-		void setParameters(const std::vector<MaterialParameterDesc>& parameters)
-		{
-			m_descriptions = parameters;
-		}
-
-		MaterialResourceProxy* getProxy() const { return m_proxy; }
-
-		MaterialResourceProxy* attachProxy();
-
-		void deattachProxy();
-
-		std::string getVertexShaderSource() const { return m_vss; }
-		std::string getFragmentShaderSource() const { return m_fss; }
-
-		const std::vector<MaterialParameterDesc>& getParameterDescriptions() const { return m_descriptions; }
-
-	protected:
-		void releaseRenderProxy() override;
-
-	private:
-		friend class Material;
-		std::string m_vss;
-		std::string m_fss;
-		std::vector<MaterialParameterDesc> m_descriptions;
-		MaterialResourceProxy* m_proxy;
-	};
 
 	class Material : public RenderResource
 	{
 	public:
-		Material(const std::shared_ptr<MaterialResource>& resource);
+		Material();
 
 		~Material();
 
@@ -77,7 +39,17 @@ namespace volucris
 	protected:
 		void releaseRenderProxy() override;
 
+		bool serialize(rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) const override;
+
+		void deserialize(const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) override;
+
 	private:
+		void setMaterialResource(const std::shared_ptr<MaterialResource>& resource);
+
+	private:
+		std::shared_ptr<Material> m_parent;
+		std::string m_vsFilePath;
+		std::string m_fsFilePath;
 		std::shared_ptr<MaterialResource> m_resource;
 		std::vector<std::unique_ptr<MaterialParameter>> m_parameters;
 		std::vector<uint8> m_parameterData;
