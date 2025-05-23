@@ -26,8 +26,8 @@ namespace volucris
 	{
 		if (m_dirty && m_proxy)
 		{
-			gApp->getRenderer()->pushCommand([this, proxy= m_proxy]() {
-				proxy->setViewport(m_viewport);
+			gApp->getRenderer()->pushCommand([vp = m_viewport, proxy= m_proxy]() {
+				proxy->setViewport(vp);
 				});
 			m_dirty = false;
 		}

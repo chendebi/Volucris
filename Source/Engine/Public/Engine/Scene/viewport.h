@@ -2,6 +2,7 @@
 #define __volucris_viewport_h__
 
 #include "Engine/Core/rect.h"
+#include "Engine/Core/size.h"
 #include "Engine/Core/types_help.h"
 #include <memory>
 #include "Engine/Scene/scene_object.h"
@@ -22,6 +23,8 @@ namespace volucris
 		void update();
 
 		ViewportProxy* getProxy() const { return m_proxy; }
+
+		const Rect& getViewportRect() const { return m_viewport; }
 
 	private:
 		friend class Scene;

@@ -1,7 +1,8 @@
 #include "editor_application.h"
 #include <Engine/Application/window.h>
 #include "MainWidget/main_widget.h"
-
+#include <Engine/Renderer/FRP/forward_render_pass.h>
+#include <Engine/Renderer/renderer.h>
 #include <Engine/Resource/resource_path.h>
 #include "editor_core.h"
 
@@ -17,9 +18,9 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	app->setWindow(window);
 	app->setMainWidget(std::make_shared<MainWidget>());
 
-	auto testPath = "/Engine/mat/xxx.json";
-	ResourcePath xx(testPath);
-	V_LOG_DEBUG(Editor, "full path: {}", xx.getSystemPath());
+	auto renderer = std::make_shared<Renderer>();
+	renderer->addRenderPass(std::make_shared<ForwardRenderPass>());
+	app->setRenderer(renderer);
 
 	return app;
 }

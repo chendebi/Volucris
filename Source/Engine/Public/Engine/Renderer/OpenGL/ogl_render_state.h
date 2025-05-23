@@ -11,6 +11,7 @@ namespace volucris
 	class OGLBufferObject;
 	class OGLVertexArrayObject;
 	class OGLProgramObject;
+	class Texture2DObject;
 	class Uniform;
 
 	struct OGLClearState
@@ -51,6 +52,7 @@ namespace volucris
 	{
 		OGLBufferObject* vbo = nullptr;
 		OGLBufferObject* ubo = nullptr;
+		Texture2DObject* texture2d = nullptr;
 		std::unordered_map<uint32, OGLBufferObject*> ubos;
 		OGLDrawState drawState;
 	};

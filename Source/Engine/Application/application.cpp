@@ -132,6 +132,10 @@ namespace volucris
 			return;
 		}
 		m_scenes.push_back(scene);
+		if (m_running)
+		{
+			scene->attachToRenderer();
+		}
 	}
 
 	Window* Application::getWindow()
@@ -186,6 +190,8 @@ namespace volucris
 
 			m_window->pollEvents();
 
+			Widget::draw(m_mainWidget.get());
+
 			// TODO: tick
 			tick(delta);
 
@@ -198,8 +204,6 @@ namespace volucris
 			{
 				scene->update();
 			}
-
-			Widget::draw(m_mainWidget.get());
 
 			m_renderer->render();
 

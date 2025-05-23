@@ -23,11 +23,13 @@ endfunction()
 volucris_engine_code(EditorEntry EDITOR_ENTRY_CODE_FILES)
 volucris_engine_code(MainWidget MAIN_WIDGET_CODE_FILES)
 volucris_engine_code(ContentBrowser CONTENT_BROWSER_CODE_FILES)
+volucris_engine_code(Viewport VIEWPORT_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${EDITOR_ENTRY_CODE_FILES}
     ${MAIN_WIDGET_CODE_FILES}
     ${CONTENT_BROWSER_CODE_FILES}
+    ${VIEWPORT_CODE_FILES}
 )
 
 target_include_directories(${TARGET} PRIVATE 

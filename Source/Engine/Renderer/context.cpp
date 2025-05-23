@@ -13,6 +13,7 @@
 #include "Renderer/OpenGL/ogl_uniform.h"
 #include <Renderer/OpenGL/ogl_check.h>
 #include "Renderer/mesh_proxy.h"
+#include <Renderer/OpenGL/ogl_texture2d_object.h>
 
 namespace volucris
 {
@@ -109,6 +110,16 @@ namespace volucris
 		{
 			glBindVertexArray(id);
 			m_renderState.drawState.vao = vao;
+		}
+	}
+
+	void Context::bindTexture2D(Texture2DObject* texture2d)
+	{
+		auto id = texture2d->getID();
+		if (id > 0 && m_renderState.texture2d != texture2d)
+		{
+			m_renderState.texture2d = texture2d;
+			glBindTexture(GL_TEXTURE_2D, id);
 		}
 	}
 

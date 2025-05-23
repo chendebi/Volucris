@@ -29,6 +29,8 @@ namespace volucris
 
 		void bindVertexArrayObject(OGLVertexArrayObject* vao);
 
+		void bindTexture2D(Texture2DObject* texture2d);
+
 		void setCameraInfoBlock(const UniformBlock& block);
 
 		void setViewport(int x, int y, int w, int h);

@@ -16,9 +16,7 @@ namespace volucris
 
 		ImGui::SetNextWindowDockID(id);
 		// 窗口 1：Shader 渲染窗口
-		ImGui::Begin("Shader View");
-		// 这里放置你的 Shader 渲染代码（见步骤 3）
-		ImGui::End();
+		m_viewport.build();
 
 		// 窗口 2-4：普通 ImGui 控件窗口
 		ImGui::Begin("Controls");

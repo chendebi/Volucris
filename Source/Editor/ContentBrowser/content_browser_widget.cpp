@@ -24,7 +24,7 @@ namespace volucris
 
 		// 分割条
 		ImGui::SameLine();
-		ImGui::InvisibleButton("Splitter", ImVec2(8.0f, ImGui::GetContentRegionAvail().y));
+		ImGui::InvisibleButton("Splitter", ImVec2(8.0f, ImGui::GetContentRegionAvail().y + 0.1));
 		if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
 			auto width = m_pathWidget ->getWidth() + ImGui::GetIO().MouseDelta.x;
 			width = ImMax(width, 50.0f); // 最小宽度限制
