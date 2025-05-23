@@ -7,6 +7,7 @@
 #include <vector>
 #include "Engine/Core/circle_queue.h"
 #include <functional>
+#include "Engine/Core/size.h"
 
 namespace volucris
 {

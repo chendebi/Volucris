@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "Core/volucris.h"
 #include <Core/directory.h>
+#include "Resource/resource_registry.h"
 
 namespace fs = std::filesystem;
 
@@ -20,25 +21,20 @@ namespace volucris
 		}
 	}
 
-	std::string ResourcePath::getSystemPath(const std::string& customExt) const
+	std::string ResourcePath::getSystemPath() const
 	{
-		std::string ext = customExt.empty() ? type : customExt;
+		std::string path;
+		ResourceRegistry::Instance().getSystemPathByResourcePath(fullpath, path);
+		return path;
+	}
 
-		Directory dir;
-		if (path.substr(0, 7) == "/Engine")
-		{
-			dir = Directory::EngineDirectory() / path.substr(7);
-		}
-		else if (path.substr(0, 8) == "/Project")
-		{
-			dir = Directory::ApplicationDirectory() / path.substr(8);
-		}
-		else
-		{
-			dir = Directory::ApplicationDirectory() / path;
-		}
+	bool ResourcePath::SystemPathToResourcePath(const std::string& filepath, std::string& path)
+	{
+		return ResourceRegistry::Instance().getResourcePathBySystemPath(filepath, path);
+	}
 
-		auto filepath = (dir / name).absolute().toString();
-		return filepath + "." + ext;
+	bool ResourcePath::ResourcePathToSystemPath(const std::string& filepath, std::string& path)
+	{
+		return ResourceRegistry::Instance().getSystemPathByResourcePath(filepath, path);
 	}
 }

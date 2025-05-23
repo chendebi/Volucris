@@ -155,11 +155,9 @@ namespace volucris
 
 	std::shared_ptr<MaterialResource> MaterialResourceLoader::loadMaterialResource(const std::string& vsf, const std::string& fsf)
 	{
-		ResourcePath vsp = ResourcePath(vsf);
-		ResourcePath fsp = ResourcePath(fsf);
-
-		auto vsfp = vsp.getSystemPath("vert");
-		auto fsfp = fsp.getSystemPath("frag");
+		std::string vsfp, fsfp;
+		ResourcePath::ResourcePathToSystemPath(vsf, vsfp);
+		ResourcePath::ResourcePathToSystemPath(fsf, fsfp);
 
 		MaterialParameterMap map;
 		std::string vss, fss;

@@ -20,6 +20,8 @@ namespace volucris
 
 		~Material();
 
+		void setShaderPath(const std::string& vs, const std::string& fs);
+
 		MaterialProxy* getProxy() const { return m_proxy; }
 
 		MaterialProxy* attachProxy();

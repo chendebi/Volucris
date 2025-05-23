@@ -35,6 +35,9 @@ namespace volucris
 			scene->render(m_context.get());
 		}
 
+		glViewport(0, 0, m_windowFrameSize.width, m_windowFrameSize.height);
+		OGLClearState state;
+		m_context->clear(state);
 		renderui();
 		m_context->swapBuffers();
 	}

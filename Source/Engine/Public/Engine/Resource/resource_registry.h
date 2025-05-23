@@ -12,7 +12,7 @@ namespace volucris
 {
 	struct GUID
 	{
-		::std::string uuid;
+		std::string uuid;
 
 		GUID() : uuid() {}
 
@@ -25,6 +25,8 @@ namespace volucris
 		{
 			return other.uuid == uuid;
 		}
+
+		static GUID generate();
 	};
 }
 
@@ -54,6 +56,12 @@ namespace volucris
 			return inst;
 		}
 
+		void addResourceSearchPath(const std::string& systemPath, const std::string& header);
+
+		bool getResourcePathBySystemPath(const std::string& systemPath, std::string& path);
+
+		bool getSystemPathByResourcePath(const std::string& resPath, std::string& path);
+
 		void loadManifiset();
 
 		std::shared_ptr<ResourceObject> loadResourceByGUID(const GUID& guid);
@@ -66,6 +74,10 @@ namespace volucris
 			return std::dynamic_pointer_cast<T>(loadResourceByGUID(guid));
 		}
 
+		bool registry(const std::shared_ptr<ResourceObject>& resource);
+
+		void save(const std::shared_ptr<ResourceObject>& resource);
+
 	protected:
 		std::shared_ptr<ResourceObject> loadResource(const ResourceMeta& meta, const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator);
 
@@ -74,9 +86,10 @@ namespace volucris
 		std::unordered_map<GUID, std::string> m_assets;
 		std::unordered_map<std::string, GUID> m_assetsSortByPath;
 
+		std::unordered_map<std::string, std::string> m_searchPaths;
+
 	protected:
 		ResourceRegistry();
-
 		ResourceRegistry(const ResourceRegistry&) = delete;
 		ResourceRegistry& operator=(const ResourceRegistry&) = delete;
 	};

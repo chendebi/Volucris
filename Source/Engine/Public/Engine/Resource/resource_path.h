@@ -21,7 +21,11 @@ namespace volucris
 			return !path.empty();
 		}
 
-		std::string getSystemPath(const std::string& customExt = "") const;
+		std::string getSystemPath() const;
+
+		static bool SystemPathToResourcePath(const std::string& filepath, std::string& path);
+
+		static bool ResourcePathToSystemPath(const std::string& filepath, std::string& path);
 	};
 }
 

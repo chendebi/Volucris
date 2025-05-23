@@ -6,6 +6,11 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
+#include <Windows.h>
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
 namespace volucris
 {
 	struct Window::Impl
@@ -40,9 +45,12 @@ namespace volucris
 
 	Window::Window()
 		: m_impl(new Impl)
-		, m_size(800, 600)
+		, m_rect(100,100, 800, 600)
+		, m_normalRect(100,100,800, 600)
 		, m_frameSize(0,0)
 		, m_title()
+		, m_fullScreen(0)
+		, m_frameless(0)
 	{
 
 	}
@@ -63,9 +71,20 @@ namespace volucris
 		m_title = title;
 	}
 
+	void Window::setPosition(int x, int y)
+	{
+		m_rect.x = x;
+		m_rect.y = y;
+		if (m_impl->handle)
+		{
+			glfwSetWindowPos(m_impl->handle, x, y);
+		}
+	}
+
 	void Window::setSize(int width, int height)
 	{
-		m_size = { width, height };
+		m_rect.w = width;
+		m_rect.h = height;
 		if (m_impl->handle)
 		{
 			glfwSetWindowSize(m_impl->handle, width, height);
@@ -85,15 +104,26 @@ namespace volucris
 			return false;
 		}
 
-		m_impl->handle = glfwCreateWindow(m_size.width, m_size.height, m_title.c_str(), nullptr, nullptr);
+		m_impl->handle = glfwCreateWindow(m_rect.w, m_rect.h, m_title.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(m_impl->handle, this);
 		glfwSetWindowCloseCallback(m_impl->handle, onGLFWWindowClose);
 		glfwSetWindowSizeCallback(m_impl->handle, onGLFWWindowResized);
 		glfwSetFramebufferSizeCallback(m_impl->handle, onGLFWFrameResized);
 		glfwSetCursorPosCallback(m_impl->handle, onGLFWMouseMove);
 
+		if (m_frameless)
+		{
+			glfwSetWindowAttrib(m_impl->handle, GLFW_DECORATED, false);
+		}
+
+		if (m_fullScreen)
+		{
+			setFullScreen(true);
+		}
+
 		WindowSizeChanged.addLambda([this](int w, int h) {
-			m_size = { w, h };
+			m_rect.w = w;
+			m_rect.h = h;
 			});
 		FrameSizeChanged.addLambda([this](int w, int h) {
 			m_frameSize = { w, h };
@@ -165,5 +195,30 @@ namespace volucris
 		ImGui_ImplOpenGL3_Init(glslversion.c_str());
 		m_impl->imguiInited = true;
 		return true;
+	}
+
+	void Window::setFullScreen(bool enabled)
+	{
+		m_fullScreen = enabled;
+		if (!m_impl->handle)
+		{
+			return;
+		}
+
+		glfwMaximizeWindow(m_impl->handle);
+		/*HWND hwnd = glfwGetWin32Window(m_impl->handle);
+		SetWindowLong()*/
+	}
+
+	void Window::setFrameless(bool enabled)
+	{
+		if (enabled)
+		{
+			glfwSetWindowAttrib(m_impl->handle, GLFW_DECORATED, false);
+		}
+		else
+		{
+			glfwSetWindowAttrib(m_impl->handle, GLFW_DECORATED, true);
+		}
 	}
 }

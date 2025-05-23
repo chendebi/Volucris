@@ -5,6 +5,8 @@
 #include <memory>
 #include "Engine/Core/event.h"
 #include "Engine/Core/size.h"
+#include "Engine/Core/types_help.h"
+#include <Engine/Core/rect.h>
 
 DECLARE_EVENT(OnClose)
 DECLARE_EVENT(OnSizeChanged, int, int)
@@ -15,6 +17,14 @@ namespace volucris
 {
 	class Window
 	{
+	public:
+		enum Flags
+		{
+			FRAMELESS = 0x01,
+			FIX_SIZE = 0x02,
+			FULL_SCREEN = 0x04,
+		};
+
 	public:
 		OnClose Close;
 		OnSizeChanged FrameSizeChanged;
@@ -30,6 +40,8 @@ namespace volucris
 
 		void setTitle(const std::string& title);
 
+		void setPosition(int x, int y);
+
 		void setSize(int width, int height);
 
 		bool initialize();
@@ -42,12 +54,19 @@ namespace volucris
 
 		Size getFrameSize() const { return m_frameSize; }
 
+		void setFullScreen(bool enabled);
+
+		void setFrameless(bool enabled);
+
 	private:
 		struct Impl;
 		Impl* m_impl;
-		Size m_size;
+		Rect m_rect;
+		Rect m_normalRect;
 		Size m_frameSize;
 		std::string m_title;
+		uint8 m_fullScreen;
+		uint8 m_frameless;
 	};
 }
 

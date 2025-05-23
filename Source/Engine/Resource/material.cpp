@@ -20,6 +20,12 @@ namespace volucris
 	{
 	}
 
+	void Material::setShaderPath(const std::string& vs, const std::string& fs)
+	{
+		m_vsFilePath = vs;
+		m_fsFilePath = fs;
+	}
+
 	MaterialProxy* Material::attachProxy()
 	{
 		if (!m_proxy)

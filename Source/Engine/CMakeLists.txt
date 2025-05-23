@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-option(BUILD_WITH_EDITOR ON)
+option(BUILD_WITH_EDITOR "build engine with editor mode" ON)
 
 if (INDEPENDENT_VOLUCRIS)
     set(TARGET "Engine")

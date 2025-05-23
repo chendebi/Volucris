@@ -2,6 +2,7 @@
 #include "Core/volucris.h"
 #include <Core/assert.h>
 #include <Application/window.h>
+#include <Core/directory.h>
 #include <crtdbg.h>
 #include "Resource/resource_registry.h"
 
@@ -11,6 +12,9 @@ int main(int argc, char** argv)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
+	ResourceRegistry::Instance().addResourceSearchPath((Directory::EngineDirectory() / "Content").toString(), "/Engine/");
+	ResourceRegistry::Instance().addResourceSearchPath((Directory::EngineDirectory() / "Source/Shader").toString(), "/Shader/");
+	ResourceRegistry::Instance().addResourceSearchPath(Directory::ApplicationDirectory().toString(), "/Project/");
 	ResourceRegistry::Instance().loadManifiset();
 
 	auto app = volucrisMain(argc, argv);

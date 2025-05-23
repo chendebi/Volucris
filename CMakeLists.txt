@@ -17,5 +17,6 @@ add_subdirectory(Source/Engine)
 add_subdirectory(Source/ThirdParty)
 
 if (${INDEPENDENT_VOLUCRIS})
+    add_subdirectory(Source/Editor)
 	add_subdirectory(Test/CoreTest)
 endif()
