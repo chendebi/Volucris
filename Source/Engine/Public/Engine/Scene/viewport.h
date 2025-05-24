@@ -6,6 +6,9 @@
 #include "Engine/Core/types_help.h"
 #include <memory>
 #include "Engine/Scene/scene_object.h"
+#include <Engine/Core/event.h>
+
+DECLARE_EVENT(OnTargetGLTextureIDChanged, volucris::uint32)
 
 namespace volucris
 {
@@ -13,6 +16,9 @@ namespace volucris
 
 	class Viewport : public SceneObject
 	{
+	public:
+		OnTargetGLTextureIDChanged TargetGLTextureIDChanged;
+
 	public:
 		Viewport();
 
@@ -26,12 +32,15 @@ namespace volucris
 
 		const Rect& getViewportRect() const { return m_viewport; }
 
+		void setTargetGLTextureID(uint32 id);
+
 	private:
 		friend class Scene;
 		friend class SceneProxy;
 		uint8 m_dirty;
 		Rect m_viewport;
 		ViewportProxy* m_proxy;
+		uint32 m_targetGLTextureID;
 	};
 }
 

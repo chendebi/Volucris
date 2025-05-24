@@ -63,11 +63,13 @@ namespace volucris
 
 	private:
 		Rect m_viewport;
+		Viewport* m_vp;
 		SceneProxy* m_scene;
 		std::vector<std::shared_ptr<RenderPass>> m_passes;
 		CameraInfo m_cameraInfo;
 		uint8 m_cameraInfoDirty;
 		UniformBlock m_cameraInfoBlock;
+		std::weak_ptr<Texture2DObject> m_target;
 	};
 }
 

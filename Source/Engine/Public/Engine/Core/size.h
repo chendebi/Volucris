@@ -14,6 +14,8 @@ namespace volucris
 			, height(h)
 		{
 		}
+
+		bool isValid() const { return width > 0 && height > 0; }
 	};
 }
 

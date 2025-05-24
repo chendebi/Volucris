@@ -30,15 +30,18 @@ namespace volucris
 			command();
 		}
 
+		m_context->setViewport({ 0, 0, m_windowFrameSize.width, m_windowFrameSize.height });
+		OGLClearState state;
+		m_context->clear(state);
+
 		for (const auto& scene : m_scenes)
 		{
 			scene->render(m_context.get());
 		}
 
-		glViewport(0, 0, m_windowFrameSize.width, m_windowFrameSize.height);
-		OGLClearState state;
-		m_context->clear(state);
+		m_context->bindFrameBuffer(nullptr);
 		renderui();
+
 		m_context->swapBuffers();
 	}
 

@@ -1,12 +1,11 @@
 #include "Renderer/OpenGL/ogl_texture2d_object.h"
 #include "Renderer/context.h"
+#include <Renderer/OpenGL/ogl_check.h>
 
 namespace volucris
 {
 	Texture2DObject::Texture2DObject()
-		: m_id(0)
-		, m_size(0,0)
-		, m_format(GL_RGB)
+		: FrameBufferComponent(ComponentType::TEXTURE)
 		, m_type(GL_UNSIGNED_BYTE)
 		, m_filter(GL_LINEAR)
 		, m_data()
@@ -24,12 +23,10 @@ namespace volucris
 
 	bool Texture2DObject::create()
 	{
-		if (m_id > 0)
+		if (m_id == 0)
 		{
-			return true;
+			glGenTextures(1, &m_id);
 		}
-
-		glGenTextures(1, &m_id);
 		return m_id > 0;
 	}
 
@@ -44,7 +41,12 @@ namespace volucris
 
 	bool Texture2DObject::initialize(Context* context)
 	{
-		if (m_id == 0)
+		if (m_valid)
+		{
+			return true;
+		}
+
+		if (m_id == 0 || !m_size.isValid())
 		{
 			return false;
 		}
@@ -54,6 +56,7 @@ namespace volucris
 		glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_size.width, m_size.height, 0, sourceFormat, m_type, m_data.data());
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_filter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_filter);
+		GL_CHECK();
 		return true;
 	}
 }

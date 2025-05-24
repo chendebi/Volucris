@@ -10,6 +10,7 @@ namespace volucris
 	class SceneProxy;
 	class Context;
 	class ViewportProxy;
+	class Texture2DObject;
 
 	class RenderPass
 	{
@@ -42,7 +43,11 @@ namespace volucris
 
 		virtual void render(Context* context) {}
 
+		virtual void viewSizeChanged(int width, int height) {}
+
 		virtual std::shared_ptr<RenderPass> clone() = 0;
+
+		virtual std::shared_ptr<Texture2DObject> getTargetTexture() const { return nullptr; }
 
 	protected:
 		virtual bool shouldCollectBatch(const PrimitiveDrawBatch& batch) const { return false; }

@@ -14,6 +14,8 @@
 #include <Renderer/OpenGL/ogl_check.h>
 #include "Renderer/mesh_proxy.h"
 #include <Renderer/OpenGL/ogl_texture2d_object.h>
+#include <Renderer/OpenGL/ogl_render_buffer_object.h>
+#include <Renderer/OpenGL/ogl_frame_buffer_object.h>
 
 namespace volucris
 {
@@ -123,6 +125,34 @@ namespace volucris
 		}
 	}
 
+	void Context::bindRenderBuffer(RenderBufferObject* rbo)
+	{
+		auto id = rbo->getID();
+		if (id > 0 && rbo != m_renderState.rbo)
+		{
+			glBindRenderbuffer(GL_RENDERBUFFER, id);
+			m_renderState.rbo = rbo;
+		}
+	}
+
+	void Context::bindFrameBuffer(FrameBufferObject* fbo)
+	{
+		if (fbo)
+		{
+			auto id = fbo->getID();
+			if (id > 0 && fbo != m_renderState.fbo)
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, id);
+				m_renderState.fbo = fbo;
+			}
+		}
+		else
+		{
+			m_renderState.fbo = nullptr;
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+	}
+
 	void Context::setCameraInfoBlock(const UniformBlock& block)
 	{
 		m_cameraInfoBlock = block;
@@ -140,6 +170,20 @@ namespace volucris
 			glViewport(rect.x, rect.y, rect.w, rect.h);
 			m_viewport = rect;
 		}
+	}
+
+	bool Context::beginRenderPass(FrameBufferObject* target)
+	{
+		if (target)
+		{
+			if (!target->create() || !target->initialize(this))
+			{
+				return false;
+			}
+			target->updateAttachments(this);
+			bindFrameBuffer(target);
+		}
+		return true;
 	}
 
 	void Context::clear(const OGLClearState& state)

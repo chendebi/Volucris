@@ -31,11 +31,17 @@ namespace volucris
 
 		void bindTexture2D(Texture2DObject* texture2d);
 
+		void bindRenderBuffer(RenderBufferObject* rbo);
+
+		void bindFrameBuffer(FrameBufferObject* fbo);
+
 		void setCameraInfoBlock(const UniformBlock& block);
 
 		void setViewport(int x, int y, int w, int h);
 
 		void setViewport(const Rect& rect);
+
+		bool beginRenderPass(FrameBufferObject* target = nullptr);
 
 		void clear(const OGLClearState& state);
 

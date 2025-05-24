@@ -12,6 +12,7 @@ namespace volucris
 		: m_dirty(0)
 		, m_viewport()
 		, m_proxy(nullptr)
+		, m_targetGLTextureID(0)
 	{
 
 	}
@@ -31,5 +32,11 @@ namespace volucris
 				});
 			m_dirty = false;
 		}
+	}
+
+	void Viewport::setTargetGLTextureID(uint32 id)
+	{
+		m_targetGLTextureID = id;
+		TargetGLTextureIDChanged.broadcast(id);
 	}
 }

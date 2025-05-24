@@ -6,6 +6,8 @@
 
 namespace volucris
 {
+	class FrameBufferObject;
+
 	class ForwardRenderPass : public RenderPass
 	{
 	public:
@@ -15,9 +17,13 @@ namespace volucris
 
 		void render(Context* context) override;
 
+		void viewSizeChanged(int width, int height) override;
+
 		std::shared_ptr<RenderPass> clone() {
 			return std::make_shared<ForwardRenderPass>();
 		}
+
+		std::shared_ptr<Texture2DObject> getTargetTexture() const override;
 
 	protected:
 		bool shouldCollectBatch(const PrimitiveDrawBatch& batch) const { return true; }
@@ -25,6 +31,7 @@ namespace volucris
 	private:
 		OGLClearState m_clearState;
 		ViewportProxy* m_view;
+		std::shared_ptr<FrameBufferObject> m_target;
 	};
 }
 

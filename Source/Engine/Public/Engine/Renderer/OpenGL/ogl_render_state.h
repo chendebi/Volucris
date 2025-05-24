@@ -12,6 +12,8 @@ namespace volucris
 	class OGLVertexArrayObject;
 	class OGLProgramObject;
 	class Texture2DObject;
+	class RenderBufferObject;
+	class FrameBufferObject;
 	class Uniform;
 
 	struct OGLClearState
@@ -25,7 +27,7 @@ namespace volucris
 		};
 
 		int clearBuffers = Buffer::ALL;
-		glm::vec4 color = { 0,0,0,0 };
+		glm::vec4 color = { 0,0,0,1 };
 		float depth = 1.0;
 	};
 
@@ -53,6 +55,8 @@ namespace volucris
 		OGLBufferObject* vbo = nullptr;
 		OGLBufferObject* ubo = nullptr;
 		Texture2DObject* texture2d = nullptr;
+		RenderBufferObject* rbo = nullptr;
+		FrameBufferObject* fbo = nullptr;
 		std::unordered_map<uint32, OGLBufferObject*> ubos;
 		OGLDrawState drawState;
 	};
