@@ -250,7 +250,6 @@ namespace volucris
 			return;
 		}
 		
-		Serializer serializer;
 		ResourceHeader header = { {'v','o','l','u','c','r', 'i', 's'}, 1};
 		std::ofstream fout = std::ofstream(resource->m_path.getSystemPath(), std::ios::binary | std::ios::trunc);
 		fout.write((char*)&header, sizeof(header));
@@ -259,13 +258,22 @@ namespace volucris
 			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
 			return;
 		}
+		{
+			Serializer serializer;
+			serializer.serialize(resource->m_metaData);
+			uint32 size = serializer.getData().size();
+			fout.write((char*)&size, sizeof(uint32));
+			fout.write((char*)serializer.getData().data(), serializer.getData().size());
+		}
 
-		serializer.serialize(resource->m_metaData);
-		uint32 size = serializer.getData().size();
-		fout.write((char*)&size, sizeof(uint32));
+		{
+			Serializer serializer;
+			resource->serialize(serializer);
+			uint32 size = serializer.getData().size();
+			fout.write((char*)&size, sizeof(uint32));
+			fout.write((char*)serializer.getData().data(), serializer.getData().size());
+		}
 
-		resource->serialize(serializer);
-		fout.write((char*)serializer.getData().data(), serializer.getData().size());
 		if (fout.fail())
 		{
 			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
