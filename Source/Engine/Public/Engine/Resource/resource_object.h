@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include "Engine/Resource/resource_path.h"
-#include <rapidjson/rapidjson.h>
+#include <Engine/Core/serializer.h>
 #include <rapidjson/document.h>
 #include "Engine/Resource/meta_data.h"
 
@@ -76,18 +76,13 @@ namespace volucris
 
 		void setResourcePath(const ResourcePath& path) { m_path = path; }
 
+		const ResourceMeta& getMetaData() const { return m_metaData; }
+
 	protected:
 		friend class ResourceRegistry;
-		virtual bool serialize(rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) const { return false; }
+		virtual bool serialize(Serializer& serializer) const { return false; }
 		
-		virtual void deserialize(const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) { }
-
-		void serializeDependence(rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator, const char* key, std::shared_ptr<ResourceObject> dependence) const
-		{
-			serializer.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(dependence->m_metaData.guid.c_str()), allocator);
-		}
-
-		std::shared_ptr<ResourceObject> loadDependence(const rapidjson::Value& serializer, const char* key) const;
+		virtual void deserialize(Serializer& serializer) { }
 
 	private:
 		friend class ResourceManager;

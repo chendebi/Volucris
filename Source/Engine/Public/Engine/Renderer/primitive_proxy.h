@@ -50,9 +50,9 @@ namespace volucris
 		std::vector<PrimitiveDrawBatch> getDrawBatch() const { return m_batches; }
 
 	private:
-		MeshProxy* m_meshProxy;
+		std::shared_ptr<MeshProxy> m_meshProxy;
 		std::vector<PrimitiveDrawBatch> m_batches;
-		std::unordered_map<MaterialProxy*, std::vector<SectionRenderData>> m_sections;
+		std::unordered_map<std::shared_ptr<MaterialProxy>, std::vector<SectionRenderData>> m_sections;
 	};
 }
 

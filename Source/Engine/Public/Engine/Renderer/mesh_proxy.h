@@ -22,7 +22,11 @@ namespace volucris
 	class MeshProxy
 	{
 	public:
+		MeshProxy();
+
 		MeshProxy(MeshResourceData* resource);
+
+		void updateByResource(MeshResourceData* resource);
 
 		MeshRenderInfo* getRenderInfo() const { return m_renderInfo.get(); }
 

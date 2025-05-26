@@ -7,6 +7,7 @@
 #include "Engine/Resource/resource_object.h"
 #include "meta_data.h"
 #include <xhash>
+#include <fstream>
 
 namespace volucris
 {
@@ -68,18 +69,22 @@ namespace volucris
 
 		std::shared_ptr<ResourceObject> loadResourceByPath(const std::string& path);
 
+		ResourceMeta getResourceMeta(const std::string& path);
+
 		template<typename T>
 		std::shared_ptr<T> loadResource(const GUID& guid)
 		{
 			return std::dynamic_pointer_cast<T>(loadResourceByGUID(guid));
 		}
 
-		bool registry(const std::shared_ptr<ResourceObject>& resource);
+		bool registry(const std::shared_ptr<ResourceObject>& resource, const std::string& path);
 
 		void save(const std::shared_ptr<ResourceObject>& resource);
 
 	protected:
-		std::shared_ptr<ResourceObject> loadResource(const ResourceMeta& meta, const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator);
+		std::shared_ptr<ResourceObject> loadResource(const ResourceMeta& meta, Serializer& serializer);
+
+		ResourceMeta readResourceMeta(std::ifstream& fin);
 
 	private:
 		std::unordered_map <std::string, std::weak_ptr<ResourceObject>> m_caches;

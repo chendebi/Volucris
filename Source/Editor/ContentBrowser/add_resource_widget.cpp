@@ -7,6 +7,7 @@
 #include "path_tree_widget.h"
 #include "EditorEntry/editor_core.h"
 #include <iostream>
+#include "material_loader.h"
 
 namespace volucris
 {
@@ -32,7 +33,7 @@ namespace volucris
 
 		if (ImGui::BeginPopupModal("add resource", &m_opened, ImGuiWindowFlags_AlwaysAutoResize)) {
 			ImGui::Text("Resource       :");
-			ImGui::SameLine(); // ±£³ÖÔÚÍ¬Ò»ÐÐ
+			ImGui::SameLine(); // ä¿æŒåœ¨åŒä¸€è¡Œ
 			ImGui::Combo("##resource_type", &m_currentIdx, ResourceTypes, IM_ARRAYSIZE(ResourceTypes));
 
 			ImGui::Text("AssetName      :");
@@ -50,10 +51,10 @@ namespace volucris
 			}
 
 			{
-				// »ñÈ¡´°¿ÚÄÚÈÝÇøÓò¿í¶È
+				// èŽ·å–çª—å£å†…å®¹åŒºåŸŸå®½åº¦
 				float window_width = ImGui::GetContentRegionAvail().x;
 
-				// ÓÒ¶ÔÆë°´Å¥
+				// å³å¯¹é½æŒ‰é’®
 				float button_width = 120.0f;
 				ImGui::SetCursorPosX(window_width - button_width);
 				if (ImGui::Button("Ok", ImVec2(button_width, 0)))
@@ -92,6 +93,14 @@ namespace volucris
 		if (ResourcePath::SystemPathToResourcePath(m_materialInfo.vsPath.data(), vs)
 			&& ResourcePath::SystemPathToResourcePath(m_materialInfo.fsPath.data(), fs))
 		{
+			MaterialLoader loader;
+			auto resource = loader.load(vs, fs);
+			if (!resource)
+			{
+				V_LOG_WARN(Editor, "add material failed. shader file not valid.");
+				return false;
+			}
+			
 			const auto& resourcePath = m_pathWidget->getSelectedPathItem()->getResourceDirectory() + "/" + m_buffer.data();
 			V_LOG_INFO(Editor, "add material: {}", resourcePath);
 			V_LOG_INFO(Editor, " vertex shader {}", vs);
@@ -99,6 +108,8 @@ namespace volucris
 			auto material = std::make_shared<Material>();
 			material->setShaderPath(vs, fs);
 			material->setResourcePath(resourcePath);
+			material->setMaterialResource(resource);
+			ResourceRegistry::Instance().registry(material, resourcePath);
 			ResourceRegistry::Instance().save(material);
 			return true;
 		}

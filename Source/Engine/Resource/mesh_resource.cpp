@@ -7,39 +7,21 @@
 namespace volucris
 {
 	MeshResource::MeshResource(const std::shared_ptr<MeshResourceData>& data)
-		: RenderResource()
+		: ResourceObject()
 		, m_data(data)
-		, m_proxy(nullptr)
+		, m_proxy()
 	{
 	}
 
-	MeshProxy* MeshResource::attachProxy()
+	std::shared_ptr<MeshProxy> MeshResource::getRenderProxy()
 	{
-		if (!m_proxy)
+		std::shared_ptr<MeshProxy> proxy = m_proxy.lock();
+		if (!proxy)
 		{
-			m_proxy = new MeshProxy(m_data.get());
+			proxy = std::make_shared<MeshProxy>();
+			m_proxy = proxy;
+			V_LOG_DEBUG(Engine, "create mesh resource proxy: {}", getResourceFullPath());
 		}
-		addRenderRef();
-		return m_proxy;
-	}
-
-	void MeshResource::deattachProxy()
-	{
-		if (m_proxy)
-		{
-			removeRenderRef();
-		}
-	}
-
-	void MeshResource::releaseRenderProxy()
-	{
-		if (m_proxy)
-		{
-			gApp->getRenderer()->pushCommand([proxy = m_proxy]() {
-				delete proxy;
-				});
-			V_LOG_DEBUG(Engine, "release mesh resource proxy: {}", getResourceFullPath());
-			m_proxy = nullptr;
-		}
+		return proxy;
 	}
 }

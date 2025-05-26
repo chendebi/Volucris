@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
-#include "Engine/Resource/render_resource.h"
+#include <Engine/Resource/resource_object.h>
 
 namespace volucris
 {

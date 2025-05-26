@@ -1,14 +1,14 @@
 #ifndef __volucris_material_resource_h__
 #define __volucris_material_resource_h__
 
-#include "Engine/Resource/render_resource.h"
+#include <Engine/Resource/resource_object.h>
 #include "Engine/Resource/material_parameter.h"
 
 namespace volucris
 {
 	class MaterialResourceProxy;
 
-	class MaterialResource : public RenderResource
+	class MaterialResource : public ResourceObject
 	{
 	public:
 		MaterialResource();
@@ -24,25 +24,23 @@ namespace volucris
 			m_descriptions = parameters;
 		}
 
-		MaterialResourceProxy* getProxy() const { return m_proxy; }
-
-		MaterialResourceProxy* attachProxy();
-
-		void deattachProxy();
+		std::shared_ptr<MaterialResourceProxy> getRenderProxy();
 
 		std::string getVertexShaderSource() const { return m_vss; }
+
 		std::string getFragmentShaderSource() const { return m_fss; }
 
 		const std::vector<MaterialParameterDesc>& getParameterDescriptions() const { return m_descriptions; }
 
-	protected:
-		void releaseRenderProxy() override;
+		bool serialize(Serializer& serializer) const override;
+
+		void deserialize(Serializer& serializer) override;
 
 	private:
 		std::string m_vss;
 		std::string m_fss;
 		std::vector<MaterialParameterDesc> m_descriptions;
-		MaterialResourceProxy* m_proxy;
+		std::weak_ptr<MaterialResourceProxy> m_proxy;
 	};
 
 	class MaterialResourceLoader

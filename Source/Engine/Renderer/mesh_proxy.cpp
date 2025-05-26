@@ -13,10 +13,22 @@ namespace volucris
 		vao->setVertexBufferObject(vbo);
 	}
 
-	MeshProxy::MeshProxy(MeshResourceData* resource)
-		: m_renderData(resource->build())
+	MeshProxy::MeshProxy()
+		: m_renderData(nullptr)
 		, m_renderInfo(std::make_unique<MeshRenderInfo>())
 	{
+
+	}
+
+	MeshProxy::MeshProxy(MeshResourceData* resource)
+		: MeshProxy()
+	{
+		updateByResource(resource);
+	}
+
+	void MeshProxy::updateByResource(MeshResourceData* resource)
+	{
+		m_renderData = resource->build();
 		m_renderInfo->vbo->setData(m_renderData->renderData.data(), m_renderData->renderData.size());
 		m_renderInfo->ebo->setData(m_renderData->sectionData.data(), m_renderData->sectionData.size());
 

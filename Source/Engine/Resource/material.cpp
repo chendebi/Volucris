@@ -5,13 +5,15 @@
 #include <Application/application.h>
 #include "Renderer/renderer.h"
 #include "Core/assert.h"
+#include <Resource/resource_registry.h>
 
 namespace volucris
 {
 	Material::Material()
-		: m_resource(nullptr)
+		: ResourceObject()
+		, m_resource(nullptr)
 		, m_parameters()
-		, m_proxy(nullptr)
+		, m_proxy()
 	{
 		
 	}
@@ -26,31 +28,24 @@ namespace volucris
 		m_fsFilePath = fs;
 	}
 
-	MaterialProxy* Material::attachProxy()
+	std::shared_ptr<MaterialProxy> Material::getRenderProxy()
 	{
-		if (!m_proxy)
+		auto proxy = m_proxy.lock();
+		if (!proxy)
 		{
-			m_proxy = new MaterialProxy(this);
-			m_proxy->setResource(m_resource->attachProxy());
-		}
-		addRenderRef();
-		V_LOG_DEBUG(Engine, "attach to material: {}, {}", getResourceFullPath(), getRenderRefCount())
-		return m_proxy;
-	}
+			proxy = std::make_shared<MaterialProxy>(this);
+			m_proxy = proxy;
 
-	void Material::deattachProxy()
-	{
-		if (m_proxy)
-		{
-			removeRenderRef();
+			V_LOG_DEBUG(Engine, "create material: {}", getResourceFullPath())
 		}
+		return proxy;
 	}
 
 	void Material::updateParametersToRenderer()
 	{
-		if (m_proxy)
+		if (auto proxy = m_proxy.lock())
 		{
-			gApp->getRenderer()->pushCommand([proxy = m_proxy, data = m_parameterData]() {
+			gApp->getRenderer()->pushCommand([proxy, data = m_parameterData]() {
 				proxy->updateParameters(data);
 				});
 		}
@@ -80,63 +75,63 @@ namespace volucris
 		return nullptr;
 	}
 
-	void Material::releaseRenderProxy()
-	{
-		if (m_proxy)
-		{
-			gApp->getRenderer()->pushCommand([proxy = m_proxy]() {
-				delete proxy;
-				});
-			m_resource->deattachProxy();
-			V_LOG_DEBUG(Engine, "release material: {}", getResourceFullPath())
-			m_proxy = nullptr;
-		}
-	}
-
-	bool Material::serialize(rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) const
+	bool Material::serialize(Serializer& serializer) const
 	{
 		if (m_parent)
 		{
-			serializeDependence(serializer, allocator, "parent", m_parent);
+			if (m_parent->getMetaData().guid.empty())
+			{
+				return false;
+			}
+			serializer << 1 << m_parent->getMetaData().guid;
 		}
 		else
 		{
-			rapidjson::Value source(rapidjson::kObjectType);
-			source.AddMember(rapidjson::StringRef("vs"), rapidjson::StringRef(m_vsFilePath.c_str()), allocator);
-			source.AddMember(rapidjson::StringRef("fs"), rapidjson::StringRef(m_fsFilePath.c_str()), allocator);
-			serializer.AddMember(rapidjson::StringRef("source"), source, allocator);
+			serializer << 2 << m_vsFilePath << m_fsFilePath;
+			m_resource->serialize(serializer);
 		}
 		return true;
 	}
 
-	void Material::deserialize(const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator)
+	void Material::deserialize(Serializer& serializer)
 	{
-		if (auto parent = loadDependence(serializer, "parent"))
+		int type = 0;
+		if (!serializer.deserialize(type))
 		{
-			m_parent = std::dynamic_pointer_cast<Material>(parent);
-			m_resource = m_parent->getResource();
+			return;
 		}
-		else
+
+		if (type == 1)
 		{
-			rapidjson::Value source;
-			if (!getJsonValueObject(serializer, allocator, "source", source))
+			// Load material from GUID
+			std::string guid;
+			if (!serializer.deserialize(guid))
 			{
 				return;
 			}
 
-			if (!getJsonValueString(source, "vs", m_vsFilePath)
-				|| !getJsonValueString(source, "fs", m_fsFilePath))
+			if (auto parent = ResourceRegistry::Instance().loadResource<Material>(GUID(guid)))
 			{
-				return;
+				setMaterialResource(parent->getResource());
 			}
-
-			MaterialResourceLoader loader;
-			if (auto resource = loader.loadMaterialResource(m_vsFilePath, m_fsFilePath))
+		}
+		else if (type == 2)
+		{
+			// Load material from shader paths
+			if (serializer.deserialize(m_vsFilePath) && serializer.deserialize(m_fsFilePath))
 			{
+				auto resource = std::make_shared<MaterialResource>();
+				resource->deserialize(serializer);
 				setMaterialResource(resource);
+			}
+			else
+			{
+				V_LOG_ERROR(Engine, "Failed to deserialize shader paths for material");
+				return;
 			}
 		}
 	}
+
 	void Material::setMaterialResource(const std::shared_ptr<MaterialResource>& resource)
 	{
 		check(!m_resource)

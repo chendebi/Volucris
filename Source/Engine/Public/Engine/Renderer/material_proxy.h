@@ -36,9 +36,13 @@ namespace volucris
 	class MaterialProxy
 	{
 	public:
+		MaterialProxy();
+
 		MaterialProxy(Material* material);
 
 		~MaterialProxy();
+
+		void updateByMaterial(Material* material);
 
 		void setResource(MaterialResourceProxy* resource);
 
@@ -47,7 +51,7 @@ namespace volucris
 		const OGLProgramState& getState() const { return m_state; }
 
 	private:
-		MaterialResourceProxy* m_resource;
+		std::shared_ptr<MaterialResourceProxy> m_resource;
 		OGLProgramState m_state;
 		std::vector<uint8> m_parameterData;
 	};

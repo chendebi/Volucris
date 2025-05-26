@@ -5,6 +5,7 @@
 #include <Engine/Renderer/renderer.h>
 #include <Engine/Resource/resource_path.h>
 #include "editor_core.h"
+#include <Engine/Resource/resource_registry.h>
 
 using namespace volucris;
 
@@ -21,6 +22,8 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	auto renderer = std::make_shared<Renderer>();
 	renderer->addRenderPass(std::make_shared<ForwardRenderPass>());
 	app->setRenderer(renderer);
+
+	auto meta = ResourceRegistry::Instance().getResourceMeta("/Engine/M_SS");
 
 	return app;
 }

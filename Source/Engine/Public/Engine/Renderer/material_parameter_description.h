@@ -2,6 +2,7 @@
 #define __volucris_material_parameter_description_h__
 
 #include "Engine/Core/types_help.h"
+#include <Engine/Core/serializer.h>
 #include <vector>
 #include <glm/glm.hpp>
 #include <string>
@@ -47,6 +48,22 @@ namespace volucris
 		Type type = UNKNOWN;
 		std::string name = std::string();
 		size_t offset = 0;
+
+		void serialize(Serializer& serializer)
+		{
+			serializer.serialize((int)type);
+			serializer.serialize(name);
+		}
+
+		void deserialize(Serializer& serializer)
+		{
+			int typeValue;
+			if (serializer.deserialize(typeValue) &&
+				serializer.deserialize(name))
+			{
+				type = (Type)typeValue;
+			}
+		};
 	};
 }
 

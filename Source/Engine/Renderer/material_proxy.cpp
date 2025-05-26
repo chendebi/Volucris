@@ -35,10 +35,17 @@ namespace volucris
 		m_program->setUniformDescriptions(m_descriptions, m_uniformBlockDescriptions);
 	}
 
-	MaterialProxy::MaterialProxy(Material* material)
+	MaterialProxy::MaterialProxy()
 		: m_resource(nullptr)
+		, m_parameterData()
 	{
-		m_parameterData = material->getParameterData();
+
+	}
+
+	MaterialProxy::MaterialProxy(Material* material)
+		: MaterialProxy()
+	{
+		updateByMaterial(material);
 	}
 
 	MaterialProxy::~MaterialProxy()
@@ -46,12 +53,14 @@ namespace volucris
 
 	}
 
-	void MaterialProxy::setResource(MaterialResourceProxy* resource)
+	void MaterialProxy::updateByMaterial(Material* material)
 	{
-		m_resource = resource;
-		m_state.program = resource->getProgramObject();
+		m_resource = material->getResource()->getRenderProxy();
+		m_parameterData = material->getParameterData();
 
-		for (const auto& desc : resource->getUniformDescrptions())
+		m_state.program = m_resource->getProgramObject();
+
+		for (const auto& desc : m_resource->getUniformDescrptions())
 		{
 			auto uniform = std::make_shared<Uniform>(desc, m_parameterData.data());
 			m_state.uniforms.push_back(uniform);

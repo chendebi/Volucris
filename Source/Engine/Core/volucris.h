@@ -9,8 +9,8 @@ VOLUCRIS_DEFINE_LOG(Engine)
 
 namespace volucris
 {
-	constexpr std::string_view MODEL_MATRIX_UNIFORM_NAME = "v_modelMat";
-	constexpr std::string_view CAMERA_INFO_BLOCK_NAME = "v_cameraInfo";
+	static_assert(sizeof(int) == 4, "Error: 'int' is not 4 bytes on this platform!");
+	static_assert(sizeof(size_t) == 8, "Error: 'size_t' is not 8 bytes on this platform!");
 }
 
 #endif // !__volucris_volucris_h__

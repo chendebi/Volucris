@@ -74,11 +74,6 @@ namespace volucris
 					});
 			}
 
-			for (const auto& [slot, mat] : m_materials)
-			{
-				mat->deattachProxy();
-			}
-			m_resource->deattachProxy();
 			m_proxy = nullptr;
 		}
 

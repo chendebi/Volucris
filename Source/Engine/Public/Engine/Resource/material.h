@@ -5,15 +5,15 @@
 #include <memory>
 #include <vector>
 #include <map>
-#include "material_parameter.h"
-#include "Engine/Resource/render_resource.h"
+#include <Engine/Resource/resource_object.h>
+#include <Engine/Resource/material_parameter.h>
 
 namespace volucris
 {
 	class MaterialResource;
 	class MaterialProxy;
 
-	class Material : public RenderResource
+	class Material : public ResourceObject
 	{
 	public:
 		Material();
@@ -22,11 +22,7 @@ namespace volucris
 
 		void setShaderPath(const std::string& vs, const std::string& fs);
 
-		MaterialProxy* getProxy() const { return m_proxy; }
-
-		MaterialProxy* attachProxy();
-
-		void deattachProxy();
+		std::shared_ptr<MaterialProxy> getRenderProxy();
 
 		void updateParametersToRenderer();
 
@@ -38,15 +34,13 @@ namespace volucris
 
 		MaterialParameter* getParameterByType(MaterialParameterDesc::Type type);
 
-	protected:
-		void releaseRenderProxy() override;
-
-		bool serialize(rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) const override;
-
-		void deserialize(const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator) override;
-
-	private:
 		void setMaterialResource(const std::shared_ptr<MaterialResource>& resource);
+
+	protected:
+
+		bool serialize(Serializer& serializer) const override;
+
+		void deserialize(Serializer& serializer) override;
 
 	private:
 		std::shared_ptr<Material> m_parent;
@@ -55,7 +49,7 @@ namespace volucris
 		std::shared_ptr<MaterialResource> m_resource;
 		std::vector<std::unique_ptr<MaterialParameter>> m_parameters;
 		std::vector<uint8> m_parameterData;
-		MaterialProxy* m_proxy;
+		std::weak_ptr<MaterialProxy> m_proxy;
 	};
 }
 

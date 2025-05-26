@@ -12,6 +12,8 @@
 #include <xhash>
 #include <combaseapi.h>
 #include <filesystem>
+#include <Core/assert.h>
+#include <Core/serializer.h>
 
 namespace fs = std::filesystem;
 
@@ -38,6 +40,12 @@ namespace volucris
 		return id;
 	}
 
+	struct ResourceHeader
+	{
+		char magic[8];
+		int version;
+	};
+
 	ResourceRegistry::~ResourceRegistry()
 	{
 		
@@ -56,9 +64,25 @@ namespace volucris
 			fs::path canonicalDir = fs::weakly_canonical(sysPath);
 			if (canonicalFilePath.string().find(canonicalDir.string()) == 0) {
 				// 获取相对于目录A的相对路径
-				fs::path relativePath = fs::relative(canonicalFilePath, canonicalDir);
-				// 转换为/Engine/开头的路径
-				path = header + relativePath.generic_string();
+				auto relativePath = fs::relative(canonicalFilePath, canonicalDir).generic_string();
+
+				if (relativePath.compare(0, 2, "./") == 0)
+				{
+					relativePath = relativePath.substr(2);
+				}
+				else if (relativePath.compare(0, 1, ".") == 0)
+				{
+					relativePath = "";
+				}
+
+				if (!relativePath.empty())
+				{
+					path = header + "/" + relativePath;
+				}
+				else
+				{
+					path = header;
+				}
 				return true;
 			}
 		}
@@ -126,73 +150,75 @@ namespace volucris
 	{
 		ResourcePath path = ResourcePath(resPath);
 		auto sysPath = path.getSystemPath();
-		rapidjson::Document doc;
-		FILE* fp = fopen(sysPath.c_str(), "r");
-		if (!fp)
+
+		std::ifstream fin = std::ifstream(sysPath, std::ios::binary);
+		if (!fin.is_open())
 		{
-			V_LOG_WARN(Engine, "load asset {} failed", resPath);
+			V_LOG_WARN(Engine, "load resource from {} failed.", resPath);
 			return nullptr;
 		}
-		fseek(fp, 0, SEEK_END);
-		size_t size = _ftelli64(fp);
-		fseek(fp, 0, SEEK_SET);
-		std::vector<uint8> buffer;
-		buffer.resize(size + 4);
-		rapidjson::FileReadStream is(fp, (char*)buffer.data(), size);
-		doc.ParseStream(is);
-		fclose(fp);
+
+		ResourceHeader header;
+		fin.read((char*)&header, sizeof(header));
+		if (fin.gcount() < 4)
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
+			return nullptr;
+		}
+
+		if (std::string(header.magic, 8) != "volucris")
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed, file not a asset.", resPath);
+			return nullptr;
+		}
+
+		ResourceMeta meta = readResourceMeta(fin);
+
+		if (!meta.isValid())
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
+			return nullptr;
+		}
+
+		// 读取资源内容
+		uint32 contentSize = 0;
+		fin.read((char*)&contentSize, sizeof(uint32));
+		if (fin.gcount() < sizeof(uint32))
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
+			return nullptr;
+		}
+
+		std::vector<uint8> contentData(contentSize);
+		fin.read((char*)contentData.data(), contentSize);
+		if (fin.gcount() < contentSize)
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
+			return nullptr;
+		}
+
+		Serializer serializer;
+		serializer.setData(std::move(contentData));
 		
-		std::vector<std::shared_ptr<ResourceObject>> dependObjects;
-
-		ResourceMeta meta;
-		if (!getJsonValueString(doc, "guid", meta.guid))
-		{
-			V_LOG_WARN(Engine, "parse asset {} failed", resPath);
-			return nullptr;
-		}
-		int type = 0;
-		if (!getJsonValueInt(doc, "type", type))
-		{
-			V_LOG_WARN(Engine, "parse asset {} failed", resPath);
-			return nullptr;
-		}
-		if (type < 0 || type > 2)
-		{
-			V_LOG_WARN(Engine, "parse asset {} failed", resPath);
-			return nullptr;
-		}
-
-		meta.type = (ResourceType)type;
-		std::vector<std::string> depends;
-		if (!getJsonValueStringList(doc, "dependencies", depends))
-		{
-			V_LOG_WARN(Engine, "parse asset {} failed", resPath);
-			return nullptr;
-		}
-
-		for (const auto guid : depends)
-		{
-			if (auto depend = loadResourceByGUID(GUID(guid)))
-			{
-				dependObjects.push_back(depend);
-			}
-			else
-			{
-				V_LOG_WARN(Engine, "load dependence {} failed.", guid);
-			}
-		}
-
-		rapidjson::Value content;
-		if (!getJsonValueObject(doc, doc.GetAllocator(), "content", content))
-		{
-			V_LOG_WARN(Engine, "parse asset {} failed", resPath);
-			return nullptr;
-		}
-
-		return loadResource(meta, content, doc.GetAllocator());
+		return loadResource(meta, serializer);
 	}
 
-	bool ResourceRegistry::registry(const const std::shared_ptr<ResourceObject>& resource)
+	ResourceMeta ResourceRegistry::getResourceMeta(const std::string& resPath)
+	{
+		ResourcePath path = ResourcePath(resPath);
+		auto sysPath = path.getSystemPath();
+
+		std::ifstream fin = std::ifstream(sysPath, std::ios::binary);
+		if (!fin.is_open())
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed.", resPath);
+			return {};
+		}
+
+		return readResourceMeta(fin);
+	}
+
+	bool ResourceRegistry::registry(const const std::shared_ptr<ResourceObject>& resource, const std::string& path)
 	{
 		if (m_assets.find(GUID(resource->m_metaData.guid)) != m_assets.end())
 		{
@@ -202,6 +228,7 @@ namespace volucris
 		ResourceMeta& meta = resource->m_metaData;
 		auto id = GUID::generate();
 		meta.guid = id.uuid;
+		meta.path = path;
 		if (dynamic_cast<Material*>(resource.get()))
 		{
 			meta.type = ResourceType::MATERIAL;
@@ -218,41 +245,36 @@ namespace volucris
 
 	void ResourceRegistry::save(const std::shared_ptr<ResourceObject>& resource)
 	{
-		if (!registry(resource))
+		if (!resource->m_metaData.isValid())
 		{
 			return;
 		}
-		rapidjson::Document doc;
-		doc.SetObject(); // 设置为对象类型  
-
-		// 获取分配器（必须用于添加成员）  
-		auto& allocator = doc.GetAllocator();
-
-		doc.AddMember(rapidjson::StringRef("guid"), rapidjson::StringRef(resource->m_metaData.guid.c_str()), allocator);
-		doc.AddMember(rapidjson::StringRef("type"), (int)resource->m_metaData.type, allocator);
-		doc.AddMember(rapidjson::StringRef("path"), rapidjson::StringRef(resource->m_metaData.path.c_str()), allocator);
-		doc.AddMember(rapidjson::StringRef("resource"), rapidjson::StringRef(resource->m_metaData.sourcePath.c_str()), allocator);
 		
-		rapidjson::Value content(rapidjson::kObjectType);
-		resource->serialize(content, allocator);
-		doc.AddMember(rapidjson::StringRef("content"), content, allocator);
-
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		doc.Accept(writer);
-
-		std::ofstream ofs(resource->m_path.getSystemPath());
-		if (ofs.is_open()) {
-			ofs << buffer.GetString();
-			ofs.close();
-			V_LOG_INFO(Engine, "resource save success");
+		Serializer serializer;
+		ResourceHeader header = { {'v','o','l','u','c','r', 'i', 's'}, 1};
+		std::ofstream fout = std::ofstream(resource->m_path.getSystemPath(), std::ios::binary | std::ios::trunc);
+		fout.write((char*)&header, sizeof(header));
+		if (fout.fail())
+		{
+			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
+			return;
 		}
-		else {
-			V_LOG_WARN(Engine, "resource save failed");
+
+		serializer.serialize(resource->m_metaData);
+		uint32 size = serializer.getData().size();
+		fout.write((char*)&size, sizeof(uint32));
+
+		resource->serialize(serializer);
+		fout.write((char*)serializer.getData().data(), serializer.getData().size());
+		if (fout.fail())
+		{
+			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
+			return;
 		}
+		fout.close();
 	}
 
-	std::shared_ptr<ResourceObject> ResourceRegistry::loadResource(const ResourceMeta& meta, const rapidjson::Value& serializer, rapidjson::Document::AllocatorType& allocator)
+	std::shared_ptr<ResourceObject> ResourceRegistry::loadResource(const ResourceMeta& meta, Serializer& serializer)
 	{
 		std::shared_ptr<ResourceObject> object;
 		switch (meta.type)
@@ -267,10 +289,49 @@ namespace volucris
 		}
 		if (object)
 		{
-			object->deserialize(serializer, allocator);
+			object->m_metaData = meta;
+			object->deserialize(serializer);
 			m_caches.insert({ meta.guid, object });
 		}
 		return object;
+	}
+
+	ResourceMeta ResourceRegistry::readResourceMeta(std::ifstream& fin)
+	{
+		fin.seekg(0, std::ios::beg);
+		ResourceHeader header;
+		fin.read((char*)&header, sizeof(header));
+		if (fin.gcount() < 4)
+		{
+			return {};
+		}
+
+		if (std::string(header.magic, 8) != "volucris")
+		{
+			return {};
+		}
+
+		uint32 metaSize;
+		fin.read((char*)&metaSize, sizeof(uint32));
+		if (fin.gcount() < sizeof(uint32))
+		{
+			return {};
+		}
+
+		std::vector<uint8> metaData;
+		metaData.resize(metaSize);
+		fin.read((char*)metaData.data(), metaSize);
+		if (fin.gcount() < metaSize)
+		{
+			return {};
+		}
+
+		Serializer serializer;
+		serializer.setData(std::move(metaData));
+
+		ResourceMeta meta;
+		serializer.deserialize(meta);
+		return meta;
 	}
 
 	ResourceRegistry::ResourceRegistry()
