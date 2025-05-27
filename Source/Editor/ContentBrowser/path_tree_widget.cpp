@@ -44,6 +44,16 @@ namespace volucris
 		
 	}
 
+	void DirectoryItem::refresh()
+	{
+		m_subItems.clear();
+		for (const auto& entry : fs::directory_iterator(m_directoryPath)) {
+			if (entry.is_directory()) {
+				m_subItems.push_back(DirectoryItem(m_manager, entry.path().string()));
+			}
+		}
+	}
+
 	std::string DirectoryItem::getResourceDirectory() const
 	{
 		std::string path;
@@ -115,6 +125,14 @@ namespace volucris
 		if (ImGui::Button("add"))
 		{
 			m_addResourceDlg->setOpened();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("refresh"))
+		{
+			if (m_selectedItem)
+				m_selectedItem->refresh();
 		}
 
 		m_addResourceDlg->build();
