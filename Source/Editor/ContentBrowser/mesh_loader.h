@@ -2,6 +2,7 @@
 #define __volucris_mesh_loader_h__
 
 #include <memory>
+#include <vector>
 #include <string>
 
 namespace volucris
@@ -13,7 +14,7 @@ namespace volucris
 	public:
 		MeshLoader() = default;
 
-		std::shared_ptr<StaticMesh> load(const std::string& filePath);
+		std::vector<std::shared_ptr<StaticMesh>> load(const std::string& filePath);
 	};
 }
 

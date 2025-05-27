@@ -9,6 +9,7 @@
 #include <iostream>
 #include "material_loader.h"
 #include <Engine/Application/file_dialog.h>
+#include "mesh_loader.h"
 
 namespace volucris
 {
@@ -93,6 +94,10 @@ namespace volucris
 		{
 			return addMaterialResource();
 		}
+		else if (m_currentIdx == 1)
+		{
+			return addMeshResource();
+		}
 		return false;
 	}
 
@@ -123,6 +128,18 @@ namespace volucris
 			return true;
 		}
 		return false;
+	}
+
+	bool AddResourceDialog::addMeshResource()
+	{
+		MeshLoader loader;
+		auto mesh = loader.load(m_filePath0.data());
+		if (mesh.empty())
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	void AddResourceDialog::buildMaterialInput()
@@ -172,15 +189,6 @@ namespace volucris
 				"All Files (*.*)\0*.*\0";
 			const auto filepath = FileDialog::GetOpenFilePath(filter, "select mesh file", m_filePath0.data());
 			memcpy(m_filePath0.data(), filepath.c_str(), filepath.size() + 1);
-		}
-	}
-
-	void AddResourceDialog::buildPathSelector(const char* filter, const char* title, std::vector<char>& path)
-	{
-		if (ImGui::Button("open"))
-		{
-			const auto filepath = FileDialog::GetOpenFilePath(filter, title, "");
-			memcpy(path.data(), filepath.c_str(), filepath.size() + 1);
 		}
 	}
 }

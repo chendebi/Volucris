@@ -18,6 +18,7 @@ std::string volucris::FileDialog::GetOpenFilePath(const char* filter, const char
     ofn.nMaxFile = sizeof(szFile);
     ofn.lpstrFilter = filter;   // 文件类型过滤器
     ofn.nFilterIndex = 1;       // 默认过滤器索引
+    ofn.lpstrInitialDir = initialDirectory;       // 默认过滤器索引
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
     // 打开文件对话框

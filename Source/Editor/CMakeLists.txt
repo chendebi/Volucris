@@ -36,6 +36,15 @@ target_include_directories(${TARGET} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+function (volucris_link_assimp target_name)
+    target_include_directories(${target_name} PRIVATE ${VOLUCRIS_ASSIMP_DIRECTORY}/include)
+    file(GLOB ASSIMP_LIBS ${VOLUCRIS_ASSIMP_DIRECTORY}/lib/*.lib)
+    target_link_libraries(${target_name} PRIVATE ${ASSIMP_LIBS})
+endfunction()
+
+volucris_link_assimp(${TARGET})
 target_link_libraries(${TARGET} PUBLIC Engine)
-target_link_libraries(${TARGET} PRIVATE assimp)
 set_target_properties(${TARGET} PROPERTIES FOLDER "")
+
+file(GLOB ASSIMP_DLLS ${VOLUCRIS_ASSIMP_DIRECTORY}/bin/*.dll)
+install(FILES ${ASSIMP_DLLS} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
