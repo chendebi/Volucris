@@ -31,7 +31,6 @@ namespace volucris
 	protected:
 		void buildMaterialInput();
 		void buildMeshInput();
-		void buildPathSelector(const char* filter, const char* title, std::vector<char>& path);
 
 	private:
 		bool m_opened;

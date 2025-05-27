@@ -31,12 +31,10 @@ namespace volucris
 		if ((int)size.x != rect.w || (int)size.y != rect.h)
 		{
 			m_viewport->setViewport({ 0, 0, (int)size.x, (int)size.y });
-			V_LOG_DEBUG(Editor, "vpsize； {}， {}", size.x, size.y);
 		}
 
 		ImTextureID texID = (ImTextureID)(intptr_t)m_targetID;
 
-		// 绘制纹理（假设纹理尺寸为 512x512）
 		ImGui::Image(texID, size);
 
 		ImGui::End();

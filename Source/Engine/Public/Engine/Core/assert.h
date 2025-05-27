@@ -15,7 +15,7 @@
 #define checkq(exp, category, msg, ...) checkf(exp, category, msg, ##__VA_ARGS__);
 #else
 #define checkf(exp, category, msg, ...) if (!(exp)) { V_LOG_ERROR(category, msg, ##__VA_ARGS__);}
-#define check(exp) checkf(exp, "check expression [ {} ] failed.", #exp);
+#define check(exp)
 #define checkq(exp, category, msg, ...) if (!(exp)) { V_LOG_ERROR(category, msg, ##__VA_ARGS__); std::exit(-1); }
 #endif
 
