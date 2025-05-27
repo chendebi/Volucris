@@ -68,7 +68,7 @@ namespace volucris
 			return false;
 		}
 
-		// ¸üĞÂÒÀÀµµÄ¶ÔÏó
+		// æ›´æ–°ä¾èµ–çš„å¯¹è±¡
 		{
 			bool status = updateAttachments(context);;
 

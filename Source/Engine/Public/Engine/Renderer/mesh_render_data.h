@@ -26,7 +26,9 @@ namespace volucris
 	enum BlockType
 	{
 		VERTEX,
-		NORMAL
+		NORMAL,
+		UV0,
+		UV1
 	};
 
 	struct BlockDescription

@@ -8,13 +8,18 @@
 namespace volucris
 {
 	class StaticMesh;
+	class ResourceObject;
 
 	class MeshLoader
 	{
 	public:
-		MeshLoader() = default;
+		MeshLoader();
 
 		std::vector<std::shared_ptr<StaticMesh>> load(const std::string& filePath);
+
+	private:
+		std::vector<std::shared_ptr<ResourceObject>> m_resources;
+		std::vector<std::shared_ptr<StaticMesh>> m_loadedMeshes;
 	};
 }
 

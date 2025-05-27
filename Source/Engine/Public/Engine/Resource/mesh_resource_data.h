@@ -56,6 +56,12 @@ namespace volucris
 
 		void setVertices(void* vertices, size_t size);
 
+		void setVertices(std::vector<glm::vec3> vertices);
+
+		void setNormals(std::vector<glm::vec3> normals);
+
+		void setUV(int idx, std::vector<glm::vec3> uv);
+
 		void addSection(const std::vector<uint32>& indices, const std::string& slot, DrawMode mode = DrawMode::TRIANGLES);
 
 		void addSection(const Section& section);
@@ -74,6 +80,8 @@ namespace volucris
 
 	private:
 		std::vector<glm::vec3> m_vertices;
+		std::vector<glm::vec3> m_normals;
+		std::vector<std::vector<glm::vec3>> m_uvs;
 		std::vector<uint32> m_indices;
 		std::vector<Section> m_sections;
 	};

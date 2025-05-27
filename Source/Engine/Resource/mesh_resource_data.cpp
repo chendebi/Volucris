@@ -7,6 +7,8 @@ namespace volucris
 {
 	MeshResourceData::MeshResourceData()
 		: m_vertices()
+		, m_normals()
+		, m_uvs({ {}, {} })
 		, m_sections()
 	{
 	}
@@ -16,6 +18,24 @@ namespace volucris
 		auto count = size / sizeof(glm::vec3);
 		m_vertices.resize(count);
 		memcpy(m_vertices.data(), vertices, size);
+	}
+
+	void MeshResourceData::setVertices(std::vector<glm::vec3> vertices)
+	{
+		m_vertices = std::move(vertices);
+	}
+
+	void MeshResourceData::setNormals(std::vector<glm::vec3> normals)
+	{
+		m_normals = std::move(normals);
+	}
+
+	void MeshResourceData::setUV(int idx, std::vector<glm::vec3> uv)
+	{
+		if (idx == 1 || idx == 2)
+		{
+			m_uvs[idx] = std::move(uv);
+		}
 	}
 
 	void MeshResourceData::addSection(const std::vector<uint32>& indices, const std::string& slot, DrawMode mode)
@@ -53,11 +73,42 @@ namespace volucris
 	{
 		auto renderData = std::make_shared<MeshRenderData>();
 		auto vertexBufferSize = m_vertices.size() * sizeof(glm::vec3);
+		auto normalBufferSize = m_normals.size() * sizeof(glm::vec3);
+		auto uv0BufferSize = m_uvs[0].size() * sizeof(glm::vec3);
+		auto uv1BufferSize = m_uvs[1].size() * sizeof(glm::vec3);
+
+		size_t offset = 0;
 		std::vector<uint8> vertexBufferData;
-		vertexBufferData.resize(vertexBufferSize);
+		vertexBufferData.resize(vertexBufferSize + normalBufferSize + uv0BufferSize + uv1BufferSize);
 		memcpy(vertexBufferData.data(), m_vertices.data(), vertexBufferSize);
-		BlockDescription vertexBlock = { BlockType::VERTEX, 0};
-		renderData->blocks.push_back(vertexBlock);
+		{
+			BlockDescription vertexBlock = { BlockType::VERTEX, offset };
+			renderData->blocks.push_back(vertexBlock);
+			offset += vertexBufferSize;
+		}
+
+		memcpy(vertexBufferData.data() + offset, m_normals.data(), normalBufferSize);
+		{
+			BlockDescription block = { BlockType::NORMAL, offset };
+			renderData->blocks.push_back(block);
+			offset += normalBufferSize;
+		}
+
+		if (uv0BufferSize > 0)
+		{
+			memcpy(vertexBufferData.data() + offset, m_uvs[0].data(), uv0BufferSize);
+			BlockDescription block = { BlockType::UV0, offset };
+			renderData->blocks.push_back(block);
+			offset += uv0BufferSize;
+		}
+
+		if (uv1BufferSize > 0)
+		{
+			memcpy(vertexBufferData.data() + offset, m_uvs[1].data(), uv1BufferSize);
+			BlockDescription block = { BlockType::UV1, offset };
+			renderData->blocks.push_back(block);
+			offset += uv1BufferSize;
+		}
 
 		std::vector<uint8> indexBufferData;
 		indexBufferData.resize(sizeof(uint32) * m_indices.size());
