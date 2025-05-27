@@ -26,6 +26,8 @@ namespace volucris
 			m_selected = selected;
 		}
 
+		void refresh();
+
 		std::string getResourceDirectory() const;
 
 	protected:
