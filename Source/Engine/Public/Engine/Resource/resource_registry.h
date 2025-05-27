@@ -81,6 +81,10 @@ namespace volucris
 
 		void save(const std::shared_ptr<ResourceObject>& resource);
 
+		bool makesureDependenceValid(const std::shared_ptr<ResourceObject>& resource);
+
+		void serializeDependenceTo(Serializer& serializer, const std::shared_ptr<ResourceObject>& resource);
+
 	protected:
 		std::shared_ptr<ResourceObject> loadResource(const ResourceMeta& meta, Serializer& serializer);
 

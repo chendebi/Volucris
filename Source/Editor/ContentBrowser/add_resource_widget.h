@@ -8,20 +8,6 @@ namespace volucris
 {
 	class PathTreeWidget;
 
-	struct MatreialInfo
-	{
-		std::vector<char> vsPath;
-		std::vector<char> fsPath;
-
-		MatreialInfo()
-			: vsPath()
-			, fsPath()
-		{
-			vsPath.resize(128);
-			fsPath.resize(128);
-		}
-	};
-
 	class AddResourceDialog : public Widget
 	{
 	public:
@@ -33,21 +19,27 @@ namespace volucris
 		{
 			m_opened = true;
 			m_showHint = false;
+			m_filePath0[0] = '\0';
+			m_filePath1[0] = '\0';
 		}
 
 	protected:
 		bool addResource();
 		bool addMaterialResource();
+		bool addMeshResource();
 
 	protected:
 		void buildMaterialInput();
+		void buildMeshInput();
+		void buildPathSelector(const char* filter, const char* title, std::vector<char>& path);
 
 	private:
 		bool m_opened;
 		bool m_showHint;
 		int m_currentIdx;
 		std::vector<char> m_buffer;
-		MatreialInfo m_materialInfo;
+		std::vector<char> m_filePath0;
+		std::vector<char> m_filePath1;
 		PathTreeWidget* m_pathWidget;
 	};
 }

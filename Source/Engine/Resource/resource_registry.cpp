@@ -249,8 +249,14 @@ namespace volucris
 		{
 			return;
 		}
-		
-		ResourceHeader header = { {'v','o','l','u','c','r', 'i', 's'}, 1};
+
+		Serializer resourceSerializer;
+		if (!resource->serialize(resourceSerializer))
+		{
+			return;
+		}
+
+		ResourceHeader header = { {'v','o','l','u','c','r', 'i', 's'}, 1 };
 		std::ofstream fout = std::ofstream(resource->m_path.getSystemPath(), std::ios::binary | std::ios::trunc);
 		fout.write((char*)&header, sizeof(header));
 		if (fout.fail())
@@ -258,21 +264,19 @@ namespace volucris
 			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
 			return;
 		}
-		{
-			Serializer serializer;
-			serializer.serialize(resource->m_metaData);
-			uint32 size = serializer.getData().size();
-			fout.write((char*)&size, sizeof(uint32));
-			fout.write((char*)serializer.getData().data(), serializer.getData().size());
-		}
 
 		{
-			Serializer serializer;
-			resource->serialize(serializer);
-			uint32 size = serializer.getData().size();
+			Serializer metaDataSerializer;
+			metaDataSerializer.serialize(resource->m_metaData);
+			uint32 size = metaDataSerializer.getData().size();
 			fout.write((char*)&size, sizeof(uint32));
-			fout.write((char*)serializer.getData().data(), serializer.getData().size());
+			fout.write((char*)metaDataSerializer.getData().data(), metaDataSerializer.getData().size());
 		}
+
+		uint32 size = resourceSerializer.getData().size();
+		fout.write((char*)&size, sizeof(uint32));
+		fout.write((char*)resourceSerializer.getData().data(), resourceSerializer.getData().size());
+		
 
 		if (fout.fail())
 		{
@@ -280,6 +284,35 @@ namespace volucris
 			return;
 		}
 		fout.close();
+	}
+
+	bool ResourceRegistry::makesureDependenceValid(const std::shared_ptr<ResourceObject>& resource)
+	{
+		if (!resource)
+		{
+			return false;
+		}
+
+		if (!resource->getMetaData().isValid())
+		{
+			// 弹窗?
+			check(false);
+			return false;
+		}
+
+		return true;
+	}
+
+	void ResourceRegistry::serializeDependenceTo(Serializer& serializer, const std::shared_ptr<ResourceObject>& resource)
+	{
+		if (!resource || !resource->getMetaData().isValid())
+		{
+			serializer.serialize("");
+		}
+		else
+		{
+			serializer.serialize(resource->getMetaData().guid);
+		}
 	}
 
 	std::shared_ptr<ResourceObject> ResourceRegistry::loadResource(const ResourceMeta& meta, Serializer& serializer)

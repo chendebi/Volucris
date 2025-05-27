@@ -1,6 +1,7 @@
 #include "Resource/mesh_resource_data.h"
 #include "Resource/material.h"
 #include "Core/assert.h"
+#include <Core/volucris.h>
 
 namespace volucris
 {
@@ -65,5 +66,31 @@ namespace volucris
 		renderData->renderData = std::move(vertexBufferData);
 		renderData->sectionData = std::move(indexBufferData);
 		return renderData;
+	}
+
+	void MeshResourceData::serialize(Serializer& serializer)
+	{
+		serializer.serialize(m_vertices);
+		serializer.serialize(m_indices);
+		serializer.serialize(m_sections);
+	}
+
+	void MeshResourceData::deserialize(Serializer& serializer)
+	{
+		std::vector<glm::vec3> vertices;
+		std::vector<uint32> indices;
+		std::vector<Section> sections;
+
+		if (serializer.deserialize(vertices) && serializer.deserialize(indices) &&
+			serializer.deserialize(sections))
+		{
+			m_vertices = std::move(vertices);
+			m_indices = std::move(indices);
+			m_sections = std::move(sections);
+		}
+		else
+		{
+			V_LOG_WARN(Engine, "deserialize MeshResourceData failed");
+		}
 	}
 }

@@ -24,7 +24,13 @@ namespace volucris
 
 		std::shared_ptr<MeshResource> getResource() const;
 
+	protected:
+		bool serialize(Serializer& serializer) const override;
+
+		void deserialize(Serializer& serializer) override;
+
 	private:
+		std::shared_ptr<StaticMesh> m_parent = nullptr;
 		std::shared_ptr<MeshResource> m_resource;
 		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 	};

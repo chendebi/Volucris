@@ -37,4 +37,5 @@ target_include_directories(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Engine)
+target_link_libraries(${TARGET} PRIVATE assimp)
 set_target_properties(${TARGET} PROPERTIES FOLDER "")

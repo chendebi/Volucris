@@ -3,6 +3,7 @@
 #include "Application/application.h"
 #include "Renderer/renderer.h"
 #include "Core/volucris.h"
+#include <Resource/mesh_resource_data.h>
 
 namespace volucris
 {
@@ -23,5 +24,22 @@ namespace volucris
 			V_LOG_DEBUG(Engine, "create mesh resource proxy: {}", getResourceFullPath());
 		}
 		return proxy;
+	}
+
+	bool MeshResource::serialize(Serializer& serializer) const
+	{
+		if (!m_data)
+		{
+			return false;
+		}
+		m_data->serialize(serializer);
+		return true;
+	}
+
+	void MeshResource::deserialize(Serializer& serializer)
+	{
+		auto data = std::make_shared<MeshResourceData>();
+		data->deserialize(serializer);
+		m_data = data;
 	}
 }

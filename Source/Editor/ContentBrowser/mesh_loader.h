@@ -1,17 +1,19 @@
 #ifndef __volucris_mesh_loader_h__
 #define __volucris_mesh_loader_h__
 
-#include "Engine/Resource/resource_path.h"
+#include <memory>
+#include <string>
 
 namespace volucris
 {
+	class StaticMesh;
+
 	class MeshLoader
 	{
 	public:
-		MeshLoader();
+		MeshLoader() = default;
 
-	private:
-
+		std::shared_ptr<StaticMesh> load(const std::string& filePath);
 	};
 }
 

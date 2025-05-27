@@ -6,6 +6,8 @@
 #include <Renderer/renderer.h>
 #include "Resource/mesh_resource_data.h"
 #include "Resource/mesh_resource.h"
+#include <Resource/material.h>
+#include <Resource/resource_registry.h>
 
 namespace volucris
 {
@@ -36,7 +38,6 @@ namespace volucris
 			V_LOG_WARN(Engine, "static mesh set material failed. not found slot: {}", slot);
 			return false;
 		}
-		// todo: 如果已经在渲染，这个需要对材质进行deattach
 		it->second = mat;
 		return true;
 	}
@@ -44,5 +45,67 @@ namespace volucris
 	std::shared_ptr<MeshResource> StaticMesh::getResource() const
 	{
 		return m_resource;
+	}
+
+	bool StaticMesh::serialize(Serializer& serializer) const
+	{
+		if (m_parent)
+		{
+			serializer << 1 << m_parent->getMetaData().guid;
+		}
+		else
+		{
+			serializer << 2;
+			if (!m_resource->serialize(serializer))
+			{
+				return false;
+			}
+		}
+
+		uint32 matCount = m_materials.size();
+		serializer.serialize(matCount);
+		for (const auto& [slot, mat] : m_materials)
+		{
+			ResourceRegistry::Instance().makesureDependenceValid(mat);
+			serializer.serialize(slot);
+			ResourceRegistry::Instance().serializeDependenceTo(serializer, mat);
+		}
+
+		return true;
+	}
+
+	void StaticMesh::deserialize(Serializer& serializer)
+	{
+		int flag = 0;
+		serializer.deserialize(flag);
+		if (flag == 1)
+		{
+			std::string guid;
+			serializer.deserialize(guid);
+			m_parent = ResourceRegistry::Instance().loadResource<StaticMesh>(GUID(guid));
+			setMeshResource(m_parent->getResource());
+		}
+		else if (flag == 2)
+		{
+			auto resource = std::make_shared<MeshResource>();
+			resource->deserialize(serializer);
+			setMeshResource(resource);
+		}
+		else
+		{
+			V_LOG_WARN(Engine, "deserialize static mesh failed.");
+			return;
+		}
+
+		uint32 matCount = 0;
+		serializer.deserialize(matCount);
+		for (auto idx = 0; idx < matCount; ++idx)
+		{
+			std::string slot, guid;
+			serializer.deserialize(slot);
+			serializer.deserialize(guid);
+			auto material = ResourceRegistry::Instance().loadResource<Material>(GUID(guid));
+			setMaterial(slot, material);
+		}
 	}
 }

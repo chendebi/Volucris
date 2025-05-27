@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <Engine/Core/types_help.h>
 #include "Engine/Renderer/mesh_render_data.h"
+#include <Engine/Core/serializer.h>
 
 namespace volucris
 {
@@ -30,6 +31,22 @@ namespace volucris
 		{
 
 		}
+
+		void serialize(Serializer& serializer)
+		{
+			serializer.serialize(mode);
+			serializer.serialize(count);
+			serializer.serialize(offset);
+			serializer.serialize(slot);
+		}
+
+		void deserialize(Serializer& serializer)
+		{
+			serializer.deserialize(mode);
+			serializer.deserialize(count);
+			serializer.deserialize(offset);
+			serializer.deserialize(slot);
+		}
 	};
 
 	class MeshResourceData
@@ -50,6 +67,10 @@ namespace volucris
 		std::shared_ptr<MeshRenderData> build();
 
 		const std::vector<Section>& getSections() const { return m_sections; }
+
+		void serialize(Serializer& serializer);
+
+		void deserialize(Serializer& serializer);
 
 	private:
 		std::vector<glm::vec3> m_vertices;

@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(VOLUCRIS_ENGINE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
+
 add_subdirectory(Source/Engine)
 add_subdirectory(Source/ThirdParty)
 

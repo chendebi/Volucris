@@ -113,29 +113,6 @@ namespace volucris
         return true;
     }
 
-#define DEFINE_POD_SERIALIZE(type) \
-    template <> \
-    inline void Serializer::serialize<type>(const type& value) \
-    { \
-        serializePOD<type>(value); \
-    }\
-\
-    template <> \
-    inline bool Serializer::deserialize<type>(type& value) \
-    { \
-        return deserializePOD<type>(value); \
-    }
-
-    DEFINE_POD_SERIALIZE(int)
-    DEFINE_POD_SERIALIZE(float)
-    DEFINE_POD_SERIALIZE(double)
-    DEFINE_POD_SERIALIZE(char)
-    DEFINE_POD_SERIALIZE(uint8)
-    DEFINE_POD_SERIALIZE(uint32);
-
-
-#undef DEFINE_POD_SERIALIZE(type)
-
     template <>
     inline void Serializer::serialize<std::string>(const std::string& value)
     {
