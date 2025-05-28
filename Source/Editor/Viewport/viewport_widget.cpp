@@ -32,13 +32,6 @@ namespace volucris
 			actor->setRootComponent(camera);
 			m_scene->addActor(actor);
 
-			auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/cube");
-			auto comp = std::make_shared<PrimitiveComponent>();
-			comp->setMeshResource(mesh->getResource());
-			comp->setMaterials(mesh->getMaterials());
-			auto meshActor = std::make_shared<Actor>();
-			meshActor->setRootComponent(comp);
-			m_scene->addActor(meshActor);
 			gApp->addScene(m_scene);
 		}
 

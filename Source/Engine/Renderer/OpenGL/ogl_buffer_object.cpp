@@ -81,6 +81,7 @@ namespace volucris
 		{
 			m_dirtyBlock.size = dirtySize;
 		}
+		m_valid = false;
 	}
 
 	bool OGLBufferObject::create()
