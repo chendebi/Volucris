@@ -29,6 +29,7 @@ namespace volucris
 		: m_config(config)
 		, m_initialized(0)
 		, m_running(0)
+		, m_delta(0)
 		, m_window(nullptr)
 		, m_renderer(nullptr)
 		, m_mainWidget(nullptr)
@@ -180,7 +181,6 @@ namespace volucris
 
 		std::function<void()> command;
 		auto time = glfwGetTime();
-		double delta = 0.0;
 		while (m_running)
 		{
 			while (m_queue.pop(command))
@@ -193,11 +193,11 @@ namespace volucris
 			Widget::draw(m_mainWidget.get());
 
 			// TODO: tick
-			tick(delta);
+			tick(m_delta);
 
 			for (const auto& scene : m_scenes)
 			{
-				scene->tick(delta);
+				scene->tick(m_delta);
 			}
 
 			for (const auto& scene: m_scenes)
@@ -208,7 +208,7 @@ namespace volucris
 			m_renderer->render();
 
 			auto now = glfwGetTime();
-			delta = now - time;
+			m_delta = now - time;
 			time = now;
 		}
 
@@ -230,5 +230,13 @@ namespace volucris
 	void Application::pushCommand(const std::function<void()>& command)
 	{
 		m_queue.push(command);
+	}
+
+	StatInfo Application::getStatInfo() const
+	{
+		StatInfo info;
+		info.frameTime = m_delta;
+		info.frameRate = 1.0 / m_delta;
+		return info;
 	}
 }

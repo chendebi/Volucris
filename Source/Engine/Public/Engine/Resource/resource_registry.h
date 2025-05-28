@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include "Engine/Resource/resource_object.h"
 #include "meta_data.h"
 #include <xhash>
@@ -25,6 +25,11 @@ namespace volucris
 		bool operator==(const GUID& other) const
 		{
 			return other.uuid == uuid;
+		}
+
+		bool operator<(const GUID& other) const
+		{
+			return uuid < other.uuid;
 		}
 
 		static GUID generate();
@@ -57,6 +62,10 @@ namespace volucris
 			return inst;
 		}
 
+		void scanResources(const std::string& path);
+
+		void scanResourcesBySystemPath(const std::string& path);
+
 		void addResourceSearchPath(const std::string& systemPath, const std::string& header);
 
 		bool getResourcePathBySystemPath(const std::string& systemPath, std::string& path);
@@ -77,6 +86,12 @@ namespace volucris
 			return std::dynamic_pointer_cast<T>(loadResourceByGUID(guid));
 		}
 
+		template<typename T>
+		std::shared_ptr<T> loadResource(const std::string& path)
+		{
+			return std::dynamic_pointer_cast<T>(loadResourceByPath(path));
+		}
+
 		bool registry(const std::shared_ptr<ResourceObject>& resource, const std::string& path);
 
 		void save(const std::shared_ptr<ResourceObject>& resource);
@@ -88,14 +103,16 @@ namespace volucris
 	protected:
 		std::shared_ptr<ResourceObject> loadResource(const ResourceMeta& meta, Serializer& serializer);
 
+		ResourceMeta getResourceMetaBySystemPath(const std::string& path);
+
 		ResourceMeta readResourceMeta(std::ifstream& fin);
 
 	private:
-		std::unordered_map <std::string, std::weak_ptr<ResourceObject>> m_caches;
-		std::unordered_map<GUID, std::string> m_assets;
-		std::unordered_map<std::string, GUID> m_assetsSortByPath;
+		std::map <std::string, std::weak_ptr<ResourceObject>> m_caches;
+		std::map<GUID, std::string> m_assets;
+		std::map<std::string, GUID> m_assetsSortByPath;
 
-		std::unordered_map<std::string, std::string> m_searchPaths;
+		std::map<std::string, std::string> m_searchPaths;
 
 	protected:
 		ResourceRegistry();

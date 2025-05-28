@@ -90,6 +90,7 @@ namespace volucris
 			serializer << 2 << m_vsFilePath << m_fsFilePath;
 			m_resource->serialize(serializer);
 		}
+		serializer.serialize(m_parameterData.data(), m_parameterData.size());
 		return true;
 	}
 
@@ -112,6 +113,9 @@ namespace volucris
 
 			if (auto parent = ResourceRegistry::Instance().loadResource<Material>(GUID(guid)))
 			{
+				m_parent = parent;
+				size_t paramDataSize;
+				serializer.deserialize(m_parameterData, paramDataSize);
 				setMaterialResource(parent->getResource());
 			}
 		}
@@ -122,6 +126,8 @@ namespace volucris
 			{
 				auto resource = std::make_shared<MaterialResource>();
 				resource->deserialize(serializer);
+				size_t paramDataSize;
+				serializer.deserialize(m_parameterData, paramDataSize);
 				setMaterialResource(resource);
 			}
 			else
@@ -130,6 +136,7 @@ namespace volucris
 				return;
 			}
 		}
+		
 	}
 
 	void Material::setMaterialResource(const std::shared_ptr<MaterialResource>& resource)

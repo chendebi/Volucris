@@ -52,6 +52,39 @@ namespace volucris
 		
 	}
 
+	void ResourceRegistry::scanResources(const std::string& path)
+	{
+		std::string syspath;
+		if (!getSystemPathByResourcePath(path, syspath))
+		{
+			V_LOG_WARN(Engine, "scan resource from {} failed.", path);
+			return;
+		}
+
+		scanResourcesBySystemPath(syspath);
+	}
+
+	void ResourceRegistry::scanResourcesBySystemPath(const std::string& path)
+	{
+		for (const auto& entry : fs::directory_iterator(path))
+		{
+			if (entry.is_regular_file())
+			{
+				const std::string& filepath = entry.path().string();
+				auto meta = getResourceMetaBySystemPath(filepath);
+				if (meta.isValid())
+				{
+					m_assets.insert({ GUID(meta.guid), meta.path });
+					m_assetsSortByPath.insert({ meta.path, GUID(meta.guid) });
+				}
+			}
+			else if (entry.is_directory())
+			{
+				scanResourcesBySystemPath(entry.path().string());
+			}
+		}
+	}
+
 	void ResourceRegistry::addResourceSearchPath(const std::string& systemPath, const std::string& header)
 	{
 		m_searchPaths.insert({ header, systemPath });
@@ -197,14 +230,7 @@ namespace volucris
 		ResourcePath path = ResourcePath(resPath);
 		auto sysPath = path.getSystemPath();
 
-		std::ifstream fin = std::ifstream(sysPath, std::ios::binary);
-		if (!fin.is_open())
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed.", resPath);
-			return {};
-		}
-
-		return readResourceMeta(fin);
+		return getResourceMetaBySystemPath(sysPath);
 	}
 
 	bool ResourceRegistry::registry(const const std::shared_ptr<ResourceObject>& resource, const std::string& path)
@@ -318,6 +344,7 @@ namespace volucris
 			object = std::make_shared<Material>();
 			break;
 		case ResourceType::STATIC_MESH:
+			object = std::make_shared<StaticMesh>();
 			break;
 		default:
 			break;
@@ -329,6 +356,18 @@ namespace volucris
 			m_caches.insert({ meta.guid, object });
 		}
 		return object;
+	}
+
+	ResourceMeta ResourceRegistry::getResourceMetaBySystemPath(const std::string& path)
+	{
+		std::ifstream fin = std::ifstream(path, std::ios::binary);
+		if (!fin.is_open())
+		{
+			V_LOG_WARN(Engine, "load resource from {} failed.", path);
+			return {};
+		}
+
+		return readResourceMeta(fin);
 	}
 
 	ResourceMeta ResourceRegistry::readResourceMeta(std::ifstream& fin)

@@ -9,6 +9,7 @@
 #include <Engine/Core/event.h>
 
 DECLARE_EVENT(OnTargetGLTextureIDChanged, volucris::uint32)
+DECLARE_EVENT(OnViewportSizeChanged, int, int)
 
 namespace volucris
 {
@@ -18,6 +19,7 @@ namespace volucris
 	{
 	public:
 		OnTargetGLTextureIDChanged TargetGLTextureIDChanged;
+		OnViewportSizeChanged ViewportSizeChanged;
 
 	public:
 		Viewport();

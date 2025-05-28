@@ -19,6 +19,12 @@ namespace volucris
 		, m_projectionViewMatrix()
 		, m_viewport(viewport)
 	{
+		if (viewport)
+		{
+			viewport->ViewportSizeChanged.addLambda([this](int w, int h) {
+				setAspect(w * 1.0 / h);
+				});
+		}
 		updateProjectionMatrix();
 		onTransformChanged();
 	}

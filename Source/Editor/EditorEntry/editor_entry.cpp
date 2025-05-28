@@ -11,6 +11,8 @@ using namespace volucris;
 
 std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 {
+	ResourceRegistry::Instance().scanResources("/Engine");
+
 	auto config = volucris::Application::Config(argc, argv);
 	auto app = std::make_shared<volucris::EditorApplication>(config);
 	auto window = std::make_shared<Window>();

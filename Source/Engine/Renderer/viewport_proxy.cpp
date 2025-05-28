@@ -44,6 +44,7 @@ namespace volucris
 			{
 				m_cameraInfoBlock = m_scene->addSceneData((uint8*)&m_cameraInfo, sizeof(m_cameraInfo));
 			}
+			m_cameraInfoDirty = false;
 		}
 
 		for (const auto& primitive : primitives)

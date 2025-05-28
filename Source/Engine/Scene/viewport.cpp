@@ -20,6 +20,7 @@ namespace volucris
 	void Viewport::setViewport(const Rect& vp)
 	{
 		m_viewport = vp;
+		ViewportSizeChanged.broadcast(vp.w, vp.h);
 		m_dirty = true;
 	}
 

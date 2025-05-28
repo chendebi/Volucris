@@ -80,6 +80,25 @@ namespace volucris
             return m_buffer;
 		}
 
+        void serialize(const uint8* memory, size_t size)
+        {
+            m_buffer.reserve(sizeof(size_t) + size);
+            serialize(size);
+            m_buffer.insert(m_buffer.end(), memory, memory + size);
+        }
+
+        bool deserialize(std::vector<uint8>& memory, size_t& size)
+        {
+            if (deserialize(size) && m_pos+size <= m_buffer.size())
+            {
+                memory.resize(size);
+                memcpy(memory.data(), &m_buffer[m_pos], size);
+                m_pos += size;
+                return true;
+            }
+            return false;
+        }
+
     private:
         // 基础类型序列化
         template <typename T>

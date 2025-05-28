@@ -18,6 +18,12 @@ namespace volucris
 	class Viewport;
 	class Scene;
 
+	struct StatInfo
+	{
+		double frameTime;
+		double frameRate;
+	};
+
 	class Application
 	{
 		static Application* Inst;
@@ -70,6 +76,8 @@ namespace volucris
 
 		std::shared_ptr<Scene> getScene(int index) { return m_scenes[index]; }
 
+		StatInfo getStatInfo() const;
+
 	protected:
 		virtual void tick(double delta) {}
 
@@ -77,6 +85,7 @@ namespace volucris
 		Config m_config;
 		uint8 m_initialized;
 		uint8 m_running;
+		double m_delta;
 		std::shared_ptr<Window> m_window;
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Widget> m_mainWidget;
