@@ -100,13 +100,9 @@ namespace volucris
 
 	std::shared_ptr<MaterialResource> MaterialLoader::load(const std::string& vsf, const std::string& fsf)
 	{
-		std::string vsfp, fsfp;
-		ResourcePath::ResourcePathToSystemPath(vsf, vsfp);
-		ResourcePath::ResourcePathToSystemPath(fsf, fsfp);
-
 		MaterialParameterMap map;
 		std::string vss, fss;
-		if (!getShaderSource(vsfp, vss, map) || !getShaderSource(fsfp, fss, map))
+		if (!getShaderSource(vsf, vss, map) || !getShaderSource(fsf, fss, map))
 		{
 			V_LOG_WARN(Editor, "load material failed.");
 			return nullptr;

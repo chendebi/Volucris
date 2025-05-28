@@ -36,7 +36,7 @@ namespace volucris
 			proxy = std::make_shared<MaterialProxy>(this);
 			m_proxy = proxy;
 
-			V_LOG_DEBUG(Engine, "create material: {}", getResourceFullPath())
+			V_LOG_DEBUG(Engine, "create material: {}", getResourcePath().fullpath)
 		}
 		return proxy;
 	}

@@ -13,6 +13,7 @@ namespace volucris
 
 	struct BufferDescription
 	{
+		int location;
 		GLenum type;
 		int size;
 		bool normalized;

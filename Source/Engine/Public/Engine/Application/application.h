@@ -68,6 +68,8 @@ namespace volucris
 
 		void pushCommand(const std::function<void()>& command);
 
+		std::shared_ptr<Scene> getScene(int index) { return m_scenes[index]; }
+
 	protected:
 		virtual void tick(double delta) {}
 

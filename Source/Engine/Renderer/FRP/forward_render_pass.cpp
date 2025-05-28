@@ -13,7 +13,7 @@ namespace volucris
 		, m_view(nullptr)
 		, m_target(nullptr)
 	{
-		m_clearState.color = glm::vec4(1.0, 0.0, 0.0, 1.0);
+		m_clearState.color = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	}
 
 	void ForwardRenderPass::initialize(ViewportProxy* viewport)

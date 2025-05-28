@@ -22,7 +22,7 @@ namespace volucris
 			SectionRenderData sectionRenderData;
 			sectionRenderData.mode = section.mode;
 			sectionRenderData.count = section.count;
-			sectionRenderData.offset = section.offset;
+			sectionRenderData.offset = section.offset * sizeof(uint32);
 			auto mat = primitive->getMaterial(section.slot);
 
 			check(mat != nullptr);

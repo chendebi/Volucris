@@ -63,7 +63,7 @@ namespace volucris
 
 		bool getSystemPathByResourcePath(const std::string& resPath, std::string& path);
 
-		void loadManifiset();
+		void updateResourcePath(ResourceObject* resource, const std::string& newPath);
 
 		std::shared_ptr<ResourceObject> loadResourceByGUID(const GUID& guid);
 

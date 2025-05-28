@@ -3,13 +3,17 @@
 #include <Engine/Resource/resource_registry.h>
 #include <Engine/Resource/material.h>
 #include <Engine/Resource/material_resource.h>
-#include <Engine/Resource/material.h>
 #include "path_tree_widget.h"
 #include "EditorEntry/editor_core.h"
 #include <iostream>
 #include "material_loader.h"
 #include <Engine/Application/file_dialog.h>
 #include "mesh_loader.h"
+#include <Engine/Application/application.h>
+#include <Engine/Scene/scene.h>
+#include <Engine/Scene/actor.h>
+#include <Engine/Scene/primitive_component.h>
+#include <Engine/Resource/static_mesh.h>
 
 namespace volucris
 {
@@ -108,7 +112,7 @@ namespace volucris
 			&& ResourcePath::SystemPathToResourcePath(m_filePath1.data(), fs))
 		{
 			MaterialLoader loader;
-			auto resource = loader.load(vs, fs);
+			auto resource = loader.load(m_filePath0.data(), m_filePath1.data());
 			if (!resource)
 			{
 				V_LOG_WARN(Editor, "add material failed. shader file not valid.");
@@ -121,7 +125,7 @@ namespace volucris
 			V_LOG_INFO(Editor, " fragment shader: {}", fs);
 			auto material = std::make_shared<Material>();
 			material->setShaderPath(vs, fs);
-			material->setResourcePath(resourcePath);
+			//material->setResourcePath(resourcePath);
 			material->setMaterialResource(resource);
 			ResourceRegistry::Instance().registry(material, resourcePath);
 			ResourceRegistry::Instance().save(material);
@@ -133,13 +137,27 @@ namespace volucris
 	bool AddResourceDialog::addMeshResource()
 	{
 		MeshLoader loader;
-		auto mesh = loader.load(m_filePath0.data());
-		if (mesh.empty())
+		if (loader.load(m_filePath0.data()))
 		{
-			return false;
+			for (const auto& resource : loader.getLoadedResouces())
+			{
+				const auto resPath = m_pathWidget->getSelectedPathItem()->getResourceDirectory() + "/" + resource->getResourcePath().name;
+				ResourceRegistry::Instance().registry(resource, resPath);
+				// 保存操作放到后面执行
+				ResourceRegistry::Instance().save(resource);
+			}
+			for (const auto& mesh : loader.getLoadedStaticMeshes())
+			{
+				auto comp = std::make_shared<PrimitiveComponent>();
+				comp->setMeshResource(mesh->getResource());
+				comp->setMaterials(mesh->getMaterials());
+				auto actor = std::make_shared<Actor>();
+				actor->setRootComponent(comp);
+				gApp->getScene(0)->addActor(actor);
+			}
+			return true;
 		}
-
-		return true;
+		return false;
 	}
 
 	void AddResourceDialog::buildMaterialInput()

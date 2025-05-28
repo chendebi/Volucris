@@ -63,12 +63,10 @@ namespace volucris
 		ctx->bindBuffer(m_vbo.get());
 		ctx->bindVertexArrayObject(this);
 		
-		auto idx = 0;
 		for (const auto& desc : m_descriptions)
 		{
-			glEnableVertexAttribArray(idx);
-			glVertexAttribPointer(idx, desc.size, desc.type, desc.normalized ? GL_TRUE : GL_FALSE, desc.stride, (void*)desc.offset);
-			++idx;
+			glEnableVertexAttribArray(desc.location);
+			glVertexAttribPointer(desc.location, desc.size, desc.type, desc.normalized ? GL_TRUE : GL_FALSE, desc.stride, (void*)desc.offset);
 		}
 		GL_CHECK();
 		m_valid = true;

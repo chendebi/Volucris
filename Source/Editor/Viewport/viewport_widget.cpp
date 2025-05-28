@@ -3,6 +3,8 @@
 #include "EditorEntry/editor_core.h"
 #include <Engine/Application/application.h>
 #include <Engine/Scene/scene.h>
+#include <Engine/Scene/camera_component.h>
+#include <Engine/Scene/actor.h>
 
 namespace volucris
 {
@@ -21,6 +23,11 @@ namespace volucris
 		{
 			m_scene = std::make_shared<Scene>();
 			m_scene->addViewport(m_viewport);
+			auto camera = std::make_shared<CameraComponent>(CameraComponent::PERSPECTIVE, m_viewport.get());
+			camera->setPosition({ 0, 2, 6 });
+			auto actor = std::make_shared<Actor>();
+			actor->setRootComponent(camera);
+			m_scene->addActor(actor);
 			gApp->addScene(m_scene);
 		}
 
@@ -35,7 +42,7 @@ namespace volucris
 
 		ImTextureID texID = (ImTextureID)(intptr_t)m_targetID;
 
-		ImGui::Image(texID, size);
+		ImGui::Image(texID, size, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
 		ImGui::PopStyleVar();

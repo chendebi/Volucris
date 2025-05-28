@@ -15,7 +15,6 @@ int main(int argc, char** argv)
 	ResourceRegistry::Instance().addResourceSearchPath((Directory::EngineDirectory() / "Content").toString(), "/Engine");
 	ResourceRegistry::Instance().addResourceSearchPath((Directory::EngineDirectory() / "Source/Shader").toString(), "/Shader");
 	ResourceRegistry::Instance().addResourceSearchPath(Directory::ApplicationDirectory().toString(), "/Project");
-	ResourceRegistry::Instance().loadManifiset();
 
 	auto app = volucrisMain(argc, argv);
 	checkq(Application::Instance(), Engine, "application not created");

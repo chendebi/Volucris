@@ -56,6 +56,15 @@ namespace volucris
 		return addSectionData(indices.data(), indices.size());
 	}
 
+	Section MeshResourceData::setSectionData(std::vector<uint32> indices)
+	{
+		m_indices = std::move(indices);
+		Section section;
+		section.count = m_indices.size();
+		section.offset = 0;
+		return section;
+	}
+
 	Section MeshResourceData::addSectionData(const uint32* indices, size_t count)
 	{
 		size_t currentCount = m_indices.size();
@@ -65,12 +74,18 @@ namespace volucris
 		memcpy(m_indices.data() + currentCount, indices, count * sizeof(uint32));
 		Section section;
 		section.count = count;
-		section.offset = currentCount;
+		section.offset = currentCount * sizeof(uint32);
 		return section;
 	}
 
 	std::shared_ptr<MeshRenderData> MeshResourceData::build()
 	{
+		if (m_vertices.empty() || m_indices.empty())
+		{
+			V_LOG_WARN(Engine, "invalid mesh resource. build failed.");
+			return nullptr;
+		}
+
 		auto renderData = std::make_shared<MeshRenderData>();
 		auto vertexBufferSize = m_vertices.size() * sizeof(glm::vec3);
 		auto normalBufferSize = m_normals.size() * sizeof(glm::vec3);
@@ -87,8 +102,9 @@ namespace volucris
 			offset += vertexBufferSize;
 		}
 
-		memcpy(vertexBufferData.data() + offset, m_normals.data(), normalBufferSize);
+		if (normalBufferSize > 0)
 		{
+			memcpy(vertexBufferData.data() + offset, m_normals.data(), normalBufferSize);
 			BlockDescription block = { BlockType::NORMAL, offset };
 			renderData->blocks.push_back(block);
 			offset += normalBufferSize;
@@ -122,6 +138,9 @@ namespace volucris
 	void MeshResourceData::serialize(Serializer& serializer)
 	{
 		serializer.serialize(m_vertices);
+		serializer.serialize(m_normals);
+		serializer.serialize(m_uvs[0]);
+		serializer.serialize(m_uvs[1]);
 		serializer.serialize(m_indices);
 		serializer.serialize(m_sections);
 	}
@@ -129,13 +148,24 @@ namespace volucris
 	void MeshResourceData::deserialize(Serializer& serializer)
 	{
 		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec3> uv0;
+		std::vector<glm::vec3> uv1;
 		std::vector<uint32> indices;
 		std::vector<Section> sections;
 
-		if (serializer.deserialize(vertices) && serializer.deserialize(indices) &&
-			serializer.deserialize(sections))
+		if (serializer.deserialize(vertices) && 
+			serializer.deserialize(normals) &&
+			serializer.deserialize(uv0) &&
+			serializer.deserialize(uv1) &&
+			serializer.deserialize(indices) &&
+			serializer.deserialize(sections)
+			)
 		{
 			m_vertices = std::move(vertices);
+			m_normals = std::move(normals);
+			m_uvs[0] = std::move(uv0);
+			m_uvs[1] = std::move(uv1);
 			m_indices = std::move(indices);
 			m_sections = std::move(sections);
 		}

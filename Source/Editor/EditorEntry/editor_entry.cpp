@@ -23,7 +23,5 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	renderer->addRenderPass(std::make_shared<ForwardRenderPass>());
 	app->setRenderer(renderer);
 
-	auto material = ResourceRegistry::Instance().loadResourceByPath("/Engine/M_11");
-
 	return app;
 }

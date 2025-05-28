@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <Core/assert.h>
 #include <Core/serializer.h>
+#include <Resource/static_mesh.h>
 
 namespace fs = std::filesystem;
 
@@ -103,34 +104,22 @@ namespace volucris
 		return false;
 	}
 
-	void ResourceRegistry::loadManifiset()
+	void ResourceRegistry::updateResourcePath(ResourceObject* resource, const std::string& newPath)
 	{
-#if WITH_EDITOR
-		const auto filepath = Directory::EngineDirectory().absolute() / "Config/manifiset.json";
-#endif
-		const auto manifisetPath = filepath.toString();
-		rapidjson::Document doc;
-		FILE* fp = fopen(manifisetPath.c_str(), "r");
-		if (!fp)
+		if (resource && resource->m_metaData.isValid())
 		{
-			V_LOG_WARN(Engine, "load asset manifiset from {} failed", manifisetPath);
-			return;
-		}
-		fseek(fp, 0, SEEK_END);
-		size_t size = _ftelli64(fp);
-		fseek(fp, 0, SEEK_SET);
-		std::vector<uint8> buffer;
-		buffer.resize(size+4);
-		rapidjson::FileReadStream is(fp, (char*)buffer.data(), size);
-		doc.ParseStream(is);
-		fclose(fp);
-
-		for (auto it = doc.MemberBegin(); it != doc.MemberEnd(); ++it)
-		{
-			std::string guid = std::string(it->name.GetString());
-			std::string path = std::string(it->value.GetString());
-			m_assets.insert({ GUID(guid), path});
-			m_assetsSortByPath.insert({ path, GUID(guid) });
+			const auto guid = GUID(resource->m_metaData.guid);
+			auto it = m_assets.find(guid);
+			if (it == m_assets.end())
+			{
+				V_LOG_WARN(Engine, "asset not registered, path: {}", resource->m_metaData.path);
+				return;
+			}
+			it->second = newPath;
+			m_assetsSortByPath.erase(resource->m_metaData.path);
+			m_assetsSortByPath.insert({ newPath,  guid});
+			resource->m_metaData.path = newPath;
+			resource->m_path = newPath;
 		}
 	}
 
@@ -229,9 +218,14 @@ namespace volucris
 		auto id = GUID::generate();
 		meta.guid = id.uuid;
 		meta.path = path;
+		resource->setResourcePath(path);
 		if (dynamic_cast<Material*>(resource.get()))
 		{
 			meta.type = ResourceType::MATERIAL;
+		}
+		else if (dynamic_cast<StaticMesh*>(resource.get()))
+		{
+			meta.type = ResourceType::STATIC_MESH;
 		}
 		else
 		{

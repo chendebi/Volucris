@@ -67,6 +67,8 @@ namespace volucris
 		void addSection(const Section& section);
 
 		Section addSectionData(const std::vector<uint32>& indices);
+
+		Section setSectionData(std::vector<uint32> indices);
 		
 		Section addSectionData(const uint32* indices, size_t count);
 

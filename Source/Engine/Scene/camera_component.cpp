@@ -46,18 +46,21 @@ namespace volucris
 		auto eye = getPosition();
 		auto center = eye + forward * 0.1f;
 		auto up = glm::cross(-forward, right);
-		m_viewMatrix = glm::lookAt(eye, {0,0,0}, {0, 1, 0});
+		m_viewMatrix = glm::lookAt(eye, center, {0, 1, 0});
 		m_projectionViewMatrix = m_projectionMatrix * m_viewMatrix;
 	}
 
 	void CameraComponent::updateTransform()
 	{
-		auto proxy = m_viewport->getProxy();
-		gApp->getRenderer()->pushCommand([proxy, viewMat = m_viewMatrix, projMat=m_projectionMatrix, pv = m_projectionViewMatrix] {
-			proxy->setViewMatrix(viewMat);
-			proxy->setProjectionMatrix(projMat);
-			proxy->setProjectionViewMatrix(pv);
-			});
+		if (m_viewport)
+		{
+			auto proxy = m_viewport->getProxy();
+			gApp->getRenderer()->pushCommand([proxy, viewMat = m_viewMatrix, projMat = m_projectionMatrix, pv = m_projectionViewMatrix] {
+				proxy->setViewMatrix(viewMat);
+				proxy->setProjectionMatrix(projMat);
+				proxy->setProjectionViewMatrix(pv);
+				});
+		}
 	}
 
 	void CameraComponent::updateRenderState()

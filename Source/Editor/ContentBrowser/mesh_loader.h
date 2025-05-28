@@ -15,9 +15,23 @@ namespace volucris
 	public:
 		MeshLoader();
 
-		std::vector<std::shared_ptr<StaticMesh>> load(const std::string& filePath);
+		bool load(const std::string& filePath);
+
+		const std::vector<std::shared_ptr<ResourceObject>>& getLoadedResouces() const { return m_resources; }
+
+		const std::vector<std::shared_ptr<StaticMesh>>& getLoadedStaticMeshes() const { return m_loadedMeshes; }
+
+	protected:
+		template<typename T>
+		std::shared_ptr<T> createResource()
+		{
+			auto resource = std::make_shared<T>();
+			m_resources.push_back(resource);
+			return resource;
+		}
 
 	private:
+		class AssimpHelper;
 		std::vector<std::shared_ptr<ResourceObject>> m_resources;
 		std::vector<std::shared_ptr<StaticMesh>> m_loadedMeshes;
 	};

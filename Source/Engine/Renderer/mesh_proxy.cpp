@@ -39,6 +39,37 @@ namespace volucris
 			{
 			case BlockType::VERTEX:
 			{
+				desc.location = 0;
+				desc.type = GL_FLOAT;
+				desc.normalized = false;
+				desc.size = 3;
+				desc.offset = block.offset;
+				desc.stride = 3 * sizeof(float);
+			}
+			break;
+			case BlockType::NORMAL:
+			{
+				desc.location = 1;
+				desc.type = GL_FLOAT;
+				desc.normalized = false;
+				desc.size = 3;
+				desc.offset = block.offset;
+				desc.stride = 3 * sizeof(float);
+			}
+			break;
+			case BlockType::UV0:
+			{
+				desc.location = 2;
+				desc.type = GL_FLOAT;
+				desc.normalized = false;
+				desc.size = 3;
+				desc.offset = block.offset;
+				desc.stride = 3 * sizeof(float);
+			}
+			break;
+			case BlockType::UV1:
+			{
+				desc.location = 3;
 				desc.type = GL_FLOAT;
 				desc.normalized = false;
 				desc.size = 3;
