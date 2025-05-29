@@ -9,7 +9,7 @@ namespace volucris
 {
 	class SceneProxy;
 	class Context;
-	class ViewportProxy;
+	class ViewProxy;
 	class Texture2DObject;
 
 	class RenderPass
@@ -19,7 +19,7 @@ namespace volucris
 
 		virtual ~RenderPass() = default;
 
-		virtual void initialize(ViewportProxy* viewport) {}
+		virtual void initialize(ViewProxy* viewport) {}
 
 		void addBatch(const PrimitiveDrawBatch& batch)
 		{

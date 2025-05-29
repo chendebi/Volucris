@@ -15,7 +15,7 @@ namespace volucris
 			PERSPECTIVE
 		};
 		
-		CameraComponent(Mode mode= PERSPECTIVE, Viewport* viewport = nullptr);
+		CameraComponent(Mode mode= PERSPECTIVE);
 
 		void setAspect(float aspect)
 		{
@@ -59,7 +59,6 @@ namespace volucris
 		glm::mat4 m_viewMatrix;
 		glm::mat4 m_projectionMatrix;
 		glm::mat4 m_projectionViewMatrix;
-		Viewport* m_viewport;
 	};
 }
 

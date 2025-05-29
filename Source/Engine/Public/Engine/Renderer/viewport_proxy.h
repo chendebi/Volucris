@@ -10,12 +10,13 @@
 
 namespace volucris
 {
-	class Viewport;
+	class ViewClient;
 	class SceneProxy;
 	class PrimitiveProxy;
 	class MaterialProxy;
 	class RenderPass;
 	class Context;
+	class RenderTargetProxy;
 
 	struct CameraInfo
 	{
@@ -24,10 +25,12 @@ namespace volucris
 		glm::mat4 projViewMatrix;
 	};
 
-	class ViewportProxy
+	class ViewProxy
 	{
 	public:
-		ViewportProxy(Viewport* viewport);
+		ViewProxy();
+
+		void initialize(ViewClient* viewport);
 
 		void setViewport(const Rect& vp);
 
@@ -40,8 +43,6 @@ namespace volucris
 		void render(Context* context);
 
 		void clear();
-
-		Rect getViewport() const { return m_viewport; }
 
 		void setViewMatrix(const glm::mat4& mat)
 		{
@@ -62,9 +63,8 @@ namespace volucris
 		}
 
 	private:
-		Rect m_viewport;
-		Viewport* m_vp;
 		SceneProxy* m_scene;
+		std::shared_ptr<RenderTargetProxy> m_renderTarget;
 		std::vector<std::shared_ptr<RenderPass>> m_passes;
 		CameraInfo m_cameraInfo;
 		uint8 m_cameraInfoDirty;

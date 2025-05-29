@@ -8,7 +8,7 @@
 #include "Renderer/context.h"
 #include "Renderer/renderer.h"
 #include "Scene/viewport.h"
-#include "Scene/scene.h"
+#include "Scene/level.h"
 
 namespace volucris
 {
@@ -33,7 +33,7 @@ namespace volucris
 		, m_window(nullptr)
 		, m_renderer(nullptr)
 		, m_mainWidget(nullptr)
-		, m_scenes()
+		, m_level(nullptr)
 		, m_queue(1024)
 	{
 		checkq(!Inst, Engine, "application already exist");
@@ -125,18 +125,15 @@ namespace volucris
 		m_mainWidget = widget;
 	}
 
-	void Application::addScene(const std::shared_ptr<Scene>& scene)
+	void Application::setLevel(const std::shared_ptr<Level>& level)
 	{
-		if (scene->getSceneProxy())
+		if (m_level)
 		{
-			V_LOG_ERROR(Engine, "Scene has already in use");
-			return;
+			m_level->deattachFromRenderer();
 		}
-		m_scenes.push_back(scene);
-		if (m_running)
-		{
-			scene->attachToRenderer();
-		}
+		m_level = level;
+		m_level->attachToRenderer();
+		CurrentLevelChanged(m_level);
 	}
 
 	Window* Application::getWindow()
@@ -174,9 +171,9 @@ namespace volucris
 
 		m_running = true;
 
-		for (const auto& scene : m_scenes)
+		if (!m_level)
 		{
-			scene->attachToRenderer();
+			setLevel(std::make_shared<Level>());
 		}
 
 		std::function<void()> command;
@@ -195,15 +192,9 @@ namespace volucris
 			// TODO: tick
 			tick(m_delta);
 
-			for (const auto& scene : m_scenes)
-			{
-				scene->tick(m_delta);
-			}
+			m_level->tick(m_delta);
 
-			for (const auto& scene: m_scenes)
-			{
-				scene->update();
-			}
+			m_level->update();
 
 			m_renderer->render();
 
@@ -217,10 +208,8 @@ namespace volucris
 			command();
 		}
 
-		for (const auto& scene : m_scenes)
-		{
-			scene->deattachFromRenderer();
-		}
+		m_level->deattachFromRenderer();
+
 		m_renderer->render();
 		m_renderer->clearCommands();
 

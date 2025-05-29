@@ -10,6 +10,7 @@
 
 DECLARE_EVENT(OnClose)
 DECLARE_EVENT(OnSizeChanged, int, int)
+DECLARE_EVENT(OnMouseEvent, volucris::MouseEvent)
 
 using OnMouseMove = OnSizeChanged;
 
@@ -30,6 +31,8 @@ namespace volucris
 		OnSizeChanged FrameSizeChanged;
 		OnSizeChanged WindowSizeChanged;
 		OnMouseMove MouseMove;
+		OnMouseEvent MousePressed;
+		OnMouseEvent MouseReleased;
 
 	public:
 		Window();

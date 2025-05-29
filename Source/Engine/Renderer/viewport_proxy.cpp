@@ -9,31 +9,37 @@
 #include "Renderer/context.h"
 #include <Application/application.h>
 #include <Renderer/OpenGL/ogl_texture2d_object.h>
+#include <Resource/render_target.h>
+#include <Renderer/render_target_proxy.h>
 
 namespace volucris
 {
-	ViewportProxy::ViewportProxy(Viewport* viewport)
-		: m_viewport()
-		, m_vp(viewport)
-		, m_scene(viewport->getScene()->getSceneProxy())
+	ViewProxy::ViewProxy()
+		: m_scene(nullptr)
+		, m_renderTarget(nullptr)
 		, m_cameraInfo()
 		, m_cameraInfoDirty(true)
 		, m_target()
 	{
 	}
 
-	void ViewportProxy::setViewport(const Rect& vp)
+	void ViewProxy::initialize(ViewClient* client)
 	{
-		m_viewport = vp;
-		V_LOG_DEBUG(Engine, "view port size: {}, {}", vp.w, vp.h);
-		for (const auto& pass : m_passes)
-		{
-			pass->viewSizeChanged(vp.w, vp.h);
-		}
+		m_scene = client->getScene()->getSceneProxy();
+		m_renderTarget = client->getRenderTarget()->getProxy();
 	}
 
-	void ViewportProxy::update(const std::vector<std::shared_ptr<PrimitiveProxy>>& primitives)
+	void ViewProxy::update(const std::vector<std::shared_ptr<PrimitiveProxy>>& primitives)
 	{
+		if (m_renderTarget->isTargetDirty())
+		{
+			//V_LOG_WARN(Engine, "在这里更新pass的渲染目标大小");
+			for (const auto& pass : m_passes)
+			{
+				
+			}
+		}
+
 		if (m_cameraInfoDirty)
 		{
 			if (m_cameraInfoBlock.block.valid())
@@ -59,13 +65,13 @@ namespace volucris
 		}
 	}
 
-	void ViewportProxy::addRenderPass(const std::shared_ptr<RenderPass>& pass)
+	void ViewProxy::addRenderPass(const std::shared_ptr<RenderPass>& pass)
 	{
 		m_passes.push_back(pass);
 		pass->initialize(this);
 	}
 
-	void ViewportProxy::render(Context* context)
+	void ViewProxy::render(Context* context)
 	{
 		context->setCameraInfoBlock(m_cameraInfoBlock);
 		for (const auto& pass : m_passes)
@@ -82,14 +88,14 @@ namespace volucris
 			if (!m_target.expired())
 			{
 				auto id = m_target.lock()->getID();
-				gApp->pushCommand([vp = m_vp, id]() {
+				/*gApp->pushCommand([vp = m_client, id]() {
 					vp->setTargetGLTextureID(id);
-					});
+					});*/
 			}
 		}
 	}
 
-	void ViewportProxy::clear()
+	void ViewProxy::clear()
 	{
 		for (const auto& pass : m_passes)
 		{

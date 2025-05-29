@@ -153,7 +153,7 @@ namespace volucris
 				comp->setMaterials(mesh->getMaterials());
 				auto actor = std::make_shared<Actor>();
 				actor->setRootComponent(comp);
-				gApp->getScene(0)->addActor(actor);
+				//gApp->getScene(0)->addActor(actor);
 			}
 			return true;
 		}

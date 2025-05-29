@@ -6,23 +6,22 @@
 
 namespace volucris
 {
+	class Level;
+
 	class ViewportWidget : public Widget
 	{
 	public:
 		ViewportWidget();
 
-		void setScene(const std::shared_ptr<Scene>& scene)
-		{
-			m_scene = scene;
-		}
-
 		void build() override;
 
 		void setViewportTargetGLID(uint32 id);
 
+		void setLevel(const std::shared_ptr<Level>& level);
+
 	private:
 		std::shared_ptr<Scene> m_scene;
-		std::shared_ptr<Viewport> m_viewport;
+		std::shared_ptr<ViewClient> m_client;
 		uint32 m_targetID;
 	};
 }

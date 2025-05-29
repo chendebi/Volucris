@@ -16,11 +16,11 @@ namespace volucris
 		m_clearState.color = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	}
 
-	void ForwardRenderPass::initialize(ViewportProxy* viewport)
+	void ForwardRenderPass::initialize(ViewProxy* viewport)
 	{
-		m_view = viewport;
+		/*m_view = viewport;
 		const auto& vp = viewport->getViewport();
-		viewSizeChanged(vp.w, vp.h);
+		viewSizeChanged(vp.w, vp.h);*/
 	}
 
 	void ForwardRenderPass::render(Context* context)
@@ -29,7 +29,7 @@ namespace volucris
 		{
 			return;
 		}
-		context->setViewport(m_view->getViewport());
+		//context->setViewport(m_target->get);
 		context->clear(m_clearState);
 		for (const auto& batch : m_renderBatches)
 		{
@@ -41,24 +41,9 @@ namespace volucris
 		}
 	}
 
-	void ForwardRenderPass::viewSizeChanged(int width, int height)
+	void ForwardRenderPass::setPassTarget(const std::shared_ptr<FrameBufferObject>& target)
 	{
-		if (!m_target)
-		{
-			m_target = std::make_shared<FrameBufferObject>();
-
-			auto colorTex = std::make_shared<Texture2DObject>();
-			colorTex->setFormat(GL_RGB);
-			colorTex->setType(GL_UNSIGNED_BYTE);
-			m_target->attachColor(0, colorTex);
-
-			auto depthRbo = std::make_shared<RenderBufferObject>();
-			depthRbo->setFormat(GL_DEPTH24_STENCIL8);
-			m_target->attachDepth(depthRbo);
-		}
-		auto colorTex = m_target->getColorAttachment(0);
-		colorTex->setSize(width, height);
-		m_target->getDepthAttachment()->setSize(width, height);
+		m_target = target;
 	}
 
 	std::shared_ptr<Texture2DObject> ForwardRenderPass::getTargetTexture() const

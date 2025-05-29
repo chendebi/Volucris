@@ -9,7 +9,7 @@ namespace volucris
 {
 	class Scene;
 	class PrimitiveProxy;
-	class ViewportProxy;
+	class ViewProxy;
 	class RenderPass;
 	class Context;
 
@@ -22,7 +22,7 @@ namespace volucris
 
 		void render(Context* context);
 
-		void addViewportProxy(const std::shared_ptr<ViewportProxy>& view);
+		void addView(const std::shared_ptr<ViewProxy>& view);
 
 		void addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy);
 
@@ -35,7 +35,7 @@ namespace volucris
 		void setSceneData(const UniformBlock& block, uint8* data);
 
 	private:
-		std::vector<std::shared_ptr<ViewportProxy>> m_views;
+		std::vector<std::shared_ptr<ViewProxy>> m_views;
 		std::vector<std::shared_ptr<PrimitiveProxy>> m_primitives;
 		std::shared_ptr<OGLBufferObject> m_ubo; // 存储场景数据
 	};

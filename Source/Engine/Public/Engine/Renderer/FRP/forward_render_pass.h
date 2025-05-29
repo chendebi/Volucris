@@ -13,11 +13,11 @@ namespace volucris
 	public:
 		ForwardRenderPass();
 
-		void initialize(ViewportProxy* viewport) override;
+		void initialize(ViewProxy* viewport) override;
 
 		void render(Context* context) override;
 
-		void viewSizeChanged(int width, int height) override;
+		void setPassTarget(const std::shared_ptr<FrameBufferObject>& target);
 
 		std::shared_ptr<RenderPass> clone() {
 			return std::make_shared<ForwardRenderPass>();
@@ -30,7 +30,7 @@ namespace volucris
 
 	private:
 		OGLClearState m_clearState;
-		ViewportProxy* m_view;
+		ViewProxy* m_view;
 		std::shared_ptr<FrameBufferObject> m_target;
 	};
 }

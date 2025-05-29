@@ -38,7 +38,7 @@ namespace volucris
 		}
 	}
 
-	void SceneProxy::addViewportProxy(const std::shared_ptr<ViewportProxy>& view)
+	void SceneProxy::addView(const std::shared_ptr<ViewProxy>& view)
 	{
 		m_views.push_back(view);
 	}

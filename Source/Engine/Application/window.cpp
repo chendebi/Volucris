@@ -5,6 +5,7 @@
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
+#include <Core/volucris.h>
 
 #include <Windows.h>
 
@@ -19,6 +20,27 @@ namespace volucris
 		uint8 imguiInited = false;
 		GLFWwindow* handle = nullptr;
 	};
+
+	inline MouseButton glfwButtonToMouseButton(int button)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			return MouseButton::LEFT;
+		}
+		else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+		{
+			return MouseButton::MIDDLE;
+		}
+		else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+		{
+			return MouseButton::RIGHT;
+		}
+		else
+		{
+			V_LOG_ERROR(Engine, "recieved a unsupported glfw button: {}", button);
+		}
+		return MouseButton::UNKNOWN;
+	}
 
 	void onGLFWWindowClose(GLFWwindow* handle)
 	{
@@ -42,6 +64,22 @@ namespace volucris
 	{
 		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
 		window->MouseMove(w, h);
+	}
+
+	void onGLFWMouseButton(GLFWwindow* handle, int button, int action, int mods)
+	{
+		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+		MouseEvent event;
+		event.button = glfwButtonToMouseButton(button);
+		event.modifiers = mods;
+		if (action == GLFW_PRESS)
+		{
+			window->MousePressed(event);
+		}
+		else
+		{
+			window->MouseReleased(event);
+		}
 	}
 
 	Window::Window()
@@ -111,6 +149,7 @@ namespace volucris
 		glfwSetWindowSizeCallback(m_impl->handle, onGLFWWindowResized);
 		glfwSetFramebufferSizeCallback(m_impl->handle, onGLFWFrameResized);
 		glfwSetCursorPosCallback(m_impl->handle, onGLFWMouseMove);
+		glfwSetMouseButtonCallback(m_impl->handle, onGLFWMouseButton);
 
 		if (m_frameless)
 		{

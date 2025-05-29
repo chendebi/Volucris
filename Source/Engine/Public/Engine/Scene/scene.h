@@ -12,7 +12,7 @@ namespace volucris
 {
 	class Actor;
 	class SceneProxy;
-	class Viewport;
+	class ViewClient;
 
 	class Scene
 	{
@@ -26,7 +26,7 @@ namespace volucris
 
 		void addActor(const std::shared_ptr<Actor>& actor);
 
-		void addViewport(const std::shared_ptr<Viewport>& viewport);
+		void addViewClient(const std::shared_ptr<ViewClient>& client);
 
 		void tick(const double& delta);
 
@@ -38,7 +38,7 @@ namespace volucris
 
 		SceneProxy* getSceneProxy() const { return m_proxy; }
 
-		const std::vector<std::shared_ptr<Viewport>>& getViews() const
+		const std::vector<std::shared_ptr<ViewClient>>& getViews() const
 		{
 			return m_views;
 		}
@@ -48,7 +48,7 @@ namespace volucris
 	private:
 		friend class Renderer;
 		std::vector<std::shared_ptr<Actor>> m_actors;
-		std::vector<std::shared_ptr<Viewport>> m_views;
+		std::vector<std::shared_ptr<ViewClient>> m_views;
 		
 		std::unordered_map<std::string, int> m_ids;
 		std::unordered_map<std::string, std::vector<int>> m_recycledIds;

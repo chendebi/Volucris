@@ -8,32 +8,23 @@
 #include <Engine/Resource/resource_registry.h>
 #include <Engine/Resource/static_mesh.h>
 #include <Engine/Scene/primitive_component.h>
+#include <Engine/Scene/level.h>
+#include <Engine/Resource/render_target.h>
 
 namespace volucris
 {
 	ViewportWidget::ViewportWidget()
 		: Widget()
 		, m_scene(nullptr)
-		, m_viewport(std::make_shared<Viewport>())
 		, m_targetID(0)
 	{
-		m_viewport->TargetGLTextureIDChanged.addObject(this, &ViewportWidget::setViewportTargetGLID);
+		gApp->CurrentLevelChanged.addObject(this, &ViewportWidget::setLevel);
+		setLevel(gApp->getCurrentLevel());
 	}
 
 	void ViewportWidget::build()
 	{
-		if (!m_scene)
-		{
-			m_scene = std::make_shared<Scene>();
-			m_scene->addViewport(m_viewport);
-			auto camera = std::make_shared<CameraComponent>(CameraComponent::PERSPECTIVE, m_viewport.get());
-			camera->setPosition({ 0, 2, 6 });
-			auto actor = std::make_shared<Actor>();
-			actor->setRootComponent(camera);
-			m_scene->addActor(actor);
-
-			gApp->addScene(m_scene);
-		}
+		
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("viewport");
@@ -45,10 +36,13 @@ namespace volucris
 
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		
-		const Rect& rect = m_viewport->getViewportRect();
-		if ((int)size.x != rect.w || (int)size.y != rect.h)
+		if (m_client)
 		{
-			m_viewport->setViewport({ 0, 0, (int)size.x, (int)size.y });
+			const Rect& rect = m_client->getRenderTarget()->getRect();
+			if ((int)size.x != rect.w || (int)size.y != rect.h)
+			{
+				m_client->setClientRect({ 0, 0, (int)size.x, (int)size.y });
+			}
 		}
 
 		ImTextureID texID = (ImTextureID)(intptr_t)m_targetID;
@@ -97,5 +91,13 @@ namespace volucris
 	void ViewportWidget::setViewportTargetGLID(uint32 id)
 	{
 		m_targetID = id;
+	}
+
+	void ViewportWidget::setLevel(const std::shared_ptr<Level>& level)
+	{
+		if (level)
+		{
+			m_client = level->addClient({ 0,0,128,128 });
+		}
 	}
 }

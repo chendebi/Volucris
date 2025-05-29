@@ -43,15 +43,15 @@ namespace volucris
 		actor->attach(this);
 	}
 
-	void Scene::addViewport(const std::shared_ptr<Viewport>& viewport)
+	void Scene::addViewClient(const std::shared_ptr<ViewClient>& client)
 	{
-		if (viewport->isAttached())
+		if (client->isAttached())
 		{
-			V_LOG_WARN(Engine, "actor has been attached");
+			V_LOG_WARN(Engine, "client has been attached");
 			return;
 		}
-		m_views.push_back(viewport);
-		viewport->attach(this);
+		m_views.push_back(client);
+		client->attach(this);
 	}
 
 	void Scene::tick(const double& delta)
@@ -88,9 +88,7 @@ namespace volucris
 		m_proxy = sceneProxy.get();
 		for (const auto& view : m_views)
 		{
-			auto proxy = std::make_shared<ViewportProxy>(view.get());
-			view->m_proxy = proxy.get();
-			sceneProxy->addViewportProxy(proxy);
+			sceneProxy->addView(view->getProxy());
 		}
 		renderer->addScene(sceneProxy);
 		V_LOG_DEBUG(Engine, "scene attach to renderer");
@@ -104,10 +102,6 @@ namespace volucris
 		m_proxy = nullptr;
 		RenderStateChanged.broadcast();
 		update();
-		for (const auto& view : m_views)
-		{
-			view->m_proxy = nullptr;
-		}
 		V_LOG_DEBUG(Engine, "scene disattach from renderer");
 	}
 

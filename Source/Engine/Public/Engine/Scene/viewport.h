@@ -9,40 +9,36 @@
 #include <Engine/Core/event.h>
 
 DECLARE_EVENT(OnTargetGLTextureIDChanged, volucris::uint32)
-DECLARE_EVENT(OnViewportSizeChanged, int, int)
 
 namespace volucris
 {
-	class ViewportProxy;
+	class ViewProxy;
+	class RenderTarget;
 
-	class Viewport : public SceneObject
+	class ViewClient : public SceneObject
 	{
 	public:
 		OnTargetGLTextureIDChanged TargetGLTextureIDChanged;
-		OnViewportSizeChanged ViewportSizeChanged;
 
 	public:
-		Viewport();
+		ViewClient(const std::shared_ptr<RenderTarget>& target);
 
-		void setViewport(const Rect& vp);
-
-		Rect getViewport() const { return m_viewport; }
+		void setClientRect(const Rect& rect);
 
 		void update();
 
-		ViewportProxy* getProxy() const { return m_proxy; }
-
-		const Rect& getViewportRect() const { return m_viewport; }
+		std::shared_ptr<ViewProxy> getProxy();
 
 		void setTargetGLTextureID(uint32 id);
+
+		std::shared_ptr<RenderTarget> getRenderTarget() const { return m_target; }
 
 	private:
 		friend class Scene;
 		friend class SceneProxy;
-		uint8 m_dirty;
-		Rect m_viewport;
-		ViewportProxy* m_proxy;
+		std::weak_ptr<ViewProxy> m_proxy;
 		uint32 m_targetGLTextureID;
+		std::shared_ptr<RenderTarget> m_target;
 	};
 }
 

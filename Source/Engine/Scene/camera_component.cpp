@@ -7,7 +7,7 @@
 
 namespace volucris
 {
-	CameraComponent::CameraComponent(Mode mode, Viewport* viewport)
+	CameraComponent::CameraComponent(Mode mode)
 		: SceneComponent()
 		, m_mode(mode)
 		, m_aspect(1200.0/800.0)
@@ -17,14 +17,7 @@ namespace volucris
 		, m_viewMatrix()
 		, m_projectionMatrix()
 		, m_projectionViewMatrix()
-		, m_viewport(viewport)
 	{
-		if (viewport)
-		{
-			viewport->ViewportSizeChanged.addLambda([this](int w, int h) {
-				setAspect(w * 1.0 / h);
-				});
-		}
 		updateProjectionMatrix();
 		onTransformChanged();
 	}
@@ -58,7 +51,7 @@ namespace volucris
 
 	void CameraComponent::updateTransform()
 	{
-		if (m_viewport)
+		/*if (m_viewport)
 		{
 			auto proxy = m_viewport->getProxy();
 			gApp->getRenderer()->pushCommand([proxy, viewMat = m_viewMatrix, projMat = m_projectionMatrix, pv = m_projectionViewMatrix] {
@@ -66,7 +59,7 @@ namespace volucris
 				proxy->setProjectionMatrix(projMat);
 				proxy->setProjectionViewMatrix(pv);
 				});
-		}
+		}*/
 	}
 
 	void CameraComponent::updateRenderState()

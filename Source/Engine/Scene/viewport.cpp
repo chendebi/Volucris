@@ -5,37 +5,44 @@
 #include "Core/volucris.h"
 #include <Renderer/viewport_proxy.h>
 #include "Core/assert.h"
+#include <Resource/render_target.h>
 
 namespace volucris
 {
-	Viewport::Viewport()
-		: m_dirty(0)
-		, m_viewport()
-		, m_proxy(nullptr)
+	ViewClient::ViewClient(const std::shared_ptr<RenderTarget>& target)
+		: m_proxy()
 		, m_targetGLTextureID(0)
+		, m_target(target)
 	{
 
 	}
 
-	void Viewport::setViewport(const Rect& vp)
+	void ViewClient::setClientRect(const Rect& rect)
 	{
-		m_viewport = vp;
-		ViewportSizeChanged.broadcast(vp.w, vp.h);
-		m_dirty = true;
-	}
-
-	void Viewport::update()
-	{
-		if (m_dirty && m_proxy)
+		if (m_target)
 		{
-			gApp->getRenderer()->pushCommand([vp = m_viewport, proxy= m_proxy]() {
-				proxy->setViewport(vp);
-				});
-			m_dirty = false;
+			m_target->setRect(rect);
 		}
 	}
 
-	void Viewport::setTargetGLTextureID(uint32 id)
+	std::shared_ptr<ViewProxy> ViewClient::getProxy()
+	{
+		auto proxy = m_proxy.lock();
+		if (!proxy)
+		{
+			proxy = std::make_shared<ViewProxy>();
+			proxy->initialize(this);
+			m_proxy = proxy;
+		}
+		return proxy;
+	}
+
+	void ViewClient::update()
+	{
+		m_target->update();
+	}
+
+	void ViewClient::setTargetGLTextureID(uint32 id)
 	{
 		m_targetGLTextureID = id;
 		TargetGLTextureIDChanged.broadcast(id);

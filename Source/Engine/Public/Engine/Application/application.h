@@ -8,6 +8,7 @@
 #include "Engine/Core/circle_queue.h"
 #include <functional>
 #include "Engine/Core/size.h"
+#include <Engine/Core/event.h>
 
 namespace volucris
 {
@@ -15,8 +16,9 @@ namespace volucris
 	class Context;
 	class Renderer;
 	class Widget;
-	class Viewport;
-	class Scene;
+	class Level;
+
+	DECLARE_EVENT(OnLevelChanged, std::shared_ptr<Level>)
 
 	struct StatInfo
 	{
@@ -35,6 +37,8 @@ namespace volucris
 			std::vector<std::string> arguments;
 			Config(int argc, char* argv[]);
 		};
+
+		OnLevelChanged CurrentLevelChanged;
 
 	public:
 		Application(const Config& config);
@@ -56,7 +60,7 @@ namespace volucris
 
 		void setMainWidget(const std::shared_ptr<Widget>& widget);
 
-		void addScene(const std::shared_ptr<Scene>& scene);
+		void setLevel(const std::shared_ptr<Level>& level);
 
 		bool isInitialized() const { return m_initialized; }
 
@@ -74,7 +78,7 @@ namespace volucris
 
 		void pushCommand(const std::function<void()>& command);
 
-		std::shared_ptr<Scene> getScene(int index) { return m_scenes[index]; }
+		std::shared_ptr<Level> getCurrentLevel() { return m_level; }
 
 		StatInfo getStatInfo() const;
 
@@ -89,7 +93,7 @@ namespace volucris
 		std::shared_ptr<Window> m_window;
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Widget> m_mainWidget;
-		std::vector<std::shared_ptr<Scene>> m_scenes;
+		std::shared_ptr<Level> m_level;
 		CircleQueue<std::function<void()>> m_queue;
 	};
 }

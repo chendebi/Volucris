@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <type_traits>
+#include <Engine/Core/types_help.h>
 
 namespace volucris
 {
@@ -126,11 +127,34 @@ namespace volucris
 		std::vector<ObjectCallable> m_objectCallables;
 	};
 
-	enum Key
+	enum class Key
 	{
 		KEY_A = 'A', KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I, KEY_J, KEY_K, KEY_L, KEY_M, KEY_N,
 		KEY_0, KEY_P, KEY_Q, KEY_R, KEY_S, KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z,
 		KEY_F1 = 0x70, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_F11, KEY_F12
+	};
+
+	enum class Modifier
+	{
+		SHIFT = 0x01,
+		CTRL = 0x02,
+		ALT = 0x04
+	};
+
+	enum class MouseButton
+	{
+		UNKNOWN,
+		LEFT,
+		MIDDLE,
+		RIGHT
+	};
+
+	using Modifiers = uint32;
+
+	struct MouseEvent
+	{
+		MouseButton button;
+		Modifiers modifiers;
 	};
 }
 
