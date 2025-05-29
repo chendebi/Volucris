@@ -6,6 +6,7 @@
 #include <Engine/Resource/resource_path.h>
 #include "editor_core.h"
 #include <Engine/Resource/resource_registry.h>
+#include <LogWidget/log_widget.h>
 
 using namespace volucris;
 
@@ -19,7 +20,10 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	window->setTitle("Volucris Editor");
 	window->setFullScreen(true);
 	app->setWindow(window);
-	app->setMainWidget(std::make_shared<MainWidget>());
+	auto widget = std::make_shared<MainWidget>();
+	auto logWidget = std::make_shared<LogWidget>();
+	widget->setLogWidget(logWidget);
+	app->setMainWidget(widget);
 
 	auto renderer = std::make_shared<Renderer>();
 	renderer->addRenderPass(std::make_shared<ForwardRenderPass>());

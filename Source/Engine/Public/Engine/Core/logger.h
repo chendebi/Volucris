@@ -3,6 +3,8 @@
 
 #include <string>
 #include <memory>
+#include <functional>
+#include <Engine/Core/circle_queue.h>
 
 namespace spdlog
 {
@@ -11,6 +13,9 @@ namespace spdlog
 
 namespace volucris
 {
+	extern CircleQueue<std::string> gLogBuffer;
+
+	class LogBuffer;
 	class Logger
 	{
 	public:
@@ -25,13 +30,11 @@ namespace volucris
 		};
 
 	public:
+		Logger();
+
 		Logger(const std::string& name, Level level = Trace);
 
-		static Logger& Instance()
-		{
-			static Logger inst("volucris");
-			return inst;
-		}
+		void initialize(const std::string& name, Level level = Trace);
 
 		void log(const std::string& msg, Level level);
 

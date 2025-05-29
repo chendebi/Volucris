@@ -40,7 +40,7 @@ namespace volucris
 
 		if (ImGui::IsWindowFocused())
 		{
-			// 允许
+			// 允许鼠标操作
 		}
 
 		ImVec2 size = ImGui::GetContentRegionAvail();

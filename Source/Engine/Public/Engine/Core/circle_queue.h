@@ -60,6 +60,38 @@ namespace volucris
 			m_count--;
 			return true;
 		}
+
+		void removeFirst()
+		{
+			if (m_count == 0)
+			{
+				return;
+			}
+			m_data[m_head] = T(); // Optional: clear the value
+			m_head = (m_head + 1) % m_size;
+			m_count--;
+		}
+
+		bool get(size_t index, T& value) const
+		{
+			if (index < m_count)
+			{
+				value = m_data[(m_head + index) % m_size];
+				return true;
+			}
+			
+			return false;
+		}
+
+		size_t count() const
+		{
+			return m_count;
+		}
+
+		size_t capacity() const
+		{
+			return m_size;
+		}
 	};
 }
 

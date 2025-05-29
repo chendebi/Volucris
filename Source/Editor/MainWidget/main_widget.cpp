@@ -1,12 +1,15 @@
 #include "main_widget.h"
 #include <imgui/imgui.h>
 #include "ContentBrowser/content_browser_widget.h"
+#include <LogWidget/log_widget.h>
 
 namespace volucris
 {
 	MainWidget::MainWidget()
 		: Widget()
 		, m_browserWidget(std::make_shared<ContentBrowserWidget>())
+		, m_logWidget(nullptr)
+		, m_viewport()
 	{
 	}
 
@@ -15,17 +18,18 @@ namespace volucris
 		auto id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
 		ImGui::SetNextWindowDockID(id);
-		// ´°¿Ú 1£ºShader äÖÈ¾´°¿Ú
+		// çª—å£ 1ï¼šShader æ¸²æŸ“çª—å£
 		m_viewport.build();
 
-		// ´°¿Ú 2-4£ºÆÕÍ¨ ImGui ¿Ø¼þ´°¿Ú
+		// çª—å£ 2-4ï¼šæ™®é€š ImGui æŽ§ä»¶çª—å£
 		ImGui::Begin("Controls");
 		ImGui::Text("This is a control panel.");
 		ImGui::End();
 
-		ImGui::Begin("Log");
-		ImGui::Text("Log messages...");
-		ImGui::End();
+		if (m_logWidget)
+		{
+			m_logWidget->build();
+		}
 
 		ImGui::Begin("Properties");
 		ImGui::SliderFloat("Value", &m_value, 0.0f, 1.0f);

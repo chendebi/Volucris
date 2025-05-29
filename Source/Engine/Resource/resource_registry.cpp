@@ -233,7 +233,7 @@ namespace volucris
 		return getResourceMetaBySystemPath(sysPath);
 	}
 
-	bool ResourceRegistry::registry(const const std::shared_ptr<ResourceObject>& resource, const std::string& path)
+	bool ResourceRegistry::registry(const std::shared_ptr<ResourceObject>& resource, const std::string& path)
 	{
 		if (m_assets.find(GUID(resource->m_metaData.guid)) != m_assets.end())
 		{

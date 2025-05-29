@@ -10,6 +10,7 @@
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include <Resource/resource_registry.h>
 
 namespace volucris
 {
@@ -189,6 +190,22 @@ namespace volucris
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+
+		ImFontConfig config;
+		config.OversampleH = 2; // 提高水平采样质量
+		config.OversampleV = 1; // 垂直采样
+
+		std::string fontPath;
+		ResourceRegistry::Instance().getSystemPathByResourcePath("/Engine/Font/wenquanyi.ttf", fontPath);
+		// 加载英文字体（主字体）
+		ImFont* font_en = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &config);
+
+		// 加载中文字体（合并到同一字体集）
+		//static const ImWchar ranges[] = { 0x4E00, 0x9FFF, 0 }; // 基本汉字范围
+		//ImFont* font_cn = io.Fonts->AddFontFromFileTTF(fontPath, 18.0f, &config, ranges);
+
+		// 必须重建字体纹理
+		//ImGui_ImplOpenGL3_CreateFontsTexture();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(m_impl->handle, true);
