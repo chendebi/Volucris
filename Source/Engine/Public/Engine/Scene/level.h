@@ -19,6 +19,12 @@ namespace volucris
 
 		std::shared_ptr<ViewClient> getClient(int index);
 
+		void dispatchMousePressEvent(const MouseEvent& event);
+
+		void dispatchMouseReleaseEvent(const MouseEvent& event);
+
+		void dispatchMouseMoveEvent(int x, int y);
+
 	private:
 		std::vector<std::shared_ptr<ViewClient>> m_clients;
 	};

@@ -12,6 +12,7 @@
 #include <Engine/Scene/primitive_component.h>
 #include <Engine/Scene/camera_component.h>
 #include <Engine/Scene/level.h>
+#include <Engine/Resource/material.h>
 
 using namespace volucris;
 
@@ -40,6 +41,19 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 		auto comp = std::make_shared<PrimitiveComponent>();
 		comp->setMeshResource(mesh->getResource());
 		comp->setMaterials(mesh->getMaterials());
+		auto idx = 0;
+		glm::vec4 colors[] = {
+			{1.0, 0.0, 0.0, 1.0},
+			{1.0, 1.0, 0.0, 1.0},
+			{1.0, 0.0, 1.0, 1.0},
+			{1.0, 1.0, 1.0, 1.0},
+			{0.0, 1.0, 0.0, 1.0},
+			{0.0, 0.0, 1.0, 1.0},
+		};
+		for (const auto& [slot, mat] : mesh->getMaterials())
+		{
+			mat->getParameterByName("fcolor")->setValue(colors[idx++]);
+		}
 		auto actor = std::make_shared<Actor>();
 		actor->addComponent(comp);
 		level->addActor(actor);

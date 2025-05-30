@@ -12,7 +12,8 @@ namespace volucris
 {
 	class ViewProxy;
 	class RenderTarget;
-	class CameraComponent;
+	class PlayerActor;
+	class EventHandler;
 
 	class ViewClient : public SceneObject
 	{
@@ -34,10 +35,24 @@ namespace volucris
 
 		std::shared_ptr<RenderTarget> getRenderTarget() const { return m_target; }
 
-		void bindCamera(const std::shared_ptr<CameraComponent>& camera)
+		void setPlayer(const std::shared_ptr<PlayerActor>& player);
+
+		PlayerActor* getPlayerActor() const { return m_player.get(); }
+
+		void addEventHandler(const std::shared_ptr<EventHandler>& handler)
 		{
-			m_camera = camera;
+			m_handlers.push_back(handler);
 		}
+
+		void removeEventHandler(EventHandler* handler);
+
+		bool isHardwareClient() const;
+
+		void dispatchMousePressEvent(const MouseEvent& event);
+		
+		void dispatchMouseReleaseEvent(const MouseEvent& event);
+
+		void dispatchMouseMoveEvent(int x, int y);
 
 	private:
 		friend class Scene;
@@ -45,7 +60,8 @@ namespace volucris
 		std::weak_ptr<ViewProxy> m_proxy;
 		uint32 m_targetGLTextureID;
 		std::shared_ptr<RenderTarget> m_target;
-		std::shared_ptr<CameraComponent> m_camera;
+		std::shared_ptr<PlayerActor> m_player;
+		std::vector<std::shared_ptr<EventHandler>> m_handlers;
 	};
 }
 

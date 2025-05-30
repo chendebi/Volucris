@@ -82,6 +82,20 @@ namespace volucris
 		}
 	}
 
+	void onGLFWKeyEvent(GLFWwindow* handle, int key, int scancode, int action, int mods)
+	{
+		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+		if (action == GLFW_PRESS)
+		{
+			//window->MousePressed(event);
+		}
+		else
+		{
+			//window->MouseReleased(event);
+		}
+
+	}
+
 	Window::Window()
 		: m_impl(new Impl)
 		, m_rect(100,100, 800, 600)
@@ -150,6 +164,7 @@ namespace volucris
 		glfwSetFramebufferSizeCallback(m_impl->handle, onGLFWFrameResized);
 		glfwSetCursorPosCallback(m_impl->handle, onGLFWMouseMove);
 		glfwSetMouseButtonCallback(m_impl->handle, onGLFWMouseButton);
+		//glfwSetKeyCallback(m_impl->handle, )
 
 		if (m_frameless)
 		{

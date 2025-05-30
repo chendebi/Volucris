@@ -9,6 +9,9 @@
 #include <Scene/scene.h>
 #include <Renderer/scene_proxy.h>
 #include <Scene/camera_component.h>
+#include <Scene/event_handler.h>
+#include <Scene/player_actor.h>
+#include <Core/vector_help.h>
 
 namespace volucris
 {
@@ -16,7 +19,8 @@ namespace volucris
 		: m_proxy()
 		, m_targetGLTextureID(0)
 		, m_target(target)
-		, m_camera(nullptr)
+		, m_player(nullptr)
+		, m_handlers()
 	{
 
 	}
@@ -43,11 +47,17 @@ namespace volucris
 
 	void ViewClient::update()
 	{
-		if (m_camera && m_camera->isRenderTransformDirty())
+		if (!m_player)
 		{
-			const auto& viewMat = m_camera->getViewMatrix();
-			const auto& projMat = m_camera->getProjectionMatrix();
-			const auto& viewProjMat = m_camera->getViewProjectionMatrix();
+			return;
+		}
+		auto camera = m_player->getCameraComponent();
+
+		if (camera && camera->isRenderTransformDirty())
+		{
+			const auto& viewMat = camera->getViewMatrix();
+			const auto& projMat = camera->getProjectionMatrix();
+			const auto& viewProjMat = camera->getViewProjectionMatrix();
 			auto proxy = getProxy();
 			gApp->getRenderer()->pushCommand([proxy, viewMat, projMat, viewProjMat] {
 				proxy->setViewMatrix(viewMat);
@@ -61,5 +71,75 @@ namespace volucris
 	void ViewClient::setTargetGLTextureID(uint32 id)
 	{
 		m_targetGLTextureID = id;
+	}
+
+	void ViewClient::setPlayer(const std::shared_ptr<PlayerActor>& player)
+	{
+		if (!player)
+		{
+			return;
+		}
+
+		if (auto scene = player->getScene())
+		{
+			if (scene != getScene())
+			{
+				V_LOG_WARN(Engine, "player has registered in other scene");
+				return;
+			}
+		}
+		else if (getScene())
+		{
+			getScene()->addActor(player);
+		}
+		
+		if (m_player)
+		{
+			removeEventHandler(m_player.get());
+		}
+		m_player = player;
+		addEventHandler(m_player);
+	}
+
+	void ViewClient::removeEventHandler(EventHandler* handler)
+	{
+		VectorHelp::quickRemoveFirstIf<std::shared_ptr<EventHandler>>(m_handlers, [handler](const std::shared_ptr<EventHandler>& exist)->bool {
+			return exist.get() == handler;
+			});
+	}
+
+	bool ViewClient::isHardwareClient() const
+	{
+		return m_target->isClientTarget();
+	}
+
+	void ViewClient::dispatchMousePressEvent(const MouseEvent& event)
+	{
+		for (const auto& handler : m_handlers)
+		{
+			handler->mousePressEvent(event);
+		}
+	}
+
+	void ViewClient::dispatchMouseReleaseEvent(const MouseEvent& event)
+	{
+		for (const auto& handler : m_handlers)
+		{
+			handler->mouseReleaseEvent(event);
+		}
+	}
+
+	void ViewClient::dispatchMouseMoveEvent(int x, int y)
+	{
+		auto rect = m_target->getRect();
+		if (!rect.contains(x, y))
+		{
+			return;
+		}
+		auto pos = rect.getRelativePoint(x, y);
+		for (const auto& handler : m_handlers)
+		{
+			handler->mouseMoveEvent(pos.x, pos.y);
+		}
 	}
 }

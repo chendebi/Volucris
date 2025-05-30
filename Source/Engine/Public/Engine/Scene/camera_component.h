@@ -50,10 +50,6 @@ namespace volucris
 
 		void onTransformChanged() override;
 
-		void updateTransform() override;
-
-		void updateRenderState() override;
-
 	private:
 		Mode m_mode;
 		float m_aspect;

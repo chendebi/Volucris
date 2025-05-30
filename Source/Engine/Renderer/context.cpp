@@ -174,6 +174,7 @@ namespace volucris
 
 	bool Context::beginRenderPass(FrameBufferObject* target)
 	{
+		glEnable(GL_DEPTH_TEST);
 		if (target)
 		{
 			if (!target->create() || !target->initialize(this))

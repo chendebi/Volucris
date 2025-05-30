@@ -10,6 +10,7 @@
 #include <Engine/Scene/primitive_component.h>
 #include <Engine/Scene/level.h>
 #include <Engine/Resource/render_target.h>
+#include "editor_player_actor.h"
 
 namespace volucris
 {
@@ -32,14 +33,24 @@ namespace volucris
 			// 允许鼠标操作
 		}
 
+		auto pos = ImGui::GetWindowPos();
+		auto winSize = ImGui::GetWindowSize();
 		ImVec2 size = ImGui::GetContentRegionAvail();
+		Point2D cpos;
+		cpos.x = pos.x + winSize.x - size.x;
+		cpos.y = pos.y + winSize.y - size.y;
 		
 		if (m_client)
 		{
 			const Rect& rect = m_client->getRenderTarget()->getRect();
 			if ((int)size.x != rect.w || (int)size.y != rect.h)
 			{
-				m_client->setClientRect({ 0, 0, (int)size.x, (int)size.y });
+				m_client->setClientRect({ cpos.x, cpos.y, (int)size.x, (int)size.y });
+				if (auto player = m_client->getPlayerActor())
+				{
+					V_LOG_DEBUG(Editor, "size changed: {}, {}, {}", size.x, size.y, size.x / size.y)
+					player->getCameraComponent()->setAspect(size.x / size.y);
+				}
 			}
 		}
 
@@ -49,7 +60,6 @@ namespace volucris
 
 		if (true)
 		{
-			auto pos = ImGui::GetWindowPos();
 			auto statInfo = gApp->getStatInfo();
 			// 设置窗口位置（右上角，偏移 10px）
 			auto winSize = ImGui::GetWindowSize();
@@ -96,6 +106,7 @@ namespace volucris
 		if (level)
 		{
 			m_client = level->addClient({ 0,0,128,128 });
+			m_client->setPlayer(std::make_shared<EditorPlayerActor>());
 		}
 	}
 }

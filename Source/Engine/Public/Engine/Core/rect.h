@@ -7,8 +7,18 @@ namespace volucris
 {
 	struct Point2D
 	{
-		int x;
-		int y;
+		int x = -1;
+		int y = -1;
+
+		bool isValid() const
+		{
+			return x >= 0 && y >= 0;
+		}
+
+		Point2D operator-(const Point2D& pos)
+		{
+			return { x - pos.x, y - pos.y };
+		}
 	};
 
 	struct Rect
@@ -52,6 +62,14 @@ namespace volucris
 		{
 			return px >= x && px <= x + w &&
 				py >= y && py <= y + h;
+		}
+
+		Point2D getRelativePoint(int px, int py)
+		{
+			Point2D pos;
+			pos.x = px - x;
+			pos.y = py - y;
+			return pos;
 		}
 
 		std::string toString() const

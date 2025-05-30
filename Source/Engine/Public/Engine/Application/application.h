@@ -82,6 +82,8 @@ namespace volucris
 
 		StatInfo getStatInfo() const;
 
+		double getFrameTime() const { return m_delta; }
+
 	protected:
 		virtual void tick(double delta) {}
 

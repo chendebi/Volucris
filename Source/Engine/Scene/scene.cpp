@@ -54,12 +54,6 @@ namespace volucris
 		}
 		m_views.push_back(client);
 		client->attach(this);
-		auto camera = std::make_shared<CameraComponent>();
-		camera->setPosition({ 0, 0, 20 });
-		auto actor = std::make_shared<Actor>();
-		actor->setRootComponent(camera);
-		addActor(actor);
-		client->bindCamera(camera);
 	}
 
 	void Scene::tick(const double& delta)
