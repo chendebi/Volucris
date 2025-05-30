@@ -1,4 +1,4 @@
-#include "Scene/viewport.h"
+#include "Scene/view_client.h"
 #include <Application/application.h>
 #include <Renderer/renderer.h>
 #include <glad/glad.h>
@@ -6,6 +6,9 @@
 #include <Renderer/viewport_proxy.h>
 #include "Core/assert.h"
 #include <Resource/render_target.h>
+#include <Scene/scene.h>
+#include <Renderer/scene_proxy.h>
+#include <Scene/camera_component.h>
 
 namespace volucris
 {
@@ -13,6 +16,7 @@ namespace volucris
 		: m_proxy()
 		, m_targetGLTextureID(0)
 		, m_target(target)
+		, m_camera(nullptr)
 	{
 
 	}
@@ -39,12 +43,23 @@ namespace volucris
 
 	void ViewClient::update()
 	{
+		if (m_camera && m_camera->isRenderTransformDirty())
+		{
+			const auto& viewMat = m_camera->getViewMatrix();
+			const auto& projMat = m_camera->getProjectionMatrix();
+			const auto& viewProjMat = m_camera->getViewProjectionMatrix();
+			auto proxy = getProxy();
+			gApp->getRenderer()->pushCommand([proxy, viewMat, projMat, viewProjMat] {
+				proxy->setViewMatrix(viewMat);
+				proxy->setProjectionMatrix(projMat);
+				proxy->setProjectionViewMatrix(viewProjMat);
+				});
+		}
 		m_target->update();
 	}
 
 	void ViewClient::setTargetGLTextureID(uint32 id)
 	{
 		m_targetGLTextureID = id;
-		TargetGLTextureIDChanged.broadcast(id);
 	}
 }

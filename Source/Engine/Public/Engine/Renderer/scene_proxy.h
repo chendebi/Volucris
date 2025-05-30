@@ -16,13 +16,15 @@ namespace volucris
 	class SceneProxy
 	{
 	public:
-		SceneProxy(Scene* scene);
+		SceneProxy();
 
 		~SceneProxy();
 
+		void initialize(Scene* scene);
+
 		void render(Context* context);
 
-		void addView(const std::shared_ptr<ViewProxy>& view);
+		void addViews(const std::vector<std::shared_ptr<ViewProxy>>& views);
 
 		void addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy);
 

@@ -2,7 +2,7 @@
 #define __volicris_viewport_widget_h__
 
 #include <Engine/Application/widget.h>
-#include <Engine/Scene/viewport.h>
+#include <Engine/Scene/view_client.h>
 
 namespace volucris
 {

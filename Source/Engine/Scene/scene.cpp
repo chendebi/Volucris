@@ -1,20 +1,22 @@
 #include "Scene/scene.h"
 #include "Scene/actor.h"
 #include "Core/volucris.h"
-#include "Scene/viewport.h"
+#include "Scene/view_client.h"
 #include <Application/application.h>
 #include "Renderer/renderer.h"
 #include "Renderer/scene_proxy.h"
 #include "Renderer/viewport_proxy.h"
+#include <Scene/camera_component.h>
 
 namespace volucris
 {
 	Scene::Scene()
-		: m_actors()
+		: m_dirty(true)
+		, m_actors()
 		, m_views()
 		, m_ids()
 		, m_recycledIds()
-		, m_proxy(nullptr)
+		, m_proxy()
 	{
 	}
 
@@ -52,6 +54,12 @@ namespace volucris
 		}
 		m_views.push_back(client);
 		client->attach(this);
+		auto camera = std::make_shared<CameraComponent>();
+		camera->setPosition({ 0, 0, 20 });
+		auto actor = std::make_shared<Actor>();
+		actor->setRootComponent(camera);
+		addActor(actor);
+		client->bindCamera(camera);
 	}
 
 	void Scene::tick(const double& delta)
@@ -64,6 +72,26 @@ namespace volucris
 
 	void Scene::update()
 	{
+		if (m_dirty)
+		{
+			std::vector<std::shared_ptr<ViewProxy>> updateViews;
+			for (const auto& view : m_views)
+			{
+				if (!view->isRenderProxyCreated())
+				{
+					updateViews.push_back(view->getProxy());
+				}
+			}
+
+			if (!updateViews.empty())
+			{
+				auto proxy = getSceneProxy();
+				gApp->getRenderer()->pushCommand([proxy, updateViews]() {
+					proxy->addViews(updateViews);
+					});
+			}
+		}
+
 		for (const auto& view : m_views)
 		{
 			view->update();
@@ -77,20 +105,21 @@ namespace volucris
 
 	void Scene::attachToRenderer()
 	{
-		if (m_proxy)
+		if (!m_proxy.expired())
 		{
 			V_LOG_ERROR(Engine, "scene has been attached");
 			return;
 		}
 
 		auto renderer = gApp->getRenderer();
-		auto sceneProxy = std::make_shared<SceneProxy>(this);
-		m_proxy = sceneProxy.get();
+		auto proxy = getSceneProxy();
+		std::vector<std::shared_ptr<ViewProxy>> updateViews;
 		for (const auto& view : m_views)
 		{
-			sceneProxy->addView(view->getProxy());
+			updateViews.push_back(view->getProxy());
 		}
-		renderer->addScene(sceneProxy);
+		proxy->addViews(updateViews);
+		renderer->addScene(proxy);
 		V_LOG_DEBUG(Engine, "scene attach to renderer");
 		RenderStateChanged.broadcast();
 	}
@@ -99,10 +128,21 @@ namespace volucris
 	{
 		auto renderer = gApp->getRenderer();
 		renderer->removeScene(this);
-		m_proxy = nullptr;
 		RenderStateChanged.broadcast();
 		update();
 		V_LOG_DEBUG(Engine, "scene disattach from renderer");
+	}
+
+	std::shared_ptr<SceneProxy> Scene::getSceneProxy()
+	{
+		std::shared_ptr<SceneProxy> proxy = m_proxy.lock();
+		if (!proxy)
+		{
+			proxy = std::make_shared<SceneProxy>();
+			proxy->initialize(this);
+			m_proxy = proxy;
+		}
+		return proxy;
 	}
 
 	std::string Scene::getDefaultDisplayName(const std::string& key)

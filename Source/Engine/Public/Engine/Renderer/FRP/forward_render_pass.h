@@ -17,21 +17,15 @@ namespace volucris
 
 		void render(Context* context) override;
 
-		void setPassTarget(const std::shared_ptr<FrameBufferObject>& target);
-
 		std::shared_ptr<RenderPass> clone() {
 			return std::make_shared<ForwardRenderPass>();
 		}
-
-		std::shared_ptr<Texture2DObject> getTargetTexture() const override;
 
 	protected:
 		bool shouldCollectBatch(const PrimitiveDrawBatch& batch) const { return true; }
 
 	private:
 		OGLClearState m_clearState;
-		ViewProxy* m_view;
-		std::shared_ptr<FrameBufferObject> m_target;
 	};
 }
 

@@ -1,6 +1,6 @@
 #include "Scene/level.h"
 #include <Resource/render_target.h>
-#include <Scene/viewport.h>
+#include <Scene/view_client.h>
 
 namespace volucris
 {

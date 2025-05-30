@@ -127,4 +127,17 @@ namespace volucris
 		m_valid = true;
 		return true;
 	}
+
+	void FrameBufferObject::resize(int w, int h)
+	{
+		if (m_depthAttachment)
+		{
+			m_depthAttachment->setSize(w, h);
+		}
+
+		for (const auto& [idx, attachment] : m_colorAttachments)
+		{
+			attachment->setSize(w, h);
+		}
+	}
 }

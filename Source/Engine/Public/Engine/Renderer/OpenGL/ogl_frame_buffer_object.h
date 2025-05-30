@@ -31,6 +31,8 @@ namespace volucris
 
 		uint32 getID() const { return m_id; }
 
+		void resize(int w, int h);
+
 		void attachColor(int index, const std::shared_ptr<FrameBufferComponent>& texture)
 		{
 			m_colorAttachments.insert_or_assign(index, texture);

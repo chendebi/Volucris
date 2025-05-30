@@ -1,7 +1,7 @@
 #include "Renderer/scene_proxy.h"
 #include "Scene/scene.h"
 #include "Renderer/viewport_proxy.h"
-#include "Scene/viewport.h"
+#include "Scene/view_client.h"
 #include "Renderer/primitive_proxy.h"
 #include "Core/vector_help.h"
 #include <Renderer/OpenGL/ogl_render_state.h>
@@ -9,7 +9,7 @@
 
 namespace volucris
 {
-	SceneProxy::SceneProxy(Scene* scene)
+	SceneProxy::SceneProxy()
 		: m_views()
 		, m_primitives()
 	{
@@ -19,6 +19,11 @@ namespace volucris
 	SceneProxy::~SceneProxy()
 	{
 		
+	}
+
+	void SceneProxy::initialize(Scene* scene)
+	{
+
 	}
 
 	void SceneProxy::render(Context* context)
@@ -38,9 +43,9 @@ namespace volucris
 		}
 	}
 
-	void SceneProxy::addView(const std::shared_ptr<ViewProxy>& view)
+	void SceneProxy::addViews(const std::vector<std::shared_ptr<ViewProxy>>& views)
 	{
-		m_views.push_back(view);
+		m_views.insert(m_views.end(), views.begin(), views.end());
 	}
 
 	void SceneProxy::addPrimitiveProxy(const std::shared_ptr<PrimitiveProxy>& proxy)

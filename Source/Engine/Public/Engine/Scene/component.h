@@ -27,6 +27,8 @@ namespace volucris
 
 		void markRenderDynamicDataDirty() { m_renderDynamicDataDirty = true; }
 
+		bool isRenderTransformDirty() const { return m_renderTransformDirty; }
+
 	protected:
 		virtual void updateDynamicData() {}
 

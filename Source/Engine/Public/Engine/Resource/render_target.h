@@ -62,6 +62,8 @@ namespace volucris
 
 		std::shared_ptr<RenderTargetProxy> getProxy();
 
+		bool isRenderResourceCreated() const { return !m_proxy.expired(); }
+
 		void update();
 
 	protected:

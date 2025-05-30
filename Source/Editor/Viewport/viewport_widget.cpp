@@ -24,8 +24,6 @@ namespace volucris
 
 	void ViewportWidget::build()
 	{
-		
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("viewport");
 
@@ -45,7 +43,7 @@ namespace volucris
 			}
 		}
 
-		ImTextureID texID = (ImTextureID)(intptr_t)m_targetID;
+		ImTextureID texID = (ImTextureID)(intptr_t)m_client->getTargetGLTextureID();;
 		
 		ImGui::Image(texID, size, ImVec2(0, 1), ImVec2(1, 0));
 

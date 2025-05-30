@@ -1,7 +1,7 @@
 #include "Renderer/viewport_proxy.h"
 #include "glad/glad.h"
 #include "Core/volucris.h"
-#include "Scene/viewport.h"
+#include "Scene/view_client.h"
 #include "Scene/scene.h"
 #include "Renderer/primitive_proxy.h"
 #include "Renderer/render_pass.h"
@@ -11,6 +11,7 @@
 #include <Renderer/OpenGL/ogl_texture2d_object.h>
 #include <Resource/render_target.h>
 #include <Renderer/render_target_proxy.h>
+#include <Renderer/FRP/forward_render_pass.h>
 
 namespace volucris
 {
@@ -19,24 +20,32 @@ namespace volucris
 		, m_renderTarget(nullptr)
 		, m_cameraInfo()
 		, m_cameraInfoDirty(true)
-		, m_target()
+		, m_client(nullptr)
 	{
+		addRenderPass(std::make_shared<ForwardRenderPass>());
 	}
 
 	void ViewProxy::initialize(ViewClient* client)
 	{
-		m_scene = client->getScene()->getSceneProxy();
+		m_client = client;
+		m_scene = client->getScene()->getSceneProxy().get();
 		m_renderTarget = client->getRenderTarget()->getProxy();
+		(*m_passes.rbegin())->setRenderTarget(m_renderTarget);
 	}
 
 	void ViewProxy::update(const std::vector<std::shared_ptr<PrimitiveProxy>>& primitives)
 	{
+		if (!m_renderTarget->getViewport().isValid())
+		{
+			return;
+		}
+
 		if (m_renderTarget->isTargetDirty())
 		{
-			//V_LOG_WARN(Engine, "在这里更新pass的渲染目标大小");
+			const auto rect = m_renderTarget->getRect();
 			for (const auto& pass : m_passes)
 			{
-				
+				pass->viewSizeChanged(rect.w, rect.h);
 			}
 		}
 
@@ -73,24 +82,27 @@ namespace volucris
 
 	void ViewProxy::render(Context* context)
 	{
+		if (!m_renderTarget->getViewport().isValid())
+		{
+			return;
+		}
 		context->setCameraInfoBlock(m_cameraInfoBlock);
+
 		for (const auto& pass : m_passes)
 		{
 			pass->render(context);
 		}
 
-		if (m_target.expired() && !m_passes.empty())
+		if (m_renderTarget && m_client)
 		{
-			if (auto tex = (*m_passes.rbegin())->getTargetTexture())
+			auto colorTex = m_renderTarget->getOutputColorTexture();
+			if (colorTex->getID() > 0)
 			{
-				m_target = tex;
-			}
-			if (!m_target.expired())
-			{
-				auto id = m_target.lock()->getID();
-				/*gApp->pushCommand([vp = m_client, id]() {
-					vp->setTargetGLTextureID(id);
-					});*/
+				uint32 id = colorTex->getID();
+				gApp->pushCommand([client = m_client, id]() {
+					client->setTargetGLTextureID(id);
+					});
+				m_client = nullptr;
 			}
 		}
 	}

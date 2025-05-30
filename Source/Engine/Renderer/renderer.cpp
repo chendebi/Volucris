@@ -2,7 +2,7 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "Renderer/context.h"
 #include "Renderer/viewport_proxy.h"
-#include "Scene/viewport.h"
+#include "Scene/view_client.h"
 #include "Renderer/primitive_proxy.h"
 #include "Scene/primitive_component.h"
 #include "Renderer/scene_proxy.h"
@@ -81,11 +81,11 @@ namespace volucris
 
 	void Renderer::removeScene(Scene* scene)
 	{
-		check(scene && scene->getSceneProxy() != nullptr);
+		check(scene);
 		auto proxy = scene->getSceneProxy();
 		pushCommand([this, proxy]() {
 			VectorHelp::quickRemoveFirstIf<std::shared_ptr<SceneProxy>>(m_scenes, [proxy](const std::shared_ptr<SceneProxy>& scene)->bool {
-				return scene.get() == proxy;
+				return scene == proxy;
 				});
 			});
 	}

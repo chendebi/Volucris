@@ -24,12 +24,24 @@ namespace volucris
 
 		void setRect(const Rect& rect);
 
+		Rect getRect() const { return m_rect; }
+
 		bool isTargetDirty() const;
+
+		std::shared_ptr<FrameBufferObject> getFrameBuffer() const
+		{
+			return m_framebuffer;
+		}
+
+		std::shared_ptr<Texture2DObject> getOutputColorTexture() const
+		{
+			return m_targetColorTexture;
+		}
 
 	private:
 		bool m_isClient;
 		Rect m_rect;
-		std::shared_ptr<Texture2DObject> m_target;
+		std::shared_ptr<Texture2DObject> m_targetColorTexture;
 		std::shared_ptr<FrameBufferObject> m_framebuffer;
 	};
 }

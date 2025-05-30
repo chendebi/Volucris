@@ -91,6 +91,10 @@ namespace volucris
 
 	void Component::disattached(Scene* scene)
 	{
+		for (const auto& child : m_children)
+		{
+			child->disattach();
+		}
 		scene->RenderStateChanged.removeAll(this);
 		markRenderStateDirty();
 	}

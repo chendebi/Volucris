@@ -9,7 +9,7 @@ namespace volucris
 	RenderTargetProxy::RenderTargetProxy()
 		: m_isClient(false)
 		, m_rect({0,0,0,0})
-		, m_target(nullptr)
+		, m_targetColorTexture(nullptr)
 		, m_framebuffer(nullptr)
 	{
 
@@ -18,28 +18,29 @@ namespace volucris
 	void RenderTargetProxy::initialize(RenderTarget* target)
 	{
 		m_isClient = target->isClientTarget();
-		m_rect = target->getRect();
-
+		
 		m_framebuffer = std::make_shared<FrameBufferObject>();
-		m_target = std::make_shared<Texture2DObject>();
-		m_target->setFormat(GL_RGB);
-		m_target->setType(GL_UNSIGNED_BYTE);
+		m_targetColorTexture = std::make_shared<Texture2DObject>();
+		m_targetColorTexture->setFormat(GL_RGB);
+		m_targetColorTexture->setType(GL_UNSIGNED_BYTE);
 
 		auto depthRbo = std::make_shared<RenderBufferObject>();
+		depthRbo->setSize(m_rect.w, m_rect.h);
 		depthRbo->setFormat(GL_DEPTH24_STENCIL8);
 		m_framebuffer->attachDepth(depthRbo);
 
-		m_framebuffer->attachColor(0, m_target);
+		m_framebuffer->attachColor(0, m_targetColorTexture);
+		setRect(target->getRect());
 	}
 
 	void RenderTargetProxy::setRect(const Rect& rect)
 	{
 		m_rect = rect;
-		m_target->setSize(rect.w, rect.h);
+		m_framebuffer->resize(rect.w, rect.h);
 	}
 
 	bool RenderTargetProxy::isTargetDirty() const
 	{
-		return !m_target->isValid();
+		return !m_targetColorTexture->isValid();
 	}
 }

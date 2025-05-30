@@ -69,7 +69,7 @@ namespace volucris
 		CameraInfo m_cameraInfo;
 		uint8 m_cameraInfoDirty;
 		UniformBlock m_cameraInfoBlock;
-		std::weak_ptr<Texture2DObject> m_target;
+		ViewClient* m_client;
 	};
 }
 

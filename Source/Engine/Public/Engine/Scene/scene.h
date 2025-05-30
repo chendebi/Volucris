@@ -36,7 +36,7 @@ namespace volucris
 
 		void deattachFromRenderer();
 
-		SceneProxy* getSceneProxy() const { return m_proxy; }
+		std::shared_ptr<SceneProxy> getSceneProxy();
 
 		const std::vector<std::shared_ptr<ViewClient>>& getViews() const
 		{
@@ -47,12 +47,12 @@ namespace volucris
 
 	private:
 		friend class Renderer;
+		bool m_dirty;
 		std::vector<std::shared_ptr<Actor>> m_actors;
 		std::vector<std::shared_ptr<ViewClient>> m_views;
-		
 		std::unordered_map<std::string, int> m_ids;
 		std::unordered_map<std::string, std::vector<int>> m_recycledIds;
-		SceneProxy* m_proxy;
+		std::weak_ptr<SceneProxy> m_proxy;
 	};
 }
 

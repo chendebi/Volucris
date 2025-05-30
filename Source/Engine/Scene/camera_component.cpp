@@ -1,6 +1,5 @@
 #include "Scene/camera_component.h"
 #include <glm/ext.hpp>
-#include "Scene/viewport.h"
 #include <Application/application.h>
 #include "Renderer/renderer.h"
 #include "Renderer/viewport_proxy.h"

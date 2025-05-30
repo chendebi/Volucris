@@ -7,7 +7,6 @@
 #include "Application/widget.h"
 #include "Renderer/context.h"
 #include "Renderer/renderer.h"
-#include "Scene/viewport.h"
 #include "Scene/level.h"
 
 namespace volucris
