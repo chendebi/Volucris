@@ -8,6 +8,7 @@ namespace volucris
 	EditorPlayerActor::EditorPlayerActor()
 		: PlayerActor()
 		, m_mousePressed(false)
+		, m_speed(0.0)
 		, m_lastPos()
 	{
 		getCameraComponent()->setFOV(45.0);
@@ -38,15 +39,47 @@ namespace volucris
 			if (m_lastPos.isValid())
 			{
 				Point2D pos = { x, y };
-				glm::vec2 moveStep = { x - m_lastPos.x, m_lastPos.y - y};
+				glm::vec2 moveStep = { m_lastPos.x - x, m_lastPos.y - y};
 				glm::vec2 rot = moveStep * glm::vec2(2.0 * gApp->getFrameTime());
 				auto camera = getCameraComponent();
 				auto rotation = camera->getRotation();
-				rotation.x += rot.x;
-				rotation.y += rot.y;
+				rotation.x += rot.y;
+				rotation.y += rot.x;
 				camera->setRotation(rotation);
 			}
 			m_lastPos = { x, y };
 		}
+	}
+
+	void EditorPlayerActor::keyPressedEvent(Key key, Modifiers modifiers)
+	{
+		if (key == Key::KEY_W)
+		{
+			m_speed = 2.0f;
+		}
+		else if (key == Key::KEY_S)
+		{
+			m_speed = -2.0f;
+		}
+	}
+
+	void EditorPlayerActor::keyReleasedEvent(Key key, Modifiers modifiers)
+	{
+		if (key == Key::KEY_W)
+		{
+			m_speed = 0.0f;
+		}
+		else if (key == Key::KEY_S)
+		{
+			m_speed = 0.0f;
+		}
+	}
+
+	void EditorPlayerActor::tick(double delta)
+	{
+		auto camera = getCameraComponent();
+		float speed = delta * m_speed;
+		auto pos = camera->getPosition() + camera->getForwardDirection() * glm::vec3(speed, speed, speed);
+		camera->setPosition(pos);
 	}
 }

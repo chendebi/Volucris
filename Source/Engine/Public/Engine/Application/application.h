@@ -92,6 +92,7 @@ namespace volucris
 		uint8 m_initialized;
 		uint8 m_running;
 		double m_delta;
+		StatInfo m_info;
 		std::shared_ptr<Window> m_window;
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Widget> m_mainWidget;

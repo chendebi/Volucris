@@ -42,7 +42,7 @@ namespace volucris
 		
 		if (m_client)
 		{
-			const Rect& rect = m_client->getRenderTarget()->getRect();
+			const Rect& rect = m_client->getRect();
 			if ((int)size.x != rect.w || (int)size.y != rect.h)
 			{
 				m_client->setClientRect({ cpos.x, cpos.y, (int)size.x, (int)size.y });
@@ -71,7 +71,7 @@ namespace volucris
 
 			// 设置窗口属性
 			ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pivot);
-			ImGui::SetNextWindowSize(ImVec2(100, 80)); // 可选：固定窗口大小
+			//ImGui::SetNextWindowSize(ImVec2(100, 80)); // 可选：固定窗口大小
 
 			// 定义窗口样式（无标题栏、无背景、无交互）
 			ImGuiWindowFlags flags =

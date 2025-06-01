@@ -38,18 +38,11 @@ namespace volucris
 
 	void CameraComponent::onTransformChanged()
 	{
-		glm::vec3 front;
-		auto rot = getRotation();
-		front.x = cos(glm::radians(rot.x)) * cos(glm::radians(rot.y));
-		front.y = sin(glm::radians(rot.y));
-		front.z = sin(glm::radians(rot.x)) * cos(glm::radians(rot.y));
-		auto Front = glm::normalize(front);
-		// also re-calculate the Right and Up vector
-		auto Right = glm::normalize(glm::cross(Front, glm::vec3(0, 1, 0)));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-		auto Up = glm::normalize(glm::cross(Right, Front));
-		//m_viewMatrix = glm::lookAt(glm::vec3(0.0, 3.0, 5.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		auto eye = getPosition();
-		m_viewMatrix = glm::lookAt(eye, eye + Front, Up);
+		auto rotation = getRortationTransform();
+		auto upDir = glm::vec4(0, 1, 0, 0);
+		auto front = getForwardDirection();
+		auto up = glm::normalize(glm::vec3(rotation * upDir));
+		m_viewMatrix = glm::lookAt(getPosition(), getPosition() + front, up);
 		m_projectionViewMatrix = m_projectionMatrix * m_viewMatrix;
 	}
 }

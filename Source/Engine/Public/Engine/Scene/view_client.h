@@ -54,9 +54,16 @@ namespace volucris
 
 		void dispatchMouseMoveEvent(int x, int y);
 
+		void dispatchKeyPressedEvent(Key key, Modifiers modifiers);
+
+		void dispatchKeyReleasedEvent(Key key, Modifiers modifiers);
+
+		Rect getRect() const { return m_rect; }
+
 	private:
 		friend class Scene;
 		friend class SceneProxy;
+		Rect m_rect;
 		std::weak_ptr<ViewProxy> m_proxy;
 		uint32 m_targetGLTextureID;
 		std::shared_ptr<RenderTarget> m_target;

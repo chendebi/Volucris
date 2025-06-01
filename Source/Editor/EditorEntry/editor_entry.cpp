@@ -36,6 +36,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	auto level = std::make_shared<Level>();
 
+	if (true)
 	{
 		auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/cube");
 		auto comp = std::make_shared<PrimitiveComponent>();

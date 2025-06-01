@@ -45,6 +45,19 @@ namespace volucris
 		makeCurrent();
 		glfwSwapInterval(1); // Enable vsync
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+		{
+			const auto vender = glGetString(GL_VENDOR);
+			const auto renderer = glGetString(GL_RENDERER);
+			const auto language = glGetString(GL_SHADING_LANGUAGE_VERSION);
+			const auto version = glGetString(GL_VERSION);
+
+			V_LOG_INFO(Engine, "context initialized");
+			V_LOG_INFO(Engine, "	vender: {}", (char*)vender);
+			V_LOG_INFO(Engine, "	renderer: {}", (char*)renderer);
+			V_LOG_INFO(Engine, "	version: {}", (char*)version);
+			V_LOG_INFO(Engine, "	language version: {}", (char*)language);
+		}
 	}
 
 	Context::~Context()

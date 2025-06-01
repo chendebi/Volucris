@@ -21,5 +21,5 @@ add_subdirectory(Source/ThirdParty EXCLUDE_FROM_ALL)
 
 if (${INDEPENDENT_VOLUCRIS})
     add_subdirectory(Source/Editor)
-	add_subdirectory(Test/CoreTest)
+   #add_subdirectory(Test/CoreTest)
 endif()

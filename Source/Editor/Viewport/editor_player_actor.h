@@ -17,8 +17,15 @@ namespace volucris
 
 		void mouseMoveEvent(int x, int y) override;
 
+		void keyPressedEvent(Key key, Modifiers modifiers) override;
+
+		void keyReleasedEvent(Key key, Modifiers modifiers) override;
+
+		void tick(double delta) override;
+
 	private:
 		bool m_mousePressed;
+		float m_speed;
 		Point2D m_lastPos;
 	};
 }

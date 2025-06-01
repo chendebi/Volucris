@@ -16,7 +16,8 @@
 namespace volucris
 {
 	ViewClient::ViewClient(const std::shared_ptr<RenderTarget>& target)
-		: m_proxy()
+		: m_rect()
+		, m_proxy()
 		, m_targetGLTextureID(0)
 		, m_target(target)
 		, m_player(nullptr)
@@ -27,9 +28,13 @@ namespace volucris
 
 	void ViewClient::setClientRect(const Rect& rect)
 	{
+		m_rect = rect;
 		if (m_target)
 		{
-			m_target->setRect(rect);
+			auto targetRect = rect;
+			targetRect.w = std::min(rect.w, 1920);
+			targetRect.h = targetRect.w * 1.0 * rect.h / rect.w;
+			m_target->setRect(targetRect);
 		}
 	}
 
@@ -131,15 +136,30 @@ namespace volucris
 
 	void ViewClient::dispatchMouseMoveEvent(int x, int y)
 	{
-		auto rect = m_target->getRect();
-		if (!rect.contains(x, y))
+		if (!m_rect.contains(x, y))
 		{
 			return;
 		}
-		auto pos = rect.getRelativePoint(x, y);
+		auto pos = m_rect.getRelativePoint(x, y);
 		for (const auto& handler : m_handlers)
 		{
 			handler->mouseMoveEvent(pos.x, pos.y);
+		}
+	}
+
+	void ViewClient::dispatchKeyPressedEvent(Key key, Modifiers modifiers)
+	{
+		for (const auto& handler : m_handlers)
+		{
+			handler->keyPressedEvent(key, modifiers);
+		}
+	}
+
+	void ViewClient::dispatchKeyReleasedEvent(Key key, Modifiers modifiers)
+	{
+		for (const auto& handler : m_handlers)
+		{
+			handler->keyReleasedEvent(key, modifiers);
 		}
 	}
 }

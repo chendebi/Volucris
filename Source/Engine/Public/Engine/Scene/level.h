@@ -25,6 +25,10 @@ namespace volucris
 
 		void dispatchMouseMoveEvent(int x, int y);
 
+		void dispatchKeyPressedEvent(Key key, Modifiers modifiers);
+
+		void dispatchKeyReleasedEvent(Key key, Modifiers modifiers);
+
 	private:
 		std::vector<std::shared_ptr<ViewClient>> m_clients;
 	};

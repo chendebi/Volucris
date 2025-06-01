@@ -85,13 +85,13 @@ namespace volucris
 	void onGLFWKeyEvent(GLFWwindow* handle, int key, int scancode, int action, int mods)
 	{
 		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-		if (action == GLFW_PRESS)
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
-			//window->MousePressed(event);
+			window->KeyPressed((Key)key, mods);
 		}
 		else
 		{
-			//window->MouseReleased(event);
+			window->KeyReleased((Key)key, mods);
 		}
 
 	}
@@ -164,7 +164,7 @@ namespace volucris
 		glfwSetFramebufferSizeCallback(m_impl->handle, onGLFWFrameResized);
 		glfwSetCursorPosCallback(m_impl->handle, onGLFWMouseMove);
 		glfwSetMouseButtonCallback(m_impl->handle, onGLFWMouseButton);
-		//glfwSetKeyCallback(m_impl->handle, )
+		glfwSetKeyCallback(m_impl->handle, onGLFWKeyEvent);
 
 		if (m_frameless)
 		{
@@ -262,6 +262,18 @@ namespace volucris
 		//ImGui_ImplOpenGL3_CreateFontsTexture();
 
 		// Setup Platform/Renderer backends
+
+		float dpi_scale = 1.0f;
+#if defined(_WIN32)
+		// Windows获取DPI缩放
+		dpi_scale = (float)GetDpiForSystem() / 96.0f;
+#elif defined(__APPLE__)
+		// macOS获取Retina缩放因子
+#endif
+
+		ImGui::GetIO().FontGlobalScale = dpi_scale;
+		ImGui::GetStyle().ScaleAllSizes(dpi_scale);
+
 		ImGui_ImplGlfw_InitForOpenGL(m_impl->handle, true);
 		ImGui_ImplOpenGL3_Init(glslversion.c_str());
 		m_impl->imguiInited = true;
@@ -277,8 +289,6 @@ namespace volucris
 		}
 
 		glfwMaximizeWindow(m_impl->handle);
-		/*HWND hwnd = glfwGetWin32Window(m_impl->handle);
-		SetWindowLong()*/
 	}
 
 	void Window::setFrameless(bool enabled)

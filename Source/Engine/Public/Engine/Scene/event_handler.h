@@ -15,6 +15,10 @@ namespace volucris
 		virtual void mouseReleaseEvent(const MouseEvent& e) {  }
 
 		virtual void mouseMoveEvent(int x, int y) {  }
+
+		virtual void keyPressedEvent(Key key, Modifiers modifiers) {}
+
+		virtual void keyReleasedEvent(Key key, Modifiers modifiers) {}
 	};
 }
 

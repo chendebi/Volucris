@@ -60,4 +60,26 @@ namespace volucris
 			}
 		}
 	}
+
+	void Level::dispatchKeyPressedEvent(Key key, Modifiers modifiers)
+	{
+		for (const auto& client : m_clients)
+		{
+			if (client->isHardwareClient())
+			{
+				client->dispatchKeyPressedEvent(key, modifiers);
+			}
+		}
+	}
+
+	void Level::dispatchKeyReleasedEvent(Key key, Modifiers modifiers)
+	{
+		for (const auto& client : m_clients)
+		{
+			if (client->isHardwareClient())
+			{
+				client->dispatchKeyReleasedEvent(key, modifiers);
+			}
+		}
+	}
 }
