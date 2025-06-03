@@ -314,4 +314,11 @@ namespace volucris
 			glfwSetInputMode(m_impl->handle, GLFW_CURSOR, enabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 		}
 	}
+
+	Point2D Window::getMousePosition() const
+	{
+		double x, y;
+		glfwGetCursorPos(m_impl->handle, &x, &y);
+		return { (int)x, (int)y };
+	}
 }

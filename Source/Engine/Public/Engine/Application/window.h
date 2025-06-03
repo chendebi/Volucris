@@ -59,6 +59,8 @@ namespace volucris
 
 		void setCursorEnabled(bool enabled);
 
+		Point2D getMousePosition() const;
+
 	private:
 		struct Impl;
 		Impl* m_impl;

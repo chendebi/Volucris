@@ -24,7 +24,7 @@ namespace volucris
 			gApp->getWindow()->setCursorEnabled(false);
 			sender->setEventScope(ViewClient::EventScope::WholeWindow);
 			m_mousePressed = true;
-			m_lastPos = Point2D();
+			m_lastPos = sender->getRect().getRelativePoint(gApp->getWindow()->getMousePosition());
 		}
 	}
 
@@ -42,17 +42,14 @@ namespace volucris
 	{
 		if (m_mousePressed)
 		{
-			if (m_lastPos.isValid())
-			{
-				Point2D pos = e->position;
-				glm::vec2 moveStep = { m_lastPos.x - pos.x, m_lastPos.y - pos.y};
-				glm::vec2 rot = moveStep * glm::vec2(2.0 * gApp->getFrameTime());
-				auto camera = getCameraComponent();
-				auto rotation = camera->getRotation();
-				rotation.x += rot.y;
-				rotation.y += rot.x;
-				camera->setRotation(rotation);
-			}
+			Point2D pos = e->position;
+			glm::vec2 moveStep = { m_lastPos.x - pos.x, m_lastPos.y - pos.y };
+			glm::vec2 rot = moveStep * glm::vec2(4.0 * gApp->getFrameTime());
+			auto camera = getCameraComponent();
+			auto rotation = camera->getRotation();
+			rotation.x += rot.y;
+			rotation.y += rot.x;
+			camera->setRotation(rotation);
 			m_lastPos = e->position;
 		}
 	}
