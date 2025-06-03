@@ -36,6 +36,24 @@ namespace volucris
 
 		void setMaterialResource(const std::shared_ptr<MaterialResource>& resource);
 
+		const std::string& getVertexShaderFilePath() const
+		{
+			if (m_parent)
+			{
+				return m_parent->getVertexShaderFilePath();
+			}
+			return m_vsFilePath;
+		}
+
+		const std::string& getFragmentShaderFilePath() const
+		{
+			if (m_parent)
+			{
+				return m_parent->getFragmentShaderFilePath();
+			}
+			return m_fsFilePath;
+		}
+
 	protected:
 
 		bool serialize(Serializer& serializer) const override;
@@ -47,7 +65,8 @@ namespace volucris
 		std::string m_vsFilePath;
 		std::string m_fsFilePath;
 		std::shared_ptr<MaterialResource> m_resource;
-		std::vector<std::unique_ptr<MaterialParameter>> m_parameters;
+		std::vector<std::unique_ptr<MaterialValueParameter>> m_parameters;
+		std::vector<std::unique_ptr<MaterialTextureParameter>> m_textureParameters;
 		std::vector<uint8> m_parameterData;
 		std::weak_ptr<MaterialProxy> m_proxy;
 	};

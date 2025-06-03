@@ -46,6 +46,7 @@ endfunction()
 
 volucris_link_assimp(${TARGET})
 target_link_libraries(${TARGET} PUBLIC Engine)
+target_link_libraries(${TARGET} PRIVATE stb_image)
 set_target_properties(${TARGET} PROPERTIES FOLDER "")
 
 file(GLOB ASSIMP_DLLS ${VOLUCRIS_ASSIMP_DIRECTORY}/bin/*.dll)

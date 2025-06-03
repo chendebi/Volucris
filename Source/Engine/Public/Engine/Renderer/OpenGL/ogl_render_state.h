@@ -35,6 +35,11 @@ namespace volucris
 	{
 		OGLBufferObject* ubo = nullptr;
 		OGLBufferObject::BlockID block;
+
+		bool valid() const
+		{
+			return ubo && block.valid();
+		}
 	};
 
 	struct OGLProgramState

@@ -113,9 +113,15 @@ namespace volucris
 		glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer->getID());
 	}
 
-	void Context::bindUniformBlock(const UniformBlock& block, uint32 index)
+	void Context::bindUniformBlock(UniformBlock* block, uint32 index)
 	{
-		glBindBufferRange(GL_UNIFORM_BUFFER, index, block.ubo->getID(), block.block.offset, block.block.size);
+		//GLint alignment;
+		//glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
+		//if (block->block.offset % alignment != 0) {
+		//	V_LOG_ERROR(Engine, "block offset is invalid: {}, {}", block->block.offset, alignment);
+		//}
+		glBindBufferRange(GL_UNIFORM_BUFFER, index, block->ubo->getID(), block->block.offset, block->block.size);
+		GL_CHECK();
 	}
 
 	void Context::bindVertexArrayObject(OGLVertexArrayObject* vao)
@@ -166,9 +172,14 @@ namespace volucris
 		}
 	}
 
-	void Context::setCameraInfoBlock(const UniformBlock& block)
+	void Context::setCameraInfoBlock(UniformBlock* block)
 	{
 		m_cameraInfoBlock = block;
+	}
+
+	void Context::setDirectionLightBlock(UniformBlock* block)
+	{
+		m_directonLightBlock = block;
 	}
 
 	void Context::setViewport(int x, int y, int w, int h)
@@ -236,20 +247,22 @@ namespace volucris
 			V_LOG_WARN(Engine, "draw call failed");
 			return;
 		}
+		GL_CHECK();
 		if (state.programState.program != m_renderState.drawState.programState.program)
 		{
 			m_renderState.drawState.programState.program = state.programState.program;
 			glUseProgram(state.programState.program->getID());
 		}
-
+		GL_CHECK();
 		for (const auto& uniform : state.programState.uniforms)
 		{
 			uniform->upload();
 		}
-
+		GL_CHECK();
 		bindVertexArrayObject(state.vao);
 		bindBuffer(state.ebo);
 		glDrawElements(getDrawMode(section.mode), section.count, GL_UNSIGNED_INT, (void*)section.offset);
+		GL_CHECK();
 	}
 
 	void Context::draw(const MaterialProxy* material, const SectionDrawData& section)
@@ -300,18 +313,30 @@ namespace volucris
 				}
 				bindUniformBlock(m_cameraInfoBlock, slot);
 				break;
+			case MaterialParameterDesc::DIRECTION_LIGHT:
+				if (!prepareUniformBlock(m_directonLightBlock))
+				{
+					return false;
+				}
+				bindUniformBlock(m_directonLightBlock, slot);
+				break;
 			default:
 				break;
 			}
 			++slot;
+			GL_CHECK();
 		}
-
+		GL_CHECK();
 		return true;
 	}
 
-	bool Context::prepareUniformBlock(const UniformBlock& block)
+	bool Context::prepareUniformBlock(UniformBlock* block)
 	{
-		auto ubo = m_cameraInfoBlock.ubo;
+		if (!block)
+		{
+			return false;
+		}
+		auto ubo = block->ubo;
 		if (!ubo || (!ubo->valid() && (!ubo->create() || !ubo->initialize(this))))
 		{
 			return false;

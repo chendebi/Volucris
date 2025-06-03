@@ -1,6 +1,6 @@
 #version 330 core
-layout(location=0) out vec4 color;
 
+in vec3 v_NormalOut;
 layout (std140) uniform v_directionLight
 {
     vec4 color;
@@ -8,9 +8,9 @@ layout (std140) uniform v_directionLight
     float intensity;
 } directionLight;
 
-uniform vec3 fcolor;
+layout(location=0) out vec4 FragColor;
 
 void main()
 {
-    color = directionLight.color;
+	FragColor.xyz = directionLight.color.xyz;
 }

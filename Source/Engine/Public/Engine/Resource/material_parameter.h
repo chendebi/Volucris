@@ -10,13 +10,36 @@
 namespace volucris
 {
 	class Material;
+	class Texture2D;
 
 	class MaterialParameter
 	{
 	public:
-		MaterialParameter(Material* material, const MaterialParameterDesc& desc, uint8* table);
+		enum Type
+		{
+			UNKNOWN,
+			VALUE,
+			TEXTURE
+		};
 
-		~MaterialParameter();
+		MaterialParameter(Material* material, const MaterialParameterDesc& desc);
+
+		virtual ~MaterialParameter();
+
+		Material* getMaterial() const { return m_material; }
+
+		const MaterialParameterDesc& getDescription() const { return m_desc; }
+
+	protected:
+		Type m_type;
+		Material* m_material;
+		MaterialParameterDesc m_desc;
+	};
+
+	class MaterialValueParameter : public MaterialParameter
+	{
+	public:
+		MaterialValueParameter(Material* material, const MaterialParameterDesc& desc, uint8* table);
 
 		void setValue(float value);
 
@@ -24,14 +47,17 @@ namespace volucris
 
 		void setValue(const glm::mat4& value);
 
-		Material* getMaterial() const { return m_material; }
+	private:
+		uint8* m_dataTable;
+	};
 
-		const MaterialParameterDesc& getDescription() const { return m_desc; }
+	class MaterialTextureParameter : public MaterialParameter
+	{
+	public:
+		MaterialTextureParameter(Material* material, const MaterialParameterDesc& desc, const std::string& guid);
 
 	private:
-		Material* m_material;
-		uint8* m_dataTable;
-		MaterialParameterDesc m_desc;
+		std::shared_ptr<Texture2D> m_texture;
 	};
 }
 

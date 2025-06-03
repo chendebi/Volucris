@@ -7,6 +7,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "OpenGL/ogl_render_state.h"
+#include "OpenGL/ogl_buffer_object.h"
 
 namespace volucris
 {
@@ -66,6 +67,7 @@ namespace volucris
 		SceneProxy* m_scene;
 		std::shared_ptr<RenderTargetProxy> m_renderTarget;
 		std::vector<std::shared_ptr<RenderPass>> m_passes;
+		std::shared_ptr<OGLBufferObject> m_ubo; // 存储相机数据
 		CameraInfo m_cameraInfo;
 		uint8 m_cameraInfoDirty;
 		UniformBlock m_cameraInfoBlock;

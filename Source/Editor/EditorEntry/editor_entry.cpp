@@ -13,6 +13,8 @@
 #include <Engine/Scene/camera_component.h>
 #include <Engine/Scene/level.h>
 #include <Engine/Resource/material.h>
+#include <Engine/Scene/direction_light_component.h>
+#include <ContentBrowser/material_loader.h>
 
 using namespace volucris;
 
@@ -36,12 +38,13 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	auto level = std::make_shared<Level>();
 
-	if (true)
+	if (false)
 	{
-		auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/cube");
+		auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/Cylinder1259");
 		auto comp = std::make_shared<PrimitiveComponent>();
 		comp->setMeshResource(mesh->getResource());
 		comp->setMaterials(mesh->getMaterials());
+		comp->setScale({ 0.01,0.01,0.01 });
 		auto idx = 0;
 		glm::vec4 colors[] = {
 			{1.0, 0.0, 0.0, 1.0},
@@ -51,13 +54,20 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 			{0.0, 1.0, 0.0, 1.0},
 			{0.0, 0.0, 1.0, 1.0},
 		};
+
+		auto newMat = ResourceRegistry::Instance().loadResource<Material>("/Engine/T_Phone");
+		MaterialLoader::reload(newMat.get());
+		//newMat->getParameterByName("fcolor")->setValue(colors[0]);
+		std::unordered_map<std::string, std::shared_ptr<Material>> materials;
 		for (const auto& [slot, mat] : mesh->getMaterials())
 		{
-			mat->getParameterByName("fcolor")->setValue(colors[idx++]);
+			materials.insert({ slot, newMat });
 		}
+		comp->setMaterials(materials);
 		auto actor = std::make_shared<Actor>();
 		actor->addComponent(comp);
 		level->addActor(actor);
+		level->addActor<DirectionLightComponent>();
 	}
 
 	gApp->setLevel(level);

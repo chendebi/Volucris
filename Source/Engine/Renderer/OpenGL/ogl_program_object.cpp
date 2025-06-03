@@ -16,9 +16,23 @@ namespace volucris
         release();
     }
 
+    bool OGLShaderObject::create()
+    {
+        if (m_id == 0)
+        {
+            m_id = glCreateShader(m_type);
+        }
+        GL_CHECK();
+        return m_id > 0;
+    }
+
     bool volucris::OGLShaderObject::initialize()
     {
-        m_id = glCreateShader(m_type);
+        if (m_id == 0)
+        {
+            return false;
+        }
+        GL_CHECK();
         const auto ss = m_source.c_str();
         glShaderSource(m_id, 1, &ss, nullptr);
         glCompileShader(m_id);
@@ -60,9 +74,11 @@ namespace volucris
 
     bool OGLProgramObject::initialize()
     {
+        GL_CHECK();
         for (const auto& shader : m_shaders)
         {
-            if (shader->getID() == 0 && !shader->initialize())
+            GL_CHECK();
+            if (!shader->create() || !shader->initialize())
             {
                 V_LOG_WARN(Engine, "initialize program failed. some shader invalid.");
                 return false;
@@ -79,8 +95,10 @@ namespace volucris
         }
 
         glLinkProgram(m_id);
+
         int success;
         char infoLog[512];
+
         glGetProgramiv(m_id, GL_LINK_STATUS, &success);
         if (!success)
         {

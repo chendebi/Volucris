@@ -53,7 +53,6 @@ namespace volucris
 				auto mat = this->loader->createResource<Material>();
 				mat->setResourceName(material->GetName().C_Str());
 				mat->setMaterialResource(resource);
-				mat->getParameterByName("fcolor")->setValue(glm::vec4(1.0, 0.0, 0.0, 1.0));
 				return mat;
 			}
 			return nullptr;

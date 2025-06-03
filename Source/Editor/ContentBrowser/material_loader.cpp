@@ -4,6 +4,7 @@
 #include <vector>
 #include <regex>
 #include "EditorEntry/editor_core.h"
+#include <Engine/Resource/material.h>
 
 namespace volucris
 {
@@ -11,6 +12,7 @@ namespace volucris
 
 	constexpr std::string_view MODEL_MATRIX_UNIFORM_NAME = "v_modelMat";
 	constexpr std::string_view CAMERA_INFO_BLOCK_NAME = "v_cameraInfo";
+	constexpr std::string_view DIRECTION_LIGHT_BLOCK_NAME = "v_directionLight";
 
 	static MaterialParameterDesc::Type getTypeByString(const std::string& name)
 	{
@@ -75,6 +77,10 @@ namespace volucris
 				{
 					type = MaterialParameterDesc::CAMERA_INFO;
 				}
+				else if (name == DIRECTION_LIGHT_BLOCK_NAME)
+				{
+					type = MaterialParameterDesc::DIRECTION_LIGHT;
+				}
 				else
 				{
 					type = MaterialParameterDesc::UNKNOWN;
@@ -132,5 +138,23 @@ namespace volucris
 		auto resource = std::make_shared<MaterialResource>(vss, fss);
 		resource->setParameters(descs);
 		return resource;
+	}
+
+	bool MaterialLoader::reload(Material* material)
+	{
+		const auto& vsf = material->getVertexShaderFilePath();
+		const auto& fsf = material->getFragmentShaderFilePath();
+
+		std::string vsp, fsp;
+		ResourcePath::ResourcePathToSystemPath(vsf, vsp);
+		ResourcePath::ResourcePathToSystemPath(fsf, fsp);
+
+		MaterialLoader loader;
+		if (auto resource = loader.load(vsp, fsp))
+		{
+			material->setMaterialResource(resource);
+			return true;
+		}
+		return false;
 	}
 }

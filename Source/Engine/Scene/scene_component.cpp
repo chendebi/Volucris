@@ -38,7 +38,7 @@ namespace volucris
 		m_rotationTransform = glm::rotate(m_rotationTransform, glm::radians(m_rotation.x), xasix);
 		m_rotationTransform = glm::rotate(m_rotationTransform, glm::radians(m_rotation.z), zasix);
 
-		m_relativeTransform = m_rotationTransform * m_rotationTransform;
+		m_relativeTransform = m_relativeTransform * m_rotationTransform;
 		m_relativeTransform = glm::translate(m_relativeTransform, m_position);
 
 		if (m_parentSceneComponent)

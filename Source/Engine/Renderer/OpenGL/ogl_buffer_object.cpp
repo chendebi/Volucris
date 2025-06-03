@@ -49,10 +49,10 @@ namespace volucris
 	{
 		auto currSize = m_data.size();
 		auto newSize = currSize + size;
-		if (size != m_bufferSize)
+		if (newSize != m_bufferSize)
 		{
-			reserve(size);
-			m_data.resize(size);
+			reserve(newSize);
+			m_data.resize(newSize);
 		}
 		memcpy(m_data.data() + currSize, data, size);
 		return { currSize, size };

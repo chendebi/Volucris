@@ -93,7 +93,7 @@ namespace volucris
 				}
 				else
 				{
-					m_modelMatParameters.push_back(param);
+					m_modelMatParameters.push_back(dynamic_cast<MaterialValueParameter*>(param));
 				}
 			}
 			onTransformChanged();

@@ -9,7 +9,7 @@ namespace volucris
 	class Material;
 	class MeshResource;
 	class PrimitiveProxy;
-	class MaterialParameter;
+	class MaterialValueParameter;
 
 	class PrimitiveComponent : public SceneComponent
 	{
@@ -37,7 +37,7 @@ namespace volucris
 		PrimitiveProxy* m_proxy;
 		std::shared_ptr<MeshResource> m_resource;
 		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
-		std::vector<MaterialParameter*> m_modelMatParameters;
+		std::vector<MaterialValueParameter*> m_modelMatParameters;
 	};
 }
 

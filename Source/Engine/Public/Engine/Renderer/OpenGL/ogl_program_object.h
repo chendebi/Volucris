@@ -24,6 +24,8 @@ namespace volucris
 			m_source = source;
 		}
 
+		bool create();
+
 		bool initialize();
 
 		void release();

@@ -18,7 +18,9 @@ namespace volucris
 			VEC3,
 			MAT4,
 			MODEL_INFO,
-			CAMERA_INFO
+			CAMERA_INFO,
+			DIRECTION_LIGHT,
+			TEXTURE2D
 		};
 
 		static size_t sizeOfType(Type type)
@@ -40,9 +42,19 @@ namespace volucris
 			return 0;
 		}
 
+		bool isNormalValue() const
+		{
+			return type != TEXTURE2D && !isUniformBlockBinding();
+		}
+
+		bool isTextureValue() const
+		{
+			return type == TEXTURE2D;
+		}
+
 		bool isUniformBlockBinding() const
 		{
-			return type == CAMERA_INFO;
+			return type == CAMERA_INFO || type == DIRECTION_LIGHT;
 		}
 
 		Type type = UNKNOWN;

@@ -13,6 +13,13 @@ namespace volucris
 	class RenderPass;
 	class Context;
 
+	struct DirectionLight
+	{
+		glm::vec4 color;
+		glm::vec4 direction;
+		float intensity;
+	};
+
 	class SceneProxy
 	{
 	public:
@@ -32,14 +39,13 @@ namespace volucris
 
 		void addRenderPass(const std::shared_ptr<RenderPass>& pass);
 
-		UniformBlock addSceneData(uint8* data, size_t size);
-
-		void setSceneData(const UniformBlock& block, uint8* data);
+		void setDirectionLightData(const DirectionLight& light);
 
 	private:
 		std::vector<std::shared_ptr<ViewProxy>> m_views;
 		std::vector<std::shared_ptr<PrimitiveProxy>> m_primitives;
 		std::shared_ptr<OGLBufferObject> m_ubo; // 存储场景数据
+		UniformBlock m_directionLightBlock;
 	};
 }
 

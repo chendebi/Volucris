@@ -18,11 +18,14 @@ namespace volucris
 	ViewProxy::ViewProxy()
 		: m_scene(nullptr)
 		, m_renderTarget(nullptr)
+		, m_passes()
+		, m_ubo()
 		, m_cameraInfo()
 		, m_cameraInfoDirty(true)
 		, m_client(nullptr)
 	{
 		addRenderPass(std::make_shared<ForwardRenderPass>());
+		m_ubo = std::make_shared<OGLBufferObject>(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
 	}
 
 	void ViewProxy::initialize(ViewClient* client)
@@ -51,13 +54,14 @@ namespace volucris
 
 		if (m_cameraInfoDirty)
 		{
-			if (m_cameraInfoBlock.block.valid())
+			if (m_cameraInfoBlock.valid())
 			{
-				m_scene->setSceneData(m_cameraInfoBlock, (uint8*) & m_cameraInfo);
+				m_ubo->setBlockData(m_cameraInfoBlock.block, (uint8*)&m_cameraInfo);
 			}
 			else
 			{
-				m_cameraInfoBlock = m_scene->addSceneData((uint8*)&m_cameraInfo, sizeof(m_cameraInfo));
+				m_cameraInfoBlock.ubo = m_ubo.get();
+				m_cameraInfoBlock.block = m_ubo->addData((uint8*)&m_cameraInfo, sizeof(m_cameraInfo));
 			}
 			m_cameraInfoDirty = false;
 		}
@@ -86,7 +90,11 @@ namespace volucris
 		{
 			return;
 		}
-		context->setCameraInfoBlock(m_cameraInfoBlock);
+		
+		if (m_cameraInfoBlock.valid())
+		{
+			context->setCameraInfoBlock(&m_cameraInfoBlock);
+		}
 
 		for (const auto& pass : m_passes)
 		{
@@ -105,6 +113,8 @@ namespace volucris
 				m_client = nullptr;
 			}
 		}
+
+		context->setCameraInfoBlock(nullptr);
 	}
 
 	void ViewProxy::clear()

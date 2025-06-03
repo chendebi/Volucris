@@ -141,25 +141,41 @@ namespace volucris
 
 	void Material::setMaterialResource(const std::shared_ptr<MaterialResource>& resource)
 	{
-		check(!m_resource)
+		//check(!m_resource)
 		m_resource = resource;
 		size_t tableSize = 0;
 		std::vector<MaterialParameterDesc> descriptions;
+		std::vector<MaterialParameterDesc> textureDescriptions;
 		for (auto desc : resource->getParameterDescriptions())
 		{
 			auto size = MaterialParameterDesc::sizeOfType(desc.type);
-			if (size > 0)
+			if (desc.isTextureValue())
 			{
-				desc.offset = tableSize;
-				tableSize += size;
+				textureDescriptions.push_back(desc);
 			}
-			descriptions.push_back(desc);
+			else
+			{
+				if (size > 0)
+				{
+					desc.offset = tableSize;
+					tableSize += size;
+				}
+				descriptions.push_back(desc);
+			}
 		}
 
 		m_parameterData.resize(tableSize);
+		m_parameters.clear();
+		m_textureParameters.clear();
 		for (const auto& desc : descriptions)
 		{
-			m_parameters.push_back(std::make_unique<MaterialParameter>(this, desc, m_parameterData.data()));
+			m_parameters.push_back(std::make_unique<MaterialValueParameter>(this, desc, m_parameterData.data()));
+		}
+
+		for (const auto& desc : textureDescriptions)
+		{
+			// TODO: 替换为默认贴图
+			m_textureParameters.push_back(std::make_unique<MaterialTextureParameter>(this, desc, ""));
 		}
 	}
 }

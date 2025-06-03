@@ -11,6 +11,8 @@ namespace volucris
 		MaterialLoader() = default;
 
 		std::shared_ptr<MaterialResource> load(const std::string& vsf, const std::string& fsf);
+
+		static bool reload(Material* material);
 	};
 }
 

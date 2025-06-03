@@ -28,11 +28,19 @@ namespace volucris
 
 		void release();
 
+		void setDataFormat(GLint format)
+		{
+			m_dataFormat = format;
+		}
+
+		void setData(std::vector<uint8> data);
+
 		bool initialize(Context* content) override;
 
 	private:
 		GLenum m_type;
 		GLint m_filter;
+		GLint m_dataFormat;
 		std::vector<uint8> m_data;
 	};
 }
