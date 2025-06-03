@@ -21,25 +21,25 @@ namespace volucris
 		GLFWwindow* handle = nullptr;
 	};
 
-	inline MouseButton glfwButtonToMouseButton(int button)
+	inline MouseEvent::MouseButton glfwButtonToMouseButton(int button)
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
-			return MouseButton::LEFT;
+			return MouseEvent::MouseButton::LEFT;
 		}
 		else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
 		{
-			return MouseButton::MIDDLE;
+			return MouseEvent::MouseButton::MIDDLE;
 		}
 		else if (button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
-			return MouseButton::RIGHT;
+			return MouseEvent::MouseButton::RIGHT;
 		}
 		else
 		{
 			V_LOG_ERROR(Engine, "recieved a unsupported glfw button: {}", button);
 		}
-		return MouseButton::UNKNOWN;
+		return MouseEvent::MouseButton::UNKNOWN;
 	}
 
 	void onGLFWWindowClose(GLFWwindow* handle)
@@ -63,22 +63,24 @@ namespace volucris
 	void onGLFWMouseMove(GLFWwindow* handle, double w, double h)
 	{
 		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-		window->MouseMove(w, h);
+		MouseMoveEvent e = MouseMoveEvent(w, h);
+		window->WindowEvent(&e);
 	}
 
 	void onGLFWMouseButton(GLFWwindow* handle, int button, int action, int mods)
 	{
 		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-		MouseEvent event;
-		event.button = glfwButtonToMouseButton(button);
-		event.modifiers = mods;
 		if (action == GLFW_PRESS)
 		{
-			window->MousePressed(event);
+			auto e = MousePressEvent(glfwButtonToMouseButton(button));
+			e.modifiers = mods;
+			window->WindowEvent(&e);
 		}
 		else
 		{
-			window->MouseReleased(event);
+			auto e = MouseReleaseEvent(glfwButtonToMouseButton(button));
+			e.modifiers = mods;
+			window->WindowEvent(&e);
 		}
 	}
 
@@ -87,11 +89,13 @@ namespace volucris
 		Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
-			window->KeyPressed((Key)key, mods);
+			auto e = KeyPressEvent((Key)key, mods);
+			window->WindowEvent(&e);
 		}
 		else
 		{
-			window->KeyReleased((Key)key, mods);
+			auto e = KeyReleaseEvent((Key)key, mods);
+			window->WindowEvent(&e);
 		}
 
 	}
@@ -300,6 +304,14 @@ namespace volucris
 		else
 		{
 			glfwSetWindowAttrib(m_impl->handle, GLFW_DECORATED, true);
+		}
+	}
+
+	void Window::setCursorEnabled(bool enabled)
+	{
+		if (m_impl->handle)
+		{
+			glfwSetInputMode(m_impl->handle, GLFW_CURSOR, enabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 		}
 	}
 }

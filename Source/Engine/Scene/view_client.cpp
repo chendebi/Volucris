@@ -16,7 +16,8 @@
 namespace volucris
 {
 	ViewClient::ViewClient(const std::shared_ptr<RenderTarget>& target)
-		: m_rect()
+		: m_scope(EventScope::ClientOnly)
+		, m_rect()
 		, m_proxy()
 		, m_targetGLTextureID(0)
 		, m_target(target)
@@ -118,48 +119,21 @@ namespace volucris
 		return m_target->isClientTarget();
 	}
 
-	void ViewClient::dispatchMousePressEvent(const MouseEvent& event)
+	void ViewClient::dispatchEvent(ClientEvent* event)
 	{
-		for (const auto& handler : m_handlers)
+		if (event->type == ClientEvent::MOUSE_MOVE)
 		{
-			handler->mousePressEvent(event);
+			auto e = (MouseMoveEvent*)event;
+			if (m_scope == EventScope::ClientOnly && !m_rect.contains(e->globalPosition.x, e->globalPosition.y))
+			{
+				return;
+			}
+			e->position = m_rect.getRelativePoint(e->globalPosition);
 		}
-	}
 
-	void ViewClient::dispatchMouseReleaseEvent(const MouseEvent& event)
-	{
 		for (const auto& handler : m_handlers)
 		{
-			handler->mouseReleaseEvent(event);
-		}
-	}
-
-	void ViewClient::dispatchMouseMoveEvent(int x, int y)
-	{
-		if (!m_rect.contains(x, y))
-		{
-			return;
-		}
-		auto pos = m_rect.getRelativePoint(x, y);
-		for (const auto& handler : m_handlers)
-		{
-			handler->mouseMoveEvent(pos.x, pos.y);
-		}
-	}
-
-	void ViewClient::dispatchKeyPressedEvent(Key key, Modifiers modifiers)
-	{
-		for (const auto& handler : m_handlers)
-		{
-			handler->keyPressedEvent(key, modifiers);
-		}
-	}
-
-	void ViewClient::dispatchKeyReleasedEvent(Key key, Modifiers modifiers)
-	{
-		for (const auto& handler : m_handlers)
-		{
-			handler->keyReleasedEvent(key, modifiers);
+			handler->handleEvent(event, this);
 		}
 	}
 }

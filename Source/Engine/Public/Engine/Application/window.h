@@ -10,10 +10,7 @@
 
 DECLARE_EVENT(OnClose)
 DECLARE_EVENT(OnSizeChanged, int, int)
-DECLARE_EVENT(OnMouseEvent, volucris::MouseEvent)
-DECLARE_EVENT(OnKeyEvent, volucris::Key, volucris::Modifiers)
-
-using OnMouseMove = OnSizeChanged;
+DECLARE_EVENT(OnWindowEvent, volucris::ClientEvent*)
 
 namespace volucris
 {
@@ -31,11 +28,7 @@ namespace volucris
 		OnClose Close;
 		OnSizeChanged FrameSizeChanged;
 		OnSizeChanged WindowSizeChanged;
-		OnMouseMove MouseMove;
-		OnMouseEvent MousePressed;
-		OnMouseEvent MouseReleased;
-		OnKeyEvent KeyPressed;
-		OnKeyEvent KeyReleased;
+		OnWindowEvent WindowEvent;
 
 	public:
 		Window();
@@ -63,6 +56,8 @@ namespace volucris
 		void setFullScreen(bool enabled);
 
 		void setFrameless(bool enabled);
+
+		void setCursorEnabled(bool enabled);
 
 	private:
 		struct Impl;

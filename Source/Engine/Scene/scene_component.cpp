@@ -9,13 +9,22 @@ namespace volucris
 		, m_position()
 		, m_rotation()
 		, m_scale()
-		, m_forward(0, 0, -1)
 		, m_rotationTransform()
 		, m_relativeTransform()
 		, m_worldTransform()
 		, m_parentSceneComponent(nullptr)
 	{
 		setScale({ 1.f, 1.f, 1.f });
+	}
+
+	glm::vec3 SceneComponent::getForwardDirection() const
+	{
+		return glm::vec3(-m_rotationTransform[2]);
+	}
+
+	glm::vec3 SceneComponent::getRightDirection() const
+	{
+		return glm::vec3(m_rotationTransform[0]);
 	}
 
 	void SceneComponent::transformChanged()
@@ -28,8 +37,6 @@ namespace volucris
 		m_rotationTransform = glm::rotate(glm::mat4(1.0), glm::radians(m_rotation.y), yasix);
 		m_rotationTransform = glm::rotate(m_rotationTransform, glm::radians(m_rotation.x), xasix);
 		m_rotationTransform = glm::rotate(m_rotationTransform, glm::radians(m_rotation.z), zasix);
-
-		m_forward = glm::vec3(m_rotationTransform * glm::vec4(0, 0, -1, 0));
 
 		m_relativeTransform = m_rotationTransform * m_rotationTransform;
 		m_relativeTransform = glm::translate(m_relativeTransform, m_position);

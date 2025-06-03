@@ -3,6 +3,7 @@
 
 #include <Engine/Scene/player_actor.h>
 #include <Engine/Core/rect.h>
+#include <glm/glm.hpp>
 
 namespace volucris
 {
@@ -11,21 +12,21 @@ namespace volucris
 	public:
 		EditorPlayerActor();
 
-		void mousePressEvent(const MouseEvent& e) override;
+		void mousePressEvent(MouseEvent* e, ViewClient* sender) override;
 
-		void mouseReleaseEvent(const MouseEvent& e) override;
+		void mouseReleaseEvent(MouseEvent* e, ViewClient* sender) override;
 
-		void mouseMoveEvent(int x, int y) override;
+		void mouseMoveEvent(MouseMoveEvent* e, ViewClient* sender) override;
 
-		void keyPressedEvent(Key key, Modifiers modifiers) override;
+		void keyPressedEvent(KeyEvent* e, ViewClient* sender) override;
 
-		void keyReleasedEvent(Key key, Modifiers modifiers) override;
+		void keyReleasedEvent(KeyEvent* e, ViewClient* sender) override;
 
 		void tick(double delta) override;
 
 	private:
 		bool m_mousePressed;
-		float m_speed;
+		glm::vec2 m_speed;
 		Point2D m_lastPos;
 	};
 }

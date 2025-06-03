@@ -5,20 +5,25 @@
 
 namespace volucris
 {
+	class ViewClient;
+
 	class EventHandler
 	{
 	public:
 		virtual ~EventHandler() = default;
 
-		virtual void mousePressEvent(const MouseEvent& e) {  }
+		void handleEvent(ClientEvent* event, ViewClient* sender);
 
-		virtual void mouseReleaseEvent(const MouseEvent& e) {  }
+	protected:
+		virtual void mousePressEvent(MouseEvent* e, ViewClient* sender) {  }
 
-		virtual void mouseMoveEvent(int x, int y) {  }
+		virtual void mouseReleaseEvent(MouseEvent* e, ViewClient* sender) {  }
 
-		virtual void keyPressedEvent(Key key, Modifiers modifiers) {}
+		virtual void mouseMoveEvent(MouseMoveEvent* e, ViewClient* sender) {  }
 
-		virtual void keyReleasedEvent(Key key, Modifiers modifiers) {}
+		virtual void keyPressedEvent(KeyEvent* e, ViewClient* sender) {}
+
+		virtual void keyReleasedEvent(KeyEvent* e, ViewClient* sender) {}
 	};
 }
 
