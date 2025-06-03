@@ -10,6 +10,7 @@ namespace volucris
 	EditorPlayerActor::EditorPlayerActor()
 		: PlayerActor()
 		, m_mousePressed(false)
+		, m_mousePosInited(false)
 		, m_speed(0.0)
 		, m_lastPos()
 	{
@@ -24,7 +25,7 @@ namespace volucris
 			gApp->getWindow()->setCursorEnabled(false);
 			sender->setEventScope(ViewClient::EventScope::WholeWindow);
 			m_mousePressed = true;
-			m_lastPos = sender->getRect().getRelativePoint(gApp->getWindow()->getMousePosition());
+			m_mousePosInited = false;
 		}
 	}
 
@@ -42,14 +43,18 @@ namespace volucris
 	{
 		if (m_mousePressed)
 		{
-			Point2D pos = e->position;
-			glm::vec2 moveStep = { m_lastPos.x - pos.x, m_lastPos.y - pos.y };
-			glm::vec2 rot = moveStep * glm::vec2(4.0 * gApp->getFrameTime());
-			auto camera = getCameraComponent();
-			auto rotation = camera->getRotation();
-			rotation.x += rot.y;
-			rotation.y += rot.x;
-			camera->setRotation(rotation);
+			if (m_mousePosInited)
+			{
+				Point2D pos = e->position;
+				glm::vec2 moveStep = { m_lastPos.x - pos.x, m_lastPos.y - pos.y };
+				glm::vec2 rot = moveStep * glm::vec2(4.0 * gApp->getFrameTime());
+				auto camera = getCameraComponent();
+				auto rotation = camera->getRotation();
+				rotation.x += rot.y;
+				rotation.y += rot.x;
+				camera->setRotation(rotation);
+			}
+			m_mousePosInited = true;
 			m_lastPos = e->position;
 		}
 	}
@@ -91,7 +96,8 @@ namespace volucris
 		auto camera = getCameraComponent();
 		float speedz = delta * m_speed.x;
 		float speedx = delta * m_speed.y;
-		auto pos = camera->getPosition() + camera->getForwardDirection() * glm::vec3(speedz, speedz, speedz)
+		auto pos = camera->getPosition() 
+			+ camera->getForwardDirection() * glm::vec3(speedz, speedz, speedz)
 			+ camera->getRightDirection() * glm::vec3(speedx, speedx, speedx);
 		camera->setPosition(pos);
 	}

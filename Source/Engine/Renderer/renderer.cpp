@@ -34,13 +34,17 @@ namespace volucris
 		OGLClearState state;
 		m_context->clear(state);
 
-		for (const auto& scene : m_scenes)
+		if (!m_scenes.empty())
 		{
-			scene->render(m_context.get());
-		}
+			for (const auto& scene : m_scenes)
+			{
+				scene->render(m_context.get());
+			}
 
-		m_context->bindFrameBuffer(nullptr);
-		renderui();
+			m_context->bindFrameBuffer(nullptr);
+
+			renderui();
+		}
 
 		m_context->swapBuffers();
 	}
@@ -122,6 +126,11 @@ namespace volucris
 	void Renderer::renderui()
 	{
 		ImGui::Render();
+		//GLFWwindow* backup_current_context = glfwGetCurrentContext();
+		//glfwMakeContextCurrent(backup_current_context);
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		m_context->makeCurrent();
 	}
 }

@@ -25,7 +25,8 @@ namespace volucris
 		void tick(double delta) override;
 
 	private:
-		bool m_mousePressed;
+		uint8 m_mousePressed;
+		uint8 m_mousePosInited;
 		glm::vec2 m_speed;
 		Point2D m_lastPos;
 	};
