@@ -4,8 +4,9 @@
 #include <vector>
 #include <string>
 #include "Engine/Resource/resource_path.h"
+#include <Engine/Resource/asset_path.h>
 #include <Engine/Core/serializer.h>
-#include <rapidjson/document.h>
+#include <Engine/Core/types_help.h>
 #include "Engine/Resource/meta_data.h"
 
 namespace volucris
@@ -13,27 +14,28 @@ namespace volucris
 	class ResourceObject
 	{
 	public:
-		ResourceObject() = default;
+		ResourceObject(AssetType type);
 
 		virtual ~ResourceObject() = default;
 
-		const ResourcePath& getResourcePath() const { return m_path; }
+		void setAsset(const Asset& asset);
 
-		const ResourceMeta& getMetaData() const { return m_metaData; }
+		const Asset& getAsset() const { return m_asset; }
 
-		void setResourceName(const std::string& name);
+		void dirty() { m_dirty = true; }
+
+		bool isDirty() const { return m_dirty; }
 
 	protected:
-		friend class ResourceRegistry;
+		friend class AssetReader;
+		friend class AssetWriter;
 		virtual bool serialize(Serializer& serializer) const { return false; }
 		
 		virtual void deserialize(Serializer& serializer) { }
 
-		void setResourcePath(const ResourcePath& path) { m_path = path; }
-
 	private:
-		ResourcePath m_path;
-		ResourceMeta m_metaData;
+		uint8 m_dirty;
+		Asset m_asset;
 	};
 }
 

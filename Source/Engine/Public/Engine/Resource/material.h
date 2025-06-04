@@ -24,11 +24,9 @@ namespace volucris
 
 		std::shared_ptr<MaterialProxy> getRenderProxy();
 
-		void updateParametersToRenderer();
+		void update();
 
 		std::shared_ptr<MaterialResource> getResource() const { return m_resource; }
-
-		std::vector<uint8> getParameterData() const { return  m_parameterData; }
 
 		MaterialParameter* getParameterByName(const std::string& name);
 
@@ -65,9 +63,7 @@ namespace volucris
 		std::string m_vsFilePath;
 		std::string m_fsFilePath;
 		std::shared_ptr<MaterialResource> m_resource;
-		std::vector<std::unique_ptr<MaterialValueParameter>> m_parameters;
-		std::vector<std::unique_ptr<MaterialTextureParameter>> m_textureParameters;
-		std::vector<uint8> m_parameterData;
+		std::vector<std::unique_ptr<MaterialParameter>> m_parameters;
 		std::weak_ptr<MaterialProxy> m_proxy;
 	};
 }

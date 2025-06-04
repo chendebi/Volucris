@@ -4,49 +4,8 @@
 #include <memory>
 #include <string>
 #include <map>
-#include "Engine/Resource/resource_object.h"
-#include "meta_data.h"
-#include <xhash>
 #include <fstream>
-
-namespace volucris
-{
-	struct GUID
-	{
-		std::string uuid;
-
-		GUID() : uuid() {}
-
-		explicit GUID(const ::std::string& id)
-			: uuid(id)
-		{
-		}
-
-		bool operator==(const GUID& other) const
-		{
-			return other.uuid == uuid;
-		}
-
-		bool operator<(const GUID& other) const
-		{
-			return uuid < other.uuid;
-		}
-
-		static GUID generate();
-	};
-}
-
-namespace std
-{
-	template<>
-	struct hash<volucris::GUID>
-	{
-		inline size_t operator()(const volucris::GUID& val) const
-		{
-			return std::hash<std::string>{}(val.uuid);
-		}
-	};
-}
+#include "Engine/Resource/resource_object.h"
 
 namespace volucris
 {
@@ -72,47 +31,26 @@ namespace volucris
 
 		bool getSystemPathByResourcePath(const std::string& resPath, std::string& path);
 
-		void updateResourcePath(ResourceObject* resource, const std::string& newPath);
+		std::shared_ptr<ResourceObject> loadResourceByAssetPath(const std::string& path);
 
-		std::shared_ptr<ResourceObject> loadResourceByGUID(const GUID& guid);
+		std::shared_ptr<ResourceObject> loadResourceByAsset(const Asset& asset);
 
-		std::shared_ptr<ResourceObject> loadResourceByPath(const std::string& path);
-
-		ResourceMeta getResourceMeta(const std::string& path);
-
-		template<typename T>
-		std::shared_ptr<T> loadResource(const GUID& guid)
-		{
-			return std::dynamic_pointer_cast<T>(loadResourceByGUID(guid));
-		}
+		Asset getAsset(const std::string& path);
 
 		template<typename T>
 		std::shared_ptr<T> loadResource(const std::string& path)
 		{
-			return std::dynamic_pointer_cast<T>(loadResourceByPath(path));
+			return std::dynamic_pointer_cast<T>(loadResourceByAssetPath(path));
 		}
 
-		bool registry(const std::shared_ptr<ResourceObject>& resource, const std::string& path);
+		bool registry(const std::shared_ptr<ResourceObject>& resource);
 
 		void save(const std::shared_ptr<ResourceObject>& resource);
 
-		bool makesureDependenceValid(const std::shared_ptr<ResourceObject>& resource);
-
-		void serializeDependenceTo(Serializer& serializer, const std::shared_ptr<ResourceObject>& resource);
-
-	protected:
-		std::shared_ptr<ResourceObject> loadResource(const ResourceMeta& meta, Serializer& serializer);
-
-		ResourceMeta getResourceMetaBySystemPath(const std::string& path);
-
-		ResourceMeta readResourceMeta(std::ifstream& fin);
-
 	private:
-		std::map <std::string, std::weak_ptr<ResourceObject>> m_caches;
-		std::map<GUID, std::string> m_assets;
-		std::map<std::string, GUID> m_assetsSortByPath;
-
-		std::map<std::string, std::string> m_searchPaths;
+		std::map<UUID, std::string> m_assets; // uuid对应的资产路径
+		std::map<std::string, std::weak_ptr<ResourceObject>> m_caches; // 资产路径对应的资源对象
+		std::map<std::string, std::string> m_searchPaths; // 扫描的资源路径
 
 	protected:
 		ResourceRegistry();

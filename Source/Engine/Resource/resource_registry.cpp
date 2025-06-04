@@ -1,45 +1,16 @@
 #include "Resource/resource_registry.h"
 #include "Core/directory.h"
-#include <rapidjson/filereadstream.h>
-#include <rapidjson/filewritestream.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/document.h>
 #include <Core/types_help.h>
 #include "Core/volucris.h"
-#include <Resource/material.h>
-#include <Resource/meta_data.h>
-#include <fstream>
-#include <xhash>
-#include <combaseapi.h>
 #include <filesystem>
 #include <Core/assert.h>
-#include <Core/serializer.h>
-#include <Resource/static_mesh.h>
+#include <Resource/asset_reader.h>
+#include <Resource/asset_writer.h>
 
 namespace fs = std::filesystem;
 
 namespace volucris
 {
-	GUID GUID::generate()
-	{
-		GUID id;
-		CoInitialize(NULL);
-		_GUID guid;
-		CoCreateGuid(&guid);
-
-		// 将 GUID 格式化为字符串
-		wchar_t guidStr[40];
-		StringFromGUID2(guid, guidStr, sizeof(guidStr) / sizeof(guidStr[0]));
-
-		int size_needed = WideCharToMultiByte(CP_UTF8, 0, guidStr, -1, NULL, 0, NULL, NULL);
-		std::string str(size_needed, 0);
-		WideCharToMultiByte(CP_UTF8, 0, guidStr, -1, &str[0], size_needed, NULL, NULL);
-		str.pop_back();
-		id.uuid = str;
-
-		CoUninitialize();
-		return id;
-	}
 
 	struct ResourceHeader
 	{
@@ -66,23 +37,7 @@ namespace volucris
 
 	void ResourceRegistry::scanResourcesBySystemPath(const std::string& path)
 	{
-		for (const auto& entry : fs::directory_iterator(path))
-		{
-			if (entry.is_regular_file())
-			{
-				const std::string& filepath = entry.path().string();
-				auto meta = getResourceMetaBySystemPath(filepath);
-				if (meta.isValid())
-				{
-					m_assets.insert({ GUID(meta.guid), meta.path });
-					m_assetsSortByPath.insert({ meta.path, GUID(meta.guid) });
-				}
-			}
-			else if (entry.is_directory())
-			{
-				scanResourcesBySystemPath(entry.path().string());
-			}
-		}
+		
 	}
 
 	void ResourceRegistry::addResourceSearchPath(const std::string& systemPath, const std::string& header)
@@ -137,275 +92,108 @@ namespace volucris
 		return false;
 	}
 
-	void ResourceRegistry::updateResourcePath(ResourceObject* resource, const std::string& newPath)
+	std::shared_ptr<ResourceObject> ResourceRegistry::loadResourceByAssetPath(const std::string& path)
 	{
-		if (resource && resource->m_metaData.isValid())
+		auto it = m_caches.find(path);
+		if (it != m_caches.end())
 		{
-			const auto guid = GUID(resource->m_metaData.guid);
-			auto it = m_assets.find(guid);
-			if (it == m_assets.end())
+			if (auto asset = it->second.lock())
 			{
-				V_LOG_WARN(Engine, "asset not registered, path: {}", resource->m_metaData.path);
-				return;
+				return asset;
 			}
-			it->second = newPath;
-			m_assetsSortByPath.erase(resource->m_metaData.path);
-			m_assetsSortByPath.insert({ newPath,  guid});
-			resource->m_metaData.path = newPath;
-			resource->m_path = newPath;
+			m_caches.erase(it);
 		}
-	}
 
-	std::shared_ptr<ResourceObject> ResourceRegistry::loadResourceByGUID(const GUID& guid)
-	{
-		auto it = m_assets.find(guid);
-		if (it == m_assets.end())
+		std::string sysPath;
+		if (!getSystemPathByResourcePath(path, sysPath))
 		{
+			V_LOG_WARN(Engine, "load asset failed. {}", path);
 			return nullptr;
 		}
 
-		// 尝试打开文件
-		return loadResourceByPath(it->second);
-	}
-
-	std::shared_ptr<ResourceObject> ResourceRegistry::loadResourceByPath(const std::string& resPath)
-	{
-		ResourcePath path = ResourcePath(resPath);
-		auto sysPath = path.getSystemPath();
-
-		std::ifstream fin = std::ifstream(sysPath, std::ios::binary);
-		if (!fin.is_open())
+		AssetReader reader;
+		reader.setLoadPath(sysPath);
+		auto object = reader.load();
+		if (object && object->getAsset().getAssetPath() == path && object->getAsset().uuid.valid())
 		{
-			V_LOG_WARN(Engine, "load resource from {} failed.", resPath);
-			return nullptr;
-		}
-
-		ResourceHeader header;
-		fin.read((char*)&header, sizeof(header));
-		if (fin.gcount() < 4)
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
-			return nullptr;
-		}
-
-		if (std::string(header.magic, 8) != "volucris")
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed, file not a asset.", resPath);
-			return nullptr;
-		}
-
-		ResourceMeta meta = readResourceMeta(fin);
-
-		if (!meta.isValid())
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
-			return nullptr;
-		}
-
-		// 读取资源内容
-		uint32 contentSize = 0;
-		fin.read((char*)&contentSize, sizeof(uint32));
-		if (fin.gcount() < sizeof(uint32))
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
-			return nullptr;
-		}
-
-		std::vector<uint8> contentData(contentSize);
-		fin.read((char*)contentData.data(), contentSize);
-		if (fin.gcount() < contentSize)
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed, file corrupted.", resPath);
-			return nullptr;
-		}
-
-		Serializer serializer;
-		serializer.setData(std::move(contentData));
-		
-		return loadResource(meta, serializer);
-	}
-
-	ResourceMeta ResourceRegistry::getResourceMeta(const std::string& resPath)
-	{
-		ResourcePath path = ResourcePath(resPath);
-		auto sysPath = path.getSystemPath();
-
-		return getResourceMetaBySystemPath(sysPath);
-	}
-
-	bool ResourceRegistry::registry(const std::shared_ptr<ResourceObject>& resource, const std::string& path)
-	{
-		if (m_assets.find(GUID(resource->m_metaData.guid)) != m_assets.end())
-		{
-			V_LOG_WARN(Engine, "resource alredy registryed");
-			return true;
-		}
-		ResourceMeta& meta = resource->m_metaData;
-		auto id = GUID::generate();
-		meta.guid = id.uuid;
-		meta.path = path;
-		resource->setResourcePath(path);
-		if (dynamic_cast<Material*>(resource.get()))
-		{
-			meta.type = ResourceType::MATERIAL;
-		}
-		else if (dynamic_cast<StaticMesh*>(resource.get()))
-		{
-			meta.type = ResourceType::STATIC_MESH;
+			m_assets.insert_or_assign(object->getAsset().uuid, path);
+			m_caches.insert({ path, object });
+			return object;
 		}
 		else
 		{
-			V_LOG_WARN(Engine, "unsupported resource");
+			V_LOG_WARN(Engine, "asset load success, but object invalid. {}", path);
+		}
+		return nullptr;
+	}
+
+	std::shared_ptr<ResourceObject> ResourceRegistry::loadResourceByAsset(const Asset& asset)
+	{
+		const auto assetPath = asset.getAssetPath();
+		return loadResourceByAssetPath(assetPath);
+	}
+
+	Asset ResourceRegistry::getAsset(const std::string& path)
+	{
+		auto it = m_caches.find(path);
+		if (it != m_caches.end())
+		{
+			if (auto asset = it->second.lock())
+			{
+				return asset->getAsset();
+			}
+		}
+
+		std::string sysPath;
+		if (!getSystemPathByResourcePath(path, sysPath))
+		{
+			V_LOG_WARN(Engine, "get asset failed. {}", path);
+			return {};
+		}
+
+		AssetReader reader;
+		reader.setLoadPath(sysPath);
+		return reader.loadAsset();
+	}
+
+	bool ResourceRegistry::registry(const std::shared_ptr<ResourceObject>& resource)
+	{
+		auto asset = resource->getAsset();
+		if (asset.type == AssetType::UNKNOWN)
+		{
+			V_LOG_WARN(Engine, "registry asset failed. asset type not supported");
 			return false;
 		}
-		m_assets.insert({ id, resource->m_path.fullpath });
-		m_assetsSortByPath.insert({ resource->m_path.fullpath, id });
+
+		auto uuid = asset.uuid;
+		if (uuid.valid() && m_assets.find(uuid) != m_assets.end())
+		{
+			V_LOG_WARN(Engine, "asset alredy registered.");
+			return true;
+		}
+
+		asset.uuid = UUID::generate();
+		resource->setAsset(asset);
+
 		return true;
 	}
 
 	void ResourceRegistry::save(const std::shared_ptr<ResourceObject>& resource)
 	{
-		if (!resource->m_metaData.isValid())
+		if (!resource->isDirty())
 		{
 			return;
 		}
 
-		Serializer resourceSerializer;
-		if (!resource->serialize(resourceSerializer))
+		AssetWriter writer;
+		if (!writer.save(resource))
 		{
-			return;
-		}
-
-		ResourceHeader header = { {'v','o','l','u','c','r', 'i', 's'}, 1 };
-		std::ofstream fout = std::ofstream(resource->m_path.getSystemPath(), std::ios::binary | std::ios::trunc);
-		fout.write((char*)&header, sizeof(header));
-		if (fout.fail())
-		{
-			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
-			return;
-		}
-
-		{
-			Serializer metaDataSerializer;
-			metaDataSerializer.serialize(resource->m_metaData);
-			uint32 size = metaDataSerializer.getData().size();
-			fout.write((char*)&size, sizeof(uint32));
-			fout.write((char*)metaDataSerializer.getData().data(), metaDataSerializer.getData().size());
-		}
-
-		uint32 size = resourceSerializer.getData().size();
-		fout.write((char*)&size, sizeof(uint32));
-		fout.write((char*)resourceSerializer.getData().data(), resourceSerializer.getData().size());
-		
-
-		if (fout.fail())
-		{
-			V_LOG_WARN(Engine, "save resource to {} failed.", resource->m_path.fullpath);
-			return;
-		}
-		fout.close();
-	}
-
-	bool ResourceRegistry::makesureDependenceValid(const std::shared_ptr<ResourceObject>& resource)
-	{
-		if (!resource)
-		{
-			return false;
-		}
-
-		if (!resource->getMetaData().isValid())
-		{
-			// 弹窗?
-			check(false);
-			return false;
-		}
-
-		return true;
-	}
-
-	void ResourceRegistry::serializeDependenceTo(Serializer& serializer, const std::shared_ptr<ResourceObject>& resource)
-	{
-		if (!resource || !resource->getMetaData().isValid())
-		{
-			serializer.serialize("");
+			V_LOG_WARN(Engine, "save asset failed.");
 		}
 		else
 		{
-			serializer.serialize(resource->getMetaData().guid);
+			V_LOG_WARN(Engine, "save asset success.");
 		}
-	}
-
-	std::shared_ptr<ResourceObject> ResourceRegistry::loadResource(const ResourceMeta& meta, Serializer& serializer)
-	{
-		std::shared_ptr<ResourceObject> object;
-		switch (meta.type)
-		{
-		case ResourceType::MATERIAL:
-			object = std::make_shared<Material>();
-			break;
-		case ResourceType::STATIC_MESH:
-			object = std::make_shared<StaticMesh>();
-			break;
-		default:
-			break;
-		}
-		if (object)
-		{
-			object->m_metaData = meta;
-			object->deserialize(serializer);
-			m_caches.insert({ meta.guid, object });
-		}
-		return object;
-	}
-
-	ResourceMeta ResourceRegistry::getResourceMetaBySystemPath(const std::string& path)
-	{
-		std::ifstream fin = std::ifstream(path, std::ios::binary);
-		if (!fin.is_open())
-		{
-			V_LOG_WARN(Engine, "load resource from {} failed.", path);
-			return {};
-		}
-
-		return readResourceMeta(fin);
-	}
-
-	ResourceMeta ResourceRegistry::readResourceMeta(std::ifstream& fin)
-	{
-		fin.seekg(0, std::ios::beg);
-		ResourceHeader header;
-		fin.read((char*)&header, sizeof(header));
-		if (fin.gcount() < 4)
-		{
-			return {};
-		}
-
-		if (std::string(header.magic, 8) != "volucris")
-		{
-			return {};
-		}
-
-		uint32 metaSize;
-		fin.read((char*)&metaSize, sizeof(uint32));
-		if (fin.gcount() < sizeof(uint32))
-		{
-			return {};
-		}
-
-		std::vector<uint8> metaData;
-		metaData.resize(metaSize);
-		fin.read((char*)metaData.data(), metaSize);
-		if (fin.gcount() < metaSize)
-		{
-			return {};
-		}
-
-		Serializer serializer;
-		serializer.setData(std::move(metaData));
-
-		ResourceMeta meta;
-		serializer.deserialize(meta);
-		return meta;
 	}
 
 	ResourceRegistry::ResourceRegistry()

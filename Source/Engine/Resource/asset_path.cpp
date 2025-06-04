@@ -1,0 +1,91 @@
+#include "Resource/asset_path.h"
+#include <filesystem>
+#include <Core/volucris.h>
+#include <guiddef.h>
+#include <combaseapi.h>
+#include <Resource/asset_reader.h>
+#include <Resource/resource_registry.h>
+
+namespace fs = std::filesystem;
+
+namespace volucris
+{
+	UUID UUID::generate()
+	{
+		UUID id;
+		CoInitialize(NULL);
+		_GUID guid;
+		CoCreateGuid(&guid);
+
+		// 将 GUID 格式化为字符串
+		wchar_t guidStr[40];
+		StringFromGUID2(guid, guidStr, sizeof(guidStr) / sizeof(guidStr[0]));
+
+		int size_needed = WideCharToMultiByte(CP_UTF8, 0, guidStr, -1, NULL, 0, NULL, NULL);
+		std::string str(size_needed, 0);
+		WideCharToMultiByte(CP_UTF8, 0, guidStr, -1, &str[0], size_needed, NULL, NULL);
+		str.pop_back();
+		id.value = str;
+
+		CoUninitialize();
+		return id;
+	}
+
+	Asset::Asset(const std::string& pathName)
+		: type(AssetType::UNKNOWN)
+		, uuid()
+		, path()
+		, name()
+		, sourcePath()
+	{
+		auto rpath = fs::path(pathName);
+		path = rpath.parent_path().string();
+		name = rpath.stem().string();
+		assetPath = fmt::format("{}/{}", path, name);
+		auto ext = rpath.extension().string();
+		if (!ext.empty())
+		{
+			const auto typeStr = ext.substr(1);
+			if (typeStr == "mat")
+			{
+				type = AssetType::MATERIAL;
+			}
+			else if (typeStr == "mesh")
+			{
+				type = AssetType::STATIC_MESH;
+			}
+			else if (typeStr == "tex")
+			{
+				type = AssetType::TEXTURE;
+			}
+		}
+
+		if (type == AssetType::UNKNOWN)
+		{
+			V_LOG_WARN(Engine, "invald asset: {}", path)
+		}
+	}
+
+	std::string Asset::getAssetPath() const
+	{
+		return assetPath;
+	}
+
+	std::shared_ptr<ResourceObject> Asset::load()
+	{
+		if (type == AssetType::UNKNOWN)
+		{
+			return nullptr;
+		}
+
+		return ResourceRegistry::Instance().loadResourceByAsset(*this);
+
+		auto rpath = fs::path(path);
+		const auto assetPath = rpath.replace_extension().string();
+		std::string sysPath;
+		ResourceRegistry::Instance().loadResourceByAsset(*this);
+		AssetReader reader;
+		reader.setLoadPath(sysPath);
+		return reader.load();
+	}
+}

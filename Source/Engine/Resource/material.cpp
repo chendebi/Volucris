@@ -10,7 +10,7 @@
 namespace volucris
 {
 	Material::Material()
-		: ResourceObject()
+		: ResourceObject(AssetType::MATERIAL)
 		, m_resource(nullptr)
 		, m_parameters()
 		, m_proxy()
@@ -36,18 +36,21 @@ namespace volucris
 			proxy = std::make_shared<MaterialProxy>(this);
 			m_proxy = proxy;
 
-			V_LOG_DEBUG(Engine, "create material: {}", getResourcePath().fullpath)
+			V_LOG_DEBUG(Engine, "create material: {}", getAsset().getAssetPath())
 		}
 		return proxy;
 	}
 
-	void Material::updateParametersToRenderer()
+	void Material::update()
 	{
-		if (auto proxy = m_proxy.lock())
+		if (isDirty())
 		{
+			auto proxy = getRenderProxy();
+
 			gApp->getRenderer()->pushCommand([proxy, data = m_parameterData]() {
 				proxy->updateParameters(data);
 				});
+			m_dirty = false;
 		}
 	}
 

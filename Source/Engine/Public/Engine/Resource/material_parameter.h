@@ -15,13 +15,6 @@ namespace volucris
 	class MaterialParameter
 	{
 	public:
-		enum Type
-		{
-			UNKNOWN,
-			VALUE,
-			TEXTURE
-		};
-
 		MaterialParameter(Material* material, const MaterialParameterDesc& desc);
 
 		virtual ~MaterialParameter();
@@ -30,16 +23,36 @@ namespace volucris
 
 		const MaterialParameterDesc& getDescription() const { return m_desc; }
 
+		void dirty();
+
 	protected:
-		Type m_type;
 		Material* m_material;
 		MaterialParameterDesc m_desc;
 	};
 
-	class MaterialValueParameter : public MaterialParameter
+	class MaterialParameterFloat : public MaterialParameter
 	{
 	public:
-		MaterialValueParameter(Material* material, const MaterialParameterDesc& desc, uint8* table);
+		MaterialParameterFloat(Material* material, const MaterialParameterDesc& desc)
+			: MaterialParameter(material, desc)
+			, m_value()
+		{
+		}
+
+		void setValue(float value);
+
+	private:
+		float m_value;
+	};
+
+	class MaterialParameterVec3 : public MaterialParameter
+	{
+	public:
+		MaterialParameterVec3(Material* material, const MaterialParameterDesc& desc)
+			: MaterialParameter(material, desc)
+			, m_value()
+		{
+		}
 
 		void setValue(float value);
 
@@ -48,13 +61,36 @@ namespace volucris
 		void setValue(const glm::mat4& value);
 
 	private:
-		uint8* m_dataTable;
+		glm::vec3 m_value;
 	};
 
-	class MaterialTextureParameter : public MaterialParameter
+	class MaterialParameterMat4 : public MaterialParameter
 	{
 	public:
-		MaterialTextureParameter(Material* material, const MaterialParameterDesc& desc, const std::string& guid);
+		MaterialParameterMat4(Material* material, const MaterialParameterDesc& desc)
+			: MaterialParameter(material, desc)
+			, m_value()
+		{ }
+
+		void setValue(const glm::mat4& value)
+		{
+			m_value = value;
+			dirty();
+		}
+
+	private:
+		glm::mat4 m_value;
+	};
+
+	class MaterialParameterTexture2D : public MaterialParameter
+	{
+	public:
+		MaterialParameterTexture2D(Material* material, const MaterialParameterDesc& desc)
+			: MaterialParameter(material, desc)
+			, m_texture(nullptr)
+		{
+
+		}
 
 	private:
 		std::shared_ptr<Texture2D> m_texture;
