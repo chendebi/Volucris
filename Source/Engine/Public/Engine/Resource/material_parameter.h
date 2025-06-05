@@ -5,41 +5,56 @@
 #include <string>
 #include <memory>
 #include <Engine/Core/types_help.h>
-#include <Engine/Renderer/material_parameter_description.h>
+#include "soft_object_ptr.h"
+#include <Engine/Core/material_parameter_type.h>
 
 namespace volucris
 {
-	class Material;
 	class Texture2D;
+	class UniformValue;
 
 	class MaterialParameter
 	{
+
 	public:
-		MaterialParameter(Material* material, const MaterialParameterDesc& desc);
+		MaterialParameter(std::string name, MaterialParameterType type);
 
-		virtual ~MaterialParameter();
+		virtual ~MaterialParameter() = default;
 
-		Material* getMaterial() const { return m_material; }
+		void dirty() { markDirty(true); }
 
-		const MaterialParameterDesc& getDescription() const { return m_desc; }
+		void markDirty(bool dirty) { m_dirty = dirty; }
 
-		void dirty();
+		bool isDirty() const { return m_dirty; }
 
-	protected:
-		Material* m_material;
-		MaterialParameterDesc m_desc;
+		const std::string& getName() const { return m_name; }
+
+		MaterialParameterType getType() const { return m_type; }
+
+		virtual std::shared_ptr<UniformValue> createUniformValue() = 0;
+
+	private:
+		uint8 m_dirty;
+		MaterialParameterType m_type;
+		std::string m_name;
 	};
 
 	class MaterialParameterFloat : public MaterialParameter
 	{
 	public:
-		MaterialParameterFloat(Material* material, const MaterialParameterDesc& desc)
-			: MaterialParameter(material, desc)
+		MaterialParameterFloat(std::string name)
+			: MaterialParameter(name, MaterialParameterType::FLOAT)
 			, m_value()
 		{
 		}
 
-		void setValue(float value);
+		std::shared_ptr<UniformValue> createUniformValue() override;
+
+		void setValue(float value)
+		{
+			m_value = value;
+			dirty();
+		}
 
 	private:
 		float m_value;
@@ -48,52 +63,40 @@ namespace volucris
 	class MaterialParameterVec3 : public MaterialParameter
 	{
 	public:
-		MaterialParameterVec3(Material* material, const MaterialParameterDesc& desc)
-			: MaterialParameter(material, desc)
+		MaterialParameterVec3(std::string name)
+			: MaterialParameter(name, MaterialParameterType::VEC3)
 			, m_value()
 		{
 		}
 
-		void setValue(float value);
+		std::shared_ptr<UniformValue> createUniformValue() override;
 
-		void setValue(const glm::vec3& value);
-
-		void setValue(const glm::mat4& value);
-
-	private:
-		glm::vec3 m_value;
-	};
-
-	class MaterialParameterMat4 : public MaterialParameter
-	{
-	public:
-		MaterialParameterMat4(Material* material, const MaterialParameterDesc& desc)
-			: MaterialParameter(material, desc)
-			, m_value()
-		{ }
-
-		void setValue(const glm::mat4& value)
+		void setValue(const glm::vec3& value)
 		{
 			m_value = value;
 			dirty();
 		}
 
 	private:
-		glm::mat4 m_value;
+		glm::vec3 m_value;
 	};
 
 	class MaterialParameterTexture2D : public MaterialParameter
 	{
 	public:
-		MaterialParameterTexture2D(Material* material, const MaterialParameterDesc& desc)
-			: MaterialParameter(material, desc)
-			, m_texture(nullptr)
+		MaterialParameterTexture2D(std::string name, std::string assetPath, int location)
+			: MaterialParameter(name, MaterialParameterType::TEXTURE2D)
+			, m_location(location)
+			, m_texture(std::move(assetPath))
 		{
 
 		}
 
+		std::shared_ptr<UniformValue> createUniformValue() override;
+
 	private:
-		std::shared_ptr<Texture2D> m_texture;
+		int m_location;
+		TSoftObjectPtr<Texture2D> m_texture;
 	};
 }
 

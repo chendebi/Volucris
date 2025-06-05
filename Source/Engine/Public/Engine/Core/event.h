@@ -13,8 +13,6 @@ namespace volucris
 	class Event
 	{
 	public:
-		virtual ~Event() = default;
-
 		// 绑定Lamda表达式
 		size_t addLambda(std::function<void(Args...)> lamda)
 		{

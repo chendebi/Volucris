@@ -22,16 +22,18 @@ namespace volucris
 
 		const Asset& getAsset() const { return m_asset; }
 
-		void dirty() { m_dirty = true; }
+		void dirty() { markDirty(true); }
+
+		void markDirty(bool dirty) { m_dirty = dirty; if (dirty) { onResourceDirty(); } }
 
 		bool isDirty() const { return m_dirty; }
 
-	protected:
-		friend class AssetReader;
-		friend class AssetWriter;
-		virtual bool serialize(Serializer& serializer) const { return false; }
+		virtual bool serialize(Serializer& serializer) const = 0;
 		
-		virtual void deserialize(Serializer& serializer) { }
+		virtual void deserialize(Serializer& serializer) = 0;
+
+	protected:
+		virtual void onResourceDirty() {}
 
 	private:
 		uint8 m_dirty;

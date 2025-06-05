@@ -7,21 +7,28 @@
 #include "Engine/Renderer/OpenGL/ogl_program_object.h"
 #include "Engine/Renderer/OpenGL/ogl_render_state.h"
 #include "Engine/Renderer/OpenGL/ogl_uniform.h"
+#include <Engine/Renderer/material_inner_data.h>
 
 namespace volucris
 {
 	class Material;
 	class MaterialResource;
-	//struct UniformDescription;
+	class Texture2DProxy;
+
+	struct MaterialRenderData
+	{
+		std::string vss;
+		std::string fss;
+		std::vector<std::string> parameterNames;
+		MaterialInnerParameters engineParameters;
+	};
 
 	class MaterialResourceProxy
 	{
 	public:
-		MaterialResourceProxy(MaterialResource* resource);
+		MaterialResourceProxy();
 
-		const std::vector<std::shared_ptr<UniformDescription>>& getUniformDescrptions() const { return m_descriptions; }
-
-		const std::vector<UniformDescription> getUniformBlockDescriptions() const { return m_uniformBlockDescriptions; }
+		void update(const MaterialRenderData& data);
 
 		OGLProgramObject* getProgramObject() const { return m_program.get(); }
 
@@ -29,8 +36,13 @@ namespace volucris
 		std::string m_vss;
 		std::string m_fss;
 		std::unique_ptr<OGLProgramObject> m_program;
-		std::vector<std::shared_ptr<UniformDescription>> m_descriptions;
-		std::vector<UniformDescription> m_uniformBlockDescriptions;
+		std::vector<std::string> m_parameterNames;
+	};
+
+	struct MaterialParameterRenderData
+	{
+		std::vector<std::shared_ptr<UniformValue>> values;
+		std::vector<std::shared_ptr<Texture2DProxy>> textures;
 	};
 
 	class MaterialProxy
@@ -38,22 +50,19 @@ namespace volucris
 	public:
 		MaterialProxy();
 
-		MaterialProxy(Material* material);
-
 		~MaterialProxy();
 
-		void updateByMaterial(Material* material);
-
-		void setResource(MaterialResourceProxy* resource);
-
-		void updateParameters(const std::vector<uint8>& data);
+		void updateParameterRenderData(MaterialParameterRenderData renderData);
 
 		const OGLProgramState& getState() const { return m_state; }
 
+		const std::shared_ptr<MaterialResourceProxy>& getResource() const { return m_resource; }
+
 	private:
 		std::shared_ptr<MaterialResourceProxy> m_resource;
+		std::vector<std::shared_ptr<Texture2DProxy>> m_textures;
+		MaterialParameterRenderData m_renderData;
 		OGLProgramState m_state;
-		std::vector<uint8> m_parameterData;
 	};
 }
 

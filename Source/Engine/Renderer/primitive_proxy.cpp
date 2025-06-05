@@ -11,11 +11,18 @@
 
 namespace volucris
 {
-	PrimitiveProxy::PrimitiveProxy(PrimitiveComponent* primitive)
-		: m_meshProxy(primitive->getResource()->getRenderProxy())
+	PrimitiveProxy::PrimitiveProxy()
+		: m_meshProxy(nullptr)
 		, m_batches()
+		, m_modelMat(nullptr)
+	{
+		
+	}
+
+	void PrimitiveProxy::initialize(PrimitiveComponent* primitive)
 	{
 		auto resource = primitive->getResource();
+		m_meshProxy = resource->getRenderProxy();
 		std::unordered_map<std::shared_ptr<MaterialProxy>, std::vector<SectionRenderData>> sections;
 		for (const auto& section : resource->getResourceData()->getSections())
 		{
@@ -38,9 +45,8 @@ namespace volucris
 				sectionIt->second.push_back(sectionRenderData);
 			}
 		}
-		
-		m_sections = sections;
 
+		m_sections = sections;
 		m_batches.reserve(m_sections.size());
 		for (auto& [material, sections] : m_sections)
 		{

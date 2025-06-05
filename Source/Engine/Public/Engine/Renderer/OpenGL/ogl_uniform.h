@@ -6,52 +6,119 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include <Engine/Renderer/material_parameter_description.h>
+#include <Engine/Renderer/material_inner_data.h>
 
 namespace volucris
 {
 	class OGLProgramObject;
 
-	class UniformDescription
-	{
-	public:
-		MaterialParameterDesc desc;
-		int32 location;
-
-		UniformDescription()
-			: desc(), location(-1)
-		{ }
-
-		UniformDescription(const MaterialParameterDesc& parameter)
-			: desc(parameter), location(-1)
-		{ }
-
-		bool valid() const { return location >= 0; }
-	};
-
 	class Uniform
 	{
 	public:
-		class Uploader;
+		Uniform(std::string name)
+			: m_name(std::move(name))
+			, m_location(-1)
+		{
 
-	public:
-		Uniform(const std::shared_ptr<UniformDescription>& desc, uint8* table);
+		}
 
-		~Uniform() = default;
+		void setLocation(int location)
+		{
+			m_location = location;
+		}
 
-		void setDataTable(uint8* table) { m_table = table; }
+		virtual void upload() = 0;
 
-		void upload();
+		const std::string getName() const { return m_name; }
 
-		bool valid() const { return m_desc->valid() && m_table; }
+		int getLocation() const { return m_location; }
 
-		UniformDescription* getDescription() const { return m_desc.get(); }
-
-	protected:
-		std::shared_ptr<UniformDescription> m_desc;
-		std::shared_ptr<Uploader> m_uploader;
-		uint8* m_table;
+	private:
+		std::string m_name;
+		int m_location;
 	};
+
+	class BlockUniform : public Uniform
+	{
+	public:
+		BlockUniform(std::string name, MaterialInnerParameter block)
+			: Uniform(name), m_block(block)
+		{ }
+
+		MaterialInnerParameter getBlockSlot() const { return m_block; }
+
+	private:
+		MaterialInnerParameter m_block;
+	};
+
+	namespace UniformUploader
+	{
+		void upload(int location, float value);
+		void upload(int location, glm::vec3 value);
+		void upload(int location, glm::vec4 value);
+		void upload(int location, glm::mat4 value);
+	}
+
+
+	class UniformValue
+	{
+	public:
+		UniformValue()
+			: m_uniform(nullptr)
+		{
+
+		}
+
+		void setUniform(const std::shared_ptr<Uniform>& uniform)
+		{
+			m_uniform = uniform;
+		}
+
+		const std::shared_ptr<Uniform>& getUniform() const { return m_uniform; }
+
+		virtual ~UniformValue() = default;
+
+		virtual void upload() = 0;
+	protected:
+		std::shared_ptr<Uniform> m_uniform;
+	};
+
+	template <typename T>
+	class UniformValueTemplate : public UniformValue
+	{
+	public:
+		UniformValueTemplate()
+			: UniformValue()
+			, m_value()
+		{
+		}
+
+		UniformValueTemplate(const T& value)
+			: UniformValue()
+			, m_value(value)
+		{ }
+
+		void setValue(const T& value)
+		{
+			m_value = value;
+		}
+
+		void upload() override
+		{
+			auto location = m_uniform->getLocation();
+			if (location >= 0)
+			{
+				UniformUploader::upload(location, m_value);
+			}
+		}
+
+	private:
+		T m_value;
+	};
+
+	using UniformValueFloat = UniformValueTemplate<float>;
+	using UniformValueVec3 = UniformValueTemplate<glm::vec3>;
+	//using UniformValueMat4 = UniformValueTemplate<glm::mat4>;
 }
 
 #endif // !__volucris_ogl_uniform_h__

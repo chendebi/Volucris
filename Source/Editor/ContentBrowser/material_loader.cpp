@@ -8,20 +8,19 @@
 
 namespace volucris
 {
-	using MaterialParameterMap = std::unordered_map<MaterialParameterDesc::Type, std::vector<std::string>>;
+	using MaterialParameterMap = std::unordered_map<MaterialParameterType, std::vector<std::string>>;
 
 	constexpr std::string_view MODEL_MATRIX_UNIFORM_NAME = "v_modelMat";
 	constexpr std::string_view CAMERA_INFO_BLOCK_NAME = "v_cameraInfo";
 	constexpr std::string_view DIRECTION_LIGHT_BLOCK_NAME = "v_directionLight";
 
-	static MaterialParameterDesc::Type getTypeByString(const std::string& name)
+	static MaterialParameterType getTypeByString(const std::string& name)
 	{
-		MaterialParameterDesc::Type type = MaterialParameterDesc::UNKNOWN;
-		if (name == "float") { type = MaterialParameterDesc::FLOAT; }
-		else if (name == "vec3") { type = MaterialParameterDesc::VEC3; }
-		else if (name == "mat4") { type = MaterialParameterDesc::MAT4; }
+		MaterialParameterType type = MaterialParameterType::NONE;
+		if (name == "float") { type = MaterialParameterType::FLOAT; }
+		else if (name == "vec3") { type = MaterialParameterType::VEC3; }
 
-		if (type == MaterialParameterDesc::UNKNOWN)
+		if (type == MaterialParameterType::NONE)
 		{
 			V_LOG_WARN(Editor, "load material with unsupported uniform type: {}", name);
 		}
@@ -50,7 +49,7 @@ namespace volucris
 
 			if (std::regex_search(line, matches, uniformattern))
 			{
-				MaterialParameterDesc::Type type = MaterialParameterDesc::UNKNOWN;    // "mat4"
+				MaterialParameterType type = MaterialParameterType::NONE;    // "mat4"
 				std::string name = matches[2];    // "v_modelMat"
 
 				if (name == MODEL_MATRIX_UNIFORM_NAME)
@@ -62,7 +61,7 @@ namespace volucris
 					type = getTypeByString(matches[1]);
 				}
 
-				if (type != MaterialParameterDesc::UNKNOWN)
+				if (type != MaterialParameterType::NONE)
 				{
 					V_LOG_DEBUG(Editor, "find material parameter: {} - {}", matches[1].str(), name);
 					map[type].push_back(name);

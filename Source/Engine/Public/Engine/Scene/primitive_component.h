@@ -20,7 +20,7 @@ namespace volucris
 
 		bool setMaterial(const std::string& slot, const std::shared_ptr<Material>& mat);
 
-		void setMaterials(const std::unordered_map < std::string, std::shared_ptr<Material>>& mats);
+		void setMaterials(const std::unordered_map <std::string, std::shared_ptr<Material>>& mats);
 
 		MeshResource* getResource() const { return m_resource.get(); }
 
@@ -34,7 +34,7 @@ namespace volucris
 		void updateTransform() override;
 
 	private:
-		PrimitiveProxy* m_proxy;
+		std::weak_ptr<PrimitiveProxy> m_proxy;
 		std::shared_ptr<MeshResource> m_resource;
 		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 		std::vector<MaterialValueParameter*> m_modelMatParameters;

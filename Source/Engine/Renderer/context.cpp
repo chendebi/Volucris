@@ -247,17 +247,22 @@ namespace volucris
 			V_LOG_WARN(Engine, "draw call failed");
 			return;
 		}
-		GL_CHECK();
+
 		if (state.programState.program != m_renderState.drawState.programState.program)
 		{
 			m_renderState.drawState.programState.program = state.programState.program;
 			glUseProgram(state.programState.program->getID());
 		}
-		GL_CHECK();
-		for (const auto& uniform : state.programState.uniforms)
+
+		if (auto renderData = state.programState.renderData)
 		{
-			uniform->upload();
+			for (const auto& uniform : renderData->values)
+			{
+				uniform->upload();
+			}
 		}
+
+		
 		GL_CHECK();
 		bindVertexArrayObject(state.vao);
 		bindBuffer(state.ebo);
@@ -301,19 +306,19 @@ namespace volucris
 		}
 
 		uint32 slot = 0;
-		for (const auto& uniformBlock : state.programState.program->getUniformBlockDescriptions())
+		for (const auto& uniformBlock : state.programState.program->getBlockUniforms())
 		{
-			glUniformBlockBinding(state.programState.program->getID(), uniformBlock.location, slot);
-			switch (uniformBlock.desc.type)
+			glUniformBlockBinding(state.programState.program->getID(), uniformBlock->getLocation(), slot);
+			switch (uniformBlock->getBlockSlot())
 			{
-			case MaterialParameterDesc::CAMERA_INFO:
+			case MaterialInnerParameter::CAMERA_INFO:
 				if (!prepareUniformBlock(m_cameraInfoBlock))
 				{
 					return false;
 				}
 				bindUniformBlock(m_cameraInfoBlock, slot);
 				break;
-			case MaterialParameterDesc::DIRECTION_LIGHT:
+			case MaterialInnerParameter::DIRECTION_LIGHT:
 				if (!prepareUniformBlock(m_directonLightBlock))
 				{
 					return false;

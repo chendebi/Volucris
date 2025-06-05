@@ -3,13 +3,25 @@
 
 #include <Engine/Resource/resource_object.h>
 #include "Engine/Resource/material_parameter.h"
+#include <Engine/Core/event.h>
+#include <Engine/Renderer/material_inner_data.h>
 
 namespace volucris
 {
+#if WITH_EDITOR
+	class MaterialResource;
+	DECLARE_EVENT(OnMaterialResouceRebuild, MaterialResource*)
+#endif
+
 	class MaterialResourceProxy;
 
-	class MaterialResource : public ResourceObject
+	class MaterialResource
 	{
+	public:
+#if WITH_EDITOR
+		OnMaterialResouceRebuild Rebuild;
+#endif
+
 	public:
 		MaterialResource();
 
@@ -19,10 +31,13 @@ namespace volucris
 
 		void setSource(const std::string& vss, const std::string& fss);
 
-		void setParameters(const std::vector<MaterialParameterDesc>& parameters)
-		{
-			m_descriptions = parameters;
-		}
+		void setParameterDescriptions(const std::vector<MaterialParameterDescription>& descriptions);
+
+		void setEngineInnerParameters(MaterialInnerParameters parameters) { m_innerParameters = parameters; }
+
+		void dirty();
+
+		void update();
 
 		std::shared_ptr<MaterialResourceProxy> getRenderProxy();
 
@@ -30,26 +45,23 @@ namespace volucris
 
 		std::string getFragmentShaderSource() const { return m_fss; }
 
-		const std::vector<MaterialParameterDesc>& getParameterDescriptions() const { return m_descriptions; }
+		MaterialInnerParameters getEngineInnerParameters() const { return m_innerParameters; }
 
-		bool serialize(Serializer& serializer) const override;
+		const std::vector<MaterialParameterDescription>& getParameterDescriptions() const { return m_descriptions; }
 
-		void deserialize(Serializer& serializer) override;
+		bool serialize(Serializer& serializer) const;
+
+		void deserialize(Serializer& serializer);
 
 	private:
+		uint8 m_dirty;
 		std::string m_vss;
 		std::string m_fss;
-		std::vector<MaterialParameterDesc> m_descriptions;
+		MaterialInnerParameters m_innerParameters;
+		std::vector<MaterialParameterDescription> m_descriptions;
 		std::weak_ptr<MaterialResourceProxy> m_proxy;
 	};
 
-	class MaterialResourceLoader
-	{
-	public:
-		MaterialResourceLoader() = default;
-
-		std::shared_ptr<MaterialResource> loadMaterialResource(const std::string& vsf, const std::string& fsf);
-	};
 }
 
 #endif // !__volucris_material_resource_h__

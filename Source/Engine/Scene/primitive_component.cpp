@@ -11,24 +11,19 @@
 #include "Renderer/material_proxy.h"
 #include "Resource/mesh_resource.h"
 #include "Resource/material.h"
+#include <Renderer/primitive_proxy.h>
 
 namespace volucris
 {
 	PrimitiveComponent::PrimitiveComponent()
 		: SceneComponent()
-		, m_proxy(nullptr)
+		, m_proxy()
 		, m_resource(nullptr)
 	{
 	}
 
 	void PrimitiveComponent::setMeshResource(const std::shared_ptr<MeshResource>& resource)
 	{
-		if (m_proxy)
-		{
-			V_LOG_WARN(Engine, "not support set mesh resource while rendering");
-			return;
-		}
-
 		m_resource = resource;
 		std::unordered_map<std::string, std::shared_ptr<Material>> materials;
 
@@ -63,6 +58,15 @@ namespace volucris
 
 	void PrimitiveComponent::updateRenderState()
 	{
+		auto proxy = m_proxy.lock();
+		if (!proxy)
+		{
+			proxy = std::make_shared<PrimitiveProxy>();
+			proxy->initialize(this);
+			m_proxy = proxy;
+			return;
+		}
+
 		auto renderer = gApp->getRenderer();
 		auto sceneProxy = getScene()->getSceneProxy();
 		if (m_proxy)

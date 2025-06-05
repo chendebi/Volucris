@@ -3,49 +3,60 @@
 #include "Resource/material_resource.h"
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
+#include <Core/volucris.h>
 
 namespace volucris
 {
 
-	MaterialResourceProxy::MaterialResourceProxy(MaterialResource* resource)
-		: m_vss(resource->getVertexShaderSource())
-		, m_fss(resource->getFragmentShaderSource())
+	MaterialResourceProxy::MaterialResourceProxy()
+		: m_vss()
+		, m_fss()
 		, m_program(std::make_unique<OGLProgramObject>())
-		, m_descriptions()
 	{
 		auto vs = std::make_shared<OGLShaderObject>(GL_VERTEX_SHADER);
-		vs->setSource(m_vss);
 		auto fs = std::make_shared<OGLShaderObject>(GL_FRAGMENT_SHADER);
-		fs->setSource(m_fss);
 		m_program->attach(vs);
 		m_program->attach(fs);
 		m_program->setAutoReleaseShader(true);
-
-		for (const auto& desc : resource->getParameterDescriptions())
-		{
-			if (desc.isUniformBlockBinding())
-			{
-				m_uniformBlockDescriptions.push_back(desc);
-			}
-			else
-			{
-				m_descriptions.push_back(std::make_shared<UniformDescription>(desc));
-			}
-		}
-		m_program->setUniformDescriptions(m_descriptions, m_uniformBlockDescriptions);
 	}
+
+	void MaterialResourceProxy::update(const MaterialRenderData& data)
+	{
+		m_program->getAttachShader(GL_VERTEX_SHADER)->setSource(data.vss);
+		m_program->getAttachShader(GL_FRAGMENT_SHADER)->setSource(data.fss);
+
+		std::vector<std::shared_ptr<Uniform>> parameterUniforms;
+		for (const auto& name : data.parameterNames)
+		{
+			parameterUniforms.push_back(std::make_shared<Uniform>(name));
+		}
+
+		std::vector<std::shared_ptr<BlockUniform>> blockUniforms;
+		if (data.engineParameters & (int32)MaterialInnerParameter::MODEL_MATRIX)
+		{
+			blockUniforms.push_back(std::make_shared<BlockUniform>("UPrimitiveInfo", MaterialInnerParameter::MODEL_MATRIX));
+		}
+		if (data.engineParameters & (int32)MaterialInnerParameter::CAMERA_INFO)
+		{
+			blockUniforms.push_back(std::make_shared<BlockUniform>("UCameraInfo", MaterialInnerParameter::CAMERA_INFO));
+		}
+		else if (data.engineParameters & (int32)MaterialInnerParameter::CAMERA_INFO)
+		{
+			blockUniforms.push_back(std::make_shared<BlockUniform>("UDirectionLight", MaterialInnerParameter::DIRECTION_LIGHT));
+		}
+
+		m_program->setParameterUniforms(parameterUniforms);
+		m_program->setBlockUniforms(blockUniforms);
+		m_program->dirty();
+	}
+
+	
 
 	MaterialProxy::MaterialProxy()
 		: m_resource(nullptr)
-		, m_parameterData()
+		, m_state()
 	{
 
-	}
-
-	MaterialProxy::MaterialProxy(Material* material)
-		: MaterialProxy()
-	{
-		updateByMaterial(material);
 	}
 
 	MaterialProxy::~MaterialProxy()
@@ -53,26 +64,21 @@ namespace volucris
 
 	}
 
-	void MaterialProxy::updateByMaterial(Material* material)
+	void MaterialProxy::updateParameterRenderData(MaterialParameterRenderData renderData)
 	{
-		m_resource = material->getResource()->getRenderProxy();
-		m_parameterData = material->getParameterData();
-
-		m_state.program = m_resource->getProgramObject();
-
-		for (const auto& desc : m_resource->getUniformDescrptions())
+		const auto& uniforms = m_state.program->getParameterUniforms();
+		if (uniforms.size() != renderData.values.size())
 		{
-			auto uniform = std::make_shared<Uniform>(desc, m_parameterData.data());
-			m_state.uniforms.push_back(uniform);
+			V_LOG_WARN(Engine, "update material render data failed");
+			return;
 		}
-	}
 
-	void MaterialProxy::updateParameters(const std::vector<uint8>& data)
-	{
-		m_parameterData = data;
-		for (const auto& uniform : m_state.uniforms)
+		m_renderData = renderData;
+		for (auto idx = 0; idx < uniforms.size(); ++idx)
 		{
-			uniform->setDataTable(m_parameterData.data());
+			m_renderData.values[idx]->setUniform(uniforms[idx]);
 		}
+
+		m_state.renderData = &m_renderData;
 	}
 }

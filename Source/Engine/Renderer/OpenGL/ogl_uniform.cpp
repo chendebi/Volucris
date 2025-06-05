@@ -6,68 +6,23 @@
 
 namespace volucris
 {
-	class Uniform::Uploader
+	void UniformUploader::upload(int location, float value)
 	{
-	public:
-		virtual ~Uploader() = default;
-		virtual void upload(int32 location, uint8* addr) = 0;
-	};
-
-	class FloatUploader : public Uniform::Uploader
-	{
-	public:
-		void upload(int32 location, uint8* addr) override
-		{
-			glUniform1f(location, *reinterpret_cast<float*>(addr));
-		}
-	};
-
-	class Vec3Uploader : public Uniform::Uploader
-	{
-	public:
-		void upload(int32 location, uint8* addr) override
-		{
-			glUniform3fv(location, 1, reinterpret_cast<float*>(addr));
-		}
-	};
-
-	class Mat4Uploader : public Uniform::Uploader
-	{
-	public:
-		void upload(int32 location, uint8* addr) override
-		{
-			glUniformMatrix4fv(location, 1, false, reinterpret_cast<float*>(addr));
-		}
-	};
-
-	Uniform::Uniform(const std::shared_ptr<UniformDescription>& desc, uint8* table)
-		: m_desc(desc)
-		, m_uploader(nullptr)
-		, m_table(table)
-	{
-		switch (desc->desc.type)
-		{
-		case MaterialParameterDesc::FLOAT:
-			m_uploader = std::make_shared<FloatUploader>();
-			break;
-		case MaterialParameterDesc::VEC3:
-			m_uploader = std::make_shared<Vec3Uploader>();
-			break;
-		case MaterialParameterDesc::MAT4:
-		case MaterialParameterDesc::MODEL_INFO:
-			m_uploader = std::make_shared<Mat4Uploader>();
-			break;
-		default:
-			break;
-		}
+		glUniform1f(location, value);
 	}
 
-	void Uniform::upload()
+	void UniformUploader::upload(int location, glm::vec3 value)
 	{
-		if (valid())
-		{
-			m_uploader->upload(m_desc->location, m_table + m_desc->desc.offset);
-		}
+		glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 
+	void UniformUploader::upload(int location, glm::vec4 value)
+	{
+		glUniform4fv(location, 1, glm::value_ptr(value));
+	}
+
+	void UniformUploader::upload(int location, glm::mat4 value)
+	{
+		glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
+	}
 }

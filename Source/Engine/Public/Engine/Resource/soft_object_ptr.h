@@ -13,7 +13,7 @@ namespace volucris
 	public:
 		TSoftObjectPtr(std::string path)
 			: m_path(std::move(path))
-			, m_object(nullptr)
+			, m_object()
 		{ }
 
 		std::shared_ptr<T> tryLoad()
@@ -22,12 +22,14 @@ namespace volucris
 			if (!object)
 			{
 				Asset asset(m_path);
-				object = asset
+				object = std::dynamic_pointer_cast<T>(asset.load());
+				m_object = object;
 			}
+			return object;
 		}
 
 	private:
-		AssetPath m_path;
+		std::string m_path;
 		std::weak_ptr<T> m_object;
 	};
 }

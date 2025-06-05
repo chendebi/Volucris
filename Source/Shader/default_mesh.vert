@@ -1,9 +1,12 @@
 #version 330 core
 layout(location=0) in vec3 v_Position;
 
-uniform mat4 v_modelMat;
+layout (std140) uniform UPrimitiveInfo
+{
+    uniform mat4 modelMat;
+}
 
-layout (std140) uniform v_cameraInfo
+layout (std140) uniform UCameraInfo
 {
     mat4 viewMat;
     mat4 projectionMat;
@@ -12,5 +15,5 @@ layout (std140) uniform v_cameraInfo
 
 void main()
 {
-    gl_Position = projectionViewMat * v_modelMat * vec4(v_Position, 1.0);
+    gl_Position = projectionViewMat * modelMat * vec4(v_Position, 1.0);
 }

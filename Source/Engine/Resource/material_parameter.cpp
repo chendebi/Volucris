@@ -5,27 +5,33 @@
 #include <Resource/resource_registry.h>
 #include <Resource/texture2d.h>
 #include <Resource/material.h>
+#include <Renderer/OpenGL/ogl_uniform.h>
 
 namespace volucris
 {
 
-	MaterialParameter::MaterialParameter(Material* material, const MaterialParameterDesc& desc)
-		: m_material(material)
-		, m_desc(desc)
+	MaterialParameter::MaterialParameter(std::string name, MaterialParameterType type)
+		: m_dirty(true)
+		, m_type(type)
+		, m_name(std::move(name))
 	{
 		
 	}
 
-	MaterialParameter::~MaterialParameter()
+	std::shared_ptr<UniformValue> MaterialParameterFloat::createUniformValue()
 	{
-		//V_LOG_DEBUG(Engine, "destroy material parameter: {}", m_desc.name);
+		return std::make_shared<UniformValueFloat>(m_value);
 	}
 
-	void MaterialParameter::dirty()
+	std::shared_ptr<UniformValue> MaterialParameterVec3::createUniformValue()
 	{
-		if (m_material)
-		{
-			m_material->di
-		}
+		return std::make_shared<UniformValueVec3>(m_value);
 	}
+
+	std::shared_ptr<UniformValue> MaterialParameterTexture2D::createUniformValue()
+	{
+		//return std::make_shared<UniformValueVec3>(m_value);
+		return nullptr;
+	}
+
 }
