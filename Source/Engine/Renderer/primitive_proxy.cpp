@@ -14,7 +14,6 @@ namespace volucris
 	PrimitiveProxy::PrimitiveProxy()
 		: m_meshProxy(nullptr)
 		, m_batches()
-		, m_modelMat(nullptr)
 	{
 		
 	}

@@ -11,7 +11,7 @@ namespace volucris
 {
 	class RenderTargetProxy;
 
-	class RenderTarget : public ResourceObject
+	class RenderTarget
 	{
 	public:
 		OnSizeChanged SizeChanged;

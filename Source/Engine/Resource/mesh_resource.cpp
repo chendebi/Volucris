@@ -8,8 +8,7 @@
 namespace volucris
 {
 	MeshResource::MeshResource(const std::shared_ptr<MeshResourceData>& data)
-		: ResourceObject()
-		, m_data(data)
+		: m_data(data)
 		, m_proxy()
 	{
 	}
@@ -22,7 +21,7 @@ namespace volucris
 			proxy = std::make_shared<MeshProxy>();
 			proxy->updateByResource(m_data.get());
 			m_proxy = proxy;
-			V_LOG_DEBUG(Engine, "create mesh resource proxy: {}", getResourcePath().fullpath);
+			V_LOG_DEBUG(Engine, "create mesh resource proxy: {}");
 		}
 		return proxy;
 	}

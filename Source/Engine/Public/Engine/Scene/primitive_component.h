@@ -37,7 +37,6 @@ namespace volucris
 		std::weak_ptr<PrimitiveProxy> m_proxy;
 		std::shared_ptr<MeshResource> m_resource;
 		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
-		std::vector<MaterialValueParameter*> m_modelMatParameters;
 	};
 }
 

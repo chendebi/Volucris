@@ -27,8 +27,6 @@ namespace volucris
 			m_location = location;
 		}
 
-		virtual void upload() = 0;
-
 		const std::string getName() const { return m_name; }
 
 		int getLocation() const { return m_location; }

@@ -94,16 +94,6 @@ namespace volucris
 			});
 	}
 
-	PrimitiveProxy* Renderer::createPrimitiveProxy(PrimitiveComponent* primitive)
-	{
-		auto proxy = std::make_shared<PrimitiveProxy>(primitive);
-		auto scene = primitive->getScene()->getSceneProxy();
-		pushCommand([scene, proxy]() {
-			scene->addPrimitiveProxy(proxy);
-			});
-		return proxy.get();
-	}
-
 	void Renderer::pushCommand(RenderCommand command)
 	{
 		m_commands.push(std::move(command));

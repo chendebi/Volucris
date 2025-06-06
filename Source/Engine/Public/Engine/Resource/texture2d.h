@@ -31,6 +31,10 @@ namespace volucris
 
 		TextureData getTextureData() const { return m_data; }
 
+		bool serialize(Serializer& serializer) const override { return false; }
+
+		void deserialize(Serializer& serializer) {}
+
 	private:
 		uint8 m_dirty;
 		TextureData m_data;

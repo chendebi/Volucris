@@ -41,8 +41,6 @@ namespace volucris
 
 		Size getFrameSize() const { return m_windowFrameSize; }
 
-		PrimitiveProxy* createPrimitiveProxy(PrimitiveComponent* primitive);
-
 		void pushCommand(RenderCommand command);
 
 		void release();
