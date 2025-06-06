@@ -138,25 +138,23 @@ namespace volucris
 
 	bool AddResourceDialog::addMeshResource()
 	{
-		MeshLoader loader;
+		MeshLoader loader = MeshLoader(m_pathWidget->getSelectedPathItem()->getResourceDirectory());
 		if (loader.load(m_filePath0.data()))
 		{
 			for (const auto& resource : loader.getLoadedResouces())
 			{
-				//const auto resPath = m_pathWidget->getSelectedPathItem()->getResourceDirectory() + "/" + resource->getResourcePath().name;
-				//ResourceRegistry::Instance().registry(resource, resPath);
-				// 保存操作放到后面执行
+				ResourceRegistry::Instance().registry(resource);
 				ResourceRegistry::Instance().save(resource);
 			}
-			for (const auto& mesh : loader.getLoadedStaticMeshes())
-			{
-				auto comp = std::make_shared<PrimitiveComponent>();
-				comp->setMeshResource(mesh->getResource());
-				comp->setMaterials(mesh->getMaterials());
-				auto actor = std::make_shared<Actor>();
-				actor->setRootComponent(comp);
-				//gApp->getScene(0)->addActor(actor);
-			}
+			//for (const auto& mesh : loader.getLoadedStaticMeshes())
+			//{
+			//	auto comp = std::make_shared<PrimitiveComponent>();
+			//	comp->setMeshResource(mesh->getResource());
+			//	comp->setMaterials(mesh->getMaterials());
+			//	auto actor = std::make_shared<Actor>();
+			//	actor->setRootComponent(comp);
+			//	//gApp->getScene(0)->addActor(actor);
+			//}
 			return true;
 		}
 		return false;

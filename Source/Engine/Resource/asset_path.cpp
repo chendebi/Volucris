@@ -51,13 +51,5 @@ namespace volucris
 	std::shared_ptr<ResourceObject> Asset::load()
 	{
 		return ResourceRegistry::Instance().loadResourceByAsset(*this);
-
-		auto rpath = fs::path(path);
-		const auto assetPath = rpath.replace_extension().string();
-		std::string sysPath;
-		ResourceRegistry::Instance().loadResourceByAsset(*this);
-		AssetReader reader;
-		reader.setLoadPath(sysPath);
-		return reader.load();
 	}
 }

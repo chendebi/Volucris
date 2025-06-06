@@ -50,9 +50,11 @@ namespace volucris
 			auto resource = loader.load(vsf, fsf);
 			if (resource)
 			{
-				auto mat = this->loader->createResource<Material>();
-				/*mat->setResourceName(material->GetName().C_Str());
-				mat->setMaterialResource(resource);*/
+				auto mat = this->loader->createResource<Material>(resource);
+				auto asset = mat->getAsset();
+				asset.name = material->GetName().C_Str();
+				asset.assetPath = fmt::format("{}/{}", asset.path, asset.name);
+				mat->setAsset(asset);
 				return mat;
 			}
 			return nullptr;
@@ -228,13 +230,17 @@ namespace volucris
 					meshes.push_back(scene->mMeshes[node->mMeshes[idx]]);
 				}
 				auto res = buildMeshResource(meshes);
-				auto staticMesh = loader->createResource<StaticMesh>();
-				staticMesh->setMeshResource(res.resource);
-				//staticMesh->setResourceName(node->mName.C_Str());
+				auto staticMesh = loader->createResource<StaticMesh>(res.resource);
+				auto asset = staticMesh->getAsset();
+				asset.name = node->mName.C_Str();
+				asset.assetPath = fmt::format("{}/{}", asset.path, asset.name);
+				staticMesh->setAsset(asset);
+
 				for (const auto& [slot, material] : res.materials)
 				{
 					staticMesh->setMaterial(slot, material);
 				}
+
 				staticMeshes.push_back(staticMesh);
 			}
 
@@ -245,8 +251,9 @@ namespace volucris
 		}
 	};
 
-	MeshLoader::MeshLoader()
-		: m_resources()
+	MeshLoader::MeshLoader(const std::string& path)
+		: m_path(path)
+		, m_resources()
 		, m_loadedMeshes()
 	{
 	}
@@ -285,6 +292,7 @@ namespace volucris
 		helper.buildStaticMesh(scene->mRootNode);
 		
 		m_loadedMeshes = std::move(helper.staticMeshes);
+		m_loadedMaterials = std::move(helper.materials);
 		return true;
 	}
 }

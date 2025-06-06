@@ -120,6 +120,7 @@ namespace volucris
 			{
 				m_assets.insert_or_assign(object->getAsset().uuid, path);
 				m_caches.insert({ path, object });
+				V_LOG_INFO(Engine, "load asset success. {}", path);
 				return object;
 			}
 			else

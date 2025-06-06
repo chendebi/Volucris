@@ -12,10 +12,22 @@ namespace volucris
 	class TSoftObjectPtr
 	{
 	public:
+		TSoftObjectPtr()
+			: m_path()
+			, m_object()
+		{ }
+
 		TSoftObjectPtr(std::string path)
 			: m_path(std::move(path))
 			, m_object()
 		{ }
+
+		TSoftObjectPtr(const std::shared_ptr<T>& object)
+			: m_path(object->getAsset().assetPath)
+			, m_object(object)
+		{
+
+		}
 
 		std::shared_ptr<T> tryLoad()
 		{

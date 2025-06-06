@@ -73,6 +73,10 @@ namespace volucris
 				{
 					parameters |= MaterialUniformBlock::CAMERA_INFO;
 				}
+				else if (name == MATERIAL_UNIFORM_PRIMITIVE_INFO)
+				{
+					parameters |= MaterialUniformBlock::PRIMITIVE_INFO;
+				}
 				else if (name == MATERIAL_UNIFORM_DIRECTION_LIGHT)
 				{
 					parameters |= MaterialUniformBlock::DIRECTION_LIGHT;

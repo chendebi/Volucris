@@ -40,7 +40,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	if (true)
 	{
-		auto mat = ResourceRegistry::Instance().loadResource<Material>("/Engine/1");
+		auto mat = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/Cube");
 	}
 
 	gApp->setLevel(level);
