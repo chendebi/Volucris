@@ -14,7 +14,7 @@ namespace volucris
 	class ResourceObject
 	{
 	public:
-		ResourceObject(AssetType type);
+		ResourceObject(Asset::Type type);
 
 		virtual ~ResourceObject() = default;
 
@@ -28,6 +28,8 @@ namespace volucris
 
 		bool isDirty() const { return m_dirty; }
 
+		Asset::Type getType() const { return m_type; }
+
 		virtual bool serialize(Serializer& serializer) const = 0;
 		
 		virtual void deserialize(Serializer& serializer) = 0;
@@ -37,6 +39,7 @@ namespace volucris
 
 	private:
 		uint8 m_dirty;
+		Asset::Type m_type;
 		Asset m_asset;
 	};
 }

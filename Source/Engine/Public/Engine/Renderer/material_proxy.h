@@ -20,7 +20,7 @@ namespace volucris
 		std::string vss;
 		std::string fss;
 		std::vector<std::string> parameterNames;
-		MaterialInnerParameters engineParameters;
+		MaterialUniformBlocks engineParameters;
 	};
 
 	class MaterialResourceProxy

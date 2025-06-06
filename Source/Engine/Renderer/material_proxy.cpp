@@ -4,6 +4,7 @@
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
 #include <Core/volucris.h>
+#include <Core/material_global.h>
 
 namespace volucris
 {
@@ -32,17 +33,17 @@ namespace volucris
 		}
 
 		std::vector<std::shared_ptr<BlockUniform>> blockUniforms;
-		if (data.engineParameters & (int32)MaterialInnerParameter::MODEL_MATRIX)
+		if (data.engineParameters & MaterialUniformBlock::PRIMITIVE_INFO)
 		{
-			blockUniforms.push_back(std::make_shared<BlockUniform>("UPrimitiveInfo", MaterialInnerParameter::MODEL_MATRIX));
+			blockUniforms.push_back(std::make_shared<BlockUniform>(MaterialUniformBlock::PRIMITIVE_INFO));
 		}
-		if (data.engineParameters & (int32)MaterialInnerParameter::CAMERA_INFO)
+		if (data.engineParameters & MaterialUniformBlock::CAMERA_INFO)
 		{
-			blockUniforms.push_back(std::make_shared<BlockUniform>("UCameraInfo", MaterialInnerParameter::CAMERA_INFO));
+			blockUniforms.push_back(std::make_shared<BlockUniform>(MaterialUniformBlock::CAMERA_INFO));
 		}
-		else if (data.engineParameters & (int32)MaterialInnerParameter::CAMERA_INFO)
+		else if (data.engineParameters & MaterialUniformBlock::CAMERA_INFO)
 		{
-			blockUniforms.push_back(std::make_shared<BlockUniform>("UDirectionLight", MaterialInnerParameter::DIRECTION_LIGHT));
+			blockUniforms.push_back(std::make_shared<BlockUniform>(MaterialUniformBlock::DIRECTION_LIGHT));
 		}
 
 		m_program->setParameterUniforms(parameterUniforms);

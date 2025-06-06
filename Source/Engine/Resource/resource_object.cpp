@@ -5,21 +5,15 @@
 
 namespace volucris
 {
-    ResourceObject::ResourceObject(AssetType type)
+    ResourceObject::ResourceObject(Asset::Type type)
         : m_dirty(true)
-        , m_asset(type)
+        , m_type(type)
+        , m_asset()
     {
     }
 
     void ResourceObject::setAsset(const Asset& asset)
     {
-        if (asset.type != m_asset.type)
-        {
-            V_LOG_ERROR(Engine, "try set invalid asset info to asset object. type {}, object type {}", (int)asset.type, (int)m_asset.type);
-        }
-        else
-        {
-            m_asset = asset;
-        }
+        m_asset = asset;
     }
 }

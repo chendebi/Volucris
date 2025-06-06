@@ -10,7 +10,7 @@
 namespace volucris
 {
 	Material::Material()
-		: ResourceObject(AssetType::MATERIAL)
+		: ResourceObject(Asset::MATERIAL)
 		, m_resource(nullptr)
 		, m_parameters()
 		, m_proxy()
@@ -124,18 +124,74 @@ namespace volucris
 	{
 		if (m_parent)
 		{
-			serializer << 1 << m_parent->getAsset().uuid;
+			serializer << 1 << m_parent->getAsset().getAssetPath();
 		}
 		else
 		{
+			serializer << 2;
 			m_resource->serialize(serializer);
 		}
-		//serializer.serialize(m_parameterData.data(), m_parameterData.size());
+		
+		serializer << (int32)m_parameters.size();
+
+		for (const auto& parameter : m_parameters)
+		{
+			int32 type = (int32)parameter->getType();
+			serializer << type;
+			serializer << parameter->getName();
+			parameter->serialize(serializer);
+		}
+
 		return true;
 	}
 
 	void Material::deserialize(Serializer& serializer)
 	{
+		int32 type = 0;
+		serializer >> type;
+		if (type == 1)
+		{
+			std::string parentPath;
+			serializer >> parentPath;
+			if (auto parent = ResourceRegistry::Instance().loadResource<Material>(parentPath))
+			{
+				m_parent = parent;
+				setMaterialResource(m_parent->getResource());
+			}
+			else
+			{
+				V_LOG_ERROR(Engine, "Failed to load material parent: {}", parentPath);
+			}
+		}
+		else if (type == 2)
+		{
+			auto resource = std::make_shared<MaterialResource>();
+			resource->deserialize(serializer);
+			setMaterialResource(resource);
+		}
+
+		int32 parameterCount = 0;
+		serializer >> parameterCount;
+		for (size_t i = 0; i < parameterCount; i++)
+		{
+			if (i >= m_parameters.size())
+			{
+				V_LOG_ERROR(Engine, "Material parameter count mismatch, expected {}, got {}", m_parameters.size(), parameterCount);
+				break;
+			}
+
+			int32 paramType = 0;
+			serializer >> paramType;
+			std::string paramName;
+			serializer >> paramName;
+			auto& parameter = m_parameters[i];
+			if (parameter->getType() != (MaterialParameterType)paramType || parameter->getName() != paramName)
+			{
+				V_LOG_ERROR(Engine, "Material parameter type mismatch, expected {}, got {}", (int)parameter->getType(), paramType);
+				continue;
+			}
+			parameter->deserialize(serializer);
+		}
 	}
 
 	void Material::setMaterialResource(const std::shared_ptr<MaterialResource>& resource)

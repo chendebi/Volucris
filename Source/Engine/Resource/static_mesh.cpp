@@ -12,7 +12,7 @@
 namespace volucris
 {
 	StaticMesh::StaticMesh()
-		: ResourceObject(AssetType::STATIC_MESH)
+		: ResourceObject(Asset::STATIC_MESH)
 		, m_resource(nullptr)
 	{
 

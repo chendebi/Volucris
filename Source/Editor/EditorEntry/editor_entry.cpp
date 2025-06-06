@@ -38,36 +38,9 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	auto level = std::make_shared<Level>();
 
-	if (false)
+	if (true)
 	{
-		auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/Cylinder1259");
-		auto comp = std::make_shared<PrimitiveComponent>();
-		comp->setMeshResource(mesh->getResource());
-		comp->setMaterials(mesh->getMaterials());
-		comp->setScale({ 0.01,0.01,0.01 });
-		auto idx = 0;
-		glm::vec4 colors[] = {
-			{1.0, 0.0, 0.0, 1.0},
-			{1.0, 1.0, 0.0, 1.0},
-			{1.0, 0.0, 1.0, 1.0},
-			{1.0, 1.0, 1.0, 1.0},
-			{0.0, 1.0, 0.0, 1.0},
-			{0.0, 0.0, 1.0, 1.0},
-		};
-
-		auto newMat = ResourceRegistry::Instance().loadResource<Material>("/Engine/T_Phone");
-		MaterialLoader::reload(newMat.get());
-		//newMat->getParameterByName("fcolor")->setValue(colors[0]);
-		std::unordered_map<std::string, std::shared_ptr<Material>> materials;
-		for (const auto& [slot, mat] : mesh->getMaterials())
-		{
-			materials.insert({ slot, newMat });
-		}
-		comp->setMaterials(materials);
-		auto actor = std::make_shared<Actor>();
-		actor->addComponent(comp);
-		level->addActor(actor);
-		level->addActor<DirectionLightComponent>();
+		auto mat = ResourceRegistry::Instance().loadResource<Material>("/Engine/1");
 	}
 
 	gApp->setLevel(level);

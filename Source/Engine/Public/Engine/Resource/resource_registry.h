@@ -6,12 +6,19 @@
 #include <map>
 #include <fstream>
 #include "Engine/Resource/resource_object.h"
+#include <Engine/Core/event.h>
 
 namespace volucris
 {
+	class ResourceObject;
+
+	DECLARE_EVENT(OnAssetRegistryed, std::shared_ptr<ResourceObject>)
 
 	class ResourceRegistry
 	{
+	public:
+		OnAssetRegistryed AssetRegistryed; // 资源注册事件
+
 	public:
 		~ResourceRegistry();
 

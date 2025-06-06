@@ -21,7 +21,7 @@ namespace volucris
 	}
 
 	Texture2D::Texture2D()
-		: ResourceObject(AssetType::TEXTURE)
+		: ResourceObject(Asset::TEXTURE)
 		, m_dirty(false)
 		, m_data()
 		, m_proxy()
@@ -29,7 +29,7 @@ namespace volucris
 	}
 
 	Texture2D::Texture2D(uint8* data, Size size, Texture::Format format)
-		: ResourceObject(AssetType::TEXTURE)
+		: ResourceObject(Asset::TEXTURE)
 		, m_dirty(false)
 		, m_data()
 		, m_proxy()

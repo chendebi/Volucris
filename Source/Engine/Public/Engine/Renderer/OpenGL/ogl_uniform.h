@@ -15,6 +15,11 @@ namespace volucris
 	class Uniform
 	{
 	public:
+		Uniform()
+			: m_name()
+			, m_location(-1)
+		{ }
+
 		Uniform(std::string name)
 			: m_name(std::move(name))
 			, m_location(-1)
@@ -31,6 +36,8 @@ namespace volucris
 
 		int getLocation() const { return m_location; }
 
+		void setName(const std::string& name) { m_name = name; }
+
 	private:
 		std::string m_name;
 		int m_location;
@@ -39,14 +46,12 @@ namespace volucris
 	class BlockUniform : public Uniform
 	{
 	public:
-		BlockUniform(std::string name, MaterialInnerParameter block)
-			: Uniform(name), m_block(block)
-		{ }
+		BlockUniform(MaterialUniformBlock block);
 
-		MaterialInnerParameter getBlockSlot() const { return m_block; }
+		MaterialUniformBlock getBlockSlot() const { return m_block; }
 
 	private:
-		MaterialInnerParameter m_block;
+		MaterialUniformBlock m_block;
 	};
 
 	namespace UniformUploader

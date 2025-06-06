@@ -311,14 +311,14 @@ namespace volucris
 			glUniformBlockBinding(state.programState.program->getID(), uniformBlock->getLocation(), slot);
 			switch (uniformBlock->getBlockSlot())
 			{
-			case MaterialInnerParameter::CAMERA_INFO:
+			case MaterialUniformBlock::CAMERA_INFO:
 				if (!prepareUniformBlock(m_cameraInfoBlock))
 				{
 					return false;
 				}
 				bindUniformBlock(m_cameraInfoBlock, slot);
 				break;
-			case MaterialInnerParameter::DIRECTION_LIGHT:
+			case MaterialUniformBlock::DIRECTION_LIGHT:
 				if (!prepareUniformBlock(m_directonLightBlock))
 				{
 					return false;

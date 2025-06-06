@@ -57,7 +57,14 @@ namespace volucris
 			return false;
 		}
 		fout.write((char*)&AssetHeader::VerifyHeader, sizeof(AssetHeader::VerifyHeader));
+		
+		// 写入类型
+		{
+			int32 type = (int32)object->getType();
+			fout.write((char*)&type, sizeof(int32));
+		}
 
+		// 写入资产数据
 		{
 			Serializer metaDataSerializer;
 			metaDataSerializer.serialize(asset);
@@ -71,5 +78,6 @@ namespace volucris
 		fout.write((char*)resourceSerializer.getData().data(), resourceSerializer.getData().size());
 
 		fout.close();
+		return true;
 	}
 }

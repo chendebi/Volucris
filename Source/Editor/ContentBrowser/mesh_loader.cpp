@@ -51,8 +51,8 @@ namespace volucris
 			if (resource)
 			{
 				auto mat = this->loader->createResource<Material>();
-				mat->setResourceName(material->GetName().C_Str());
-				mat->setMaterialResource(resource);
+				/*mat->setResourceName(material->GetName().C_Str());
+				mat->setMaterialResource(resource);*/
 				return mat;
 			}
 			return nullptr;
@@ -230,7 +230,7 @@ namespace volucris
 				auto res = buildMeshResource(meshes);
 				auto staticMesh = loader->createResource<StaticMesh>();
 				staticMesh->setMeshResource(res.resource);
-				staticMesh->setResourceName(node->mName.C_Str());
+				//staticMesh->setResourceName(node->mName.C_Str());
 				for (const auto& [slot, material] : res.materials)
 				{
 					staticMesh->setMaterial(slot, material);

@@ -1,6 +1,7 @@
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include "Renderer/OpenGL/ogl_check.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
+#include <Core/material_global.h>
 
 namespace volucris
 {

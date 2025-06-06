@@ -32,8 +32,7 @@ namespace volucris
 	}
 
 	Asset::Asset(const std::string& pathName)
-		: type(AssetType::UNKNOWN)
-		, uuid()
+		: uuid()
 		, path()
 		, name()
 		, sourcePath()
@@ -42,28 +41,6 @@ namespace volucris
 		path = rpath.parent_path().string();
 		name = rpath.stem().string();
 		assetPath = fmt::format("{}/{}", path, name);
-		auto ext = rpath.extension().string();
-		if (!ext.empty())
-		{
-			const auto typeStr = ext.substr(1);
-			if (typeStr == "mat")
-			{
-				type = AssetType::MATERIAL;
-			}
-			else if (typeStr == "mesh")
-			{
-				type = AssetType::STATIC_MESH;
-			}
-			else if (typeStr == "tex")
-			{
-				type = AssetType::TEXTURE;
-			}
-		}
-
-		if (type == AssetType::UNKNOWN)
-		{
-			V_LOG_WARN(Engine, "invald asset: {}", path)
-		}
 	}
 
 	std::string Asset::getAssetPath() const
@@ -73,11 +50,6 @@ namespace volucris
 
 	std::shared_ptr<ResourceObject> Asset::load()
 	{
-		if (type == AssetType::UNKNOWN)
-		{
-			return nullptr;
-		}
-
 		return ResourceRegistry::Instance().loadResourceByAsset(*this);
 
 		auto rpath = fs::path(path);

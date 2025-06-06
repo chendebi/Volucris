@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <Engine/Resource/asset_path.h>
+#include <Engine/Core/serializer.h>
 
 namespace volucris
 {
@@ -26,6 +27,21 @@ namespace volucris
 				m_object = object;
 			}
 			return object;
+		}
+
+		void serialize(Serializer& serializer)
+		{
+			serializer.serialize(m_path);
+		}
+
+		void deserialize(Serializer& serializer)
+		{
+			std::string path;
+			if (serializer.deserialize(path))
+			{
+				m_path = std::move(path);
+				m_object.reset(); // Reset the weak pointer to force reloading
+			}
 		}
 
 	private:

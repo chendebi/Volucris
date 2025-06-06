@@ -16,14 +16,14 @@ namespace volucris
 	{
 	}
 
-	MaterialResource::~MaterialResource()
-	{
-	}
-
 	MaterialResource::MaterialResource(const std::string& vss, const std::string& fss)
 		: MaterialResource()
 	{
 		setSource(vss, fss);
+	}
+
+	MaterialResource::~MaterialResource()
+	{
 	}
 
 	void MaterialResource::setSource(const std::string& vss, const std::string& fss)
@@ -35,6 +35,11 @@ namespace volucris
 	void MaterialResource::setParameterDescriptions(const std::vector<MaterialParameterDescription>& descriptions)
 	{
 		m_descriptions = descriptions;
+	}
+
+	void MaterialResource::setBindingUniformBlocks(MaterialUniformBlocks blocks)
+	{
+		m_innerParameters = blocks;
 	}
 
 	void MaterialResource::dirty()
@@ -92,14 +97,17 @@ namespace volucris
 		serializer.serialize(m_vss);
 		serializer.serialize(m_fss);
 		serializer.serialize(m_innerParameters);
+		serializer.serialize(m_descriptions);
 		return true;
 	}
 
 	void  MaterialResource::deserialize(Serializer& serializer)
 	{
 		std::string vss, fss;
-		MaterialInnerParameters engineDatas;
-		if (!serializer.deserialize(vss) || !serializer.deserialize(fss) || !serializer.deserialize(engineDatas))
+		MaterialUniformBlocks engineDatas;
+		std::vector<MaterialParameterDescription> descriptions;
+		if (!serializer.deserialize(vss) || !serializer.deserialize(fss) || !serializer.deserialize(engineDatas) ||
+			!serializer.deserialize(descriptions))
 		{
 			V_LOG_WARN(Engine, "deserialize material resource failed.");
 			return;
@@ -108,5 +116,6 @@ namespace volucris
 		m_vss = std::move(vss);
 		m_fss = std::move(fss);
 		m_innerParameters = engineDatas;
+		m_descriptions = std::move(descriptions);
 	}
 }

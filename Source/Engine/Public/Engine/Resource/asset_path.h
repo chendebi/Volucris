@@ -70,40 +70,31 @@ namespace volucris
 {
 	class ResourceObject;
 
-	enum class AssetType
-	{
-		UNKNOWN,
-		MATERIAL,
-		TEXTURE,
-		STATIC_MESH,
-		MAX
-	};
-
 	// /Engine/Material/M_Red.mat
 	struct Asset
 	{
-		AssetType type;
+		enum Type
+		{
+			UNKNOWN,
+			MATERIAL,
+			TEXTURE,
+			STATIC_MESH,
+			CUSTOM = 16
+		};
+
 		UUID uuid;
 		std::string path;
 		std::string name;
 		std::string sourcePath;
+		std::string assetPath;
 
 		Asset()
-			: type(AssetType::UNKNOWN)
-			, uuid()
+			: uuid()
 			, path()
 			, name()
 			, sourcePath()
 		{
 		}
-
-		Asset(AssetType assetType)
-			: type(assetType)
-			, uuid()
-			, path()
-			, name()
-			, sourcePath()
-		{ }
 
 		Asset(const std::string& pathName);
 
@@ -113,35 +104,23 @@ namespace volucris
 
 		void serialize(Serializer& serializer)
 		{
-			serializer.serialize((int)type);
 			serializer.serialize(uuid);
 			serializer.serialize(path);
 			serializer.serialize(name);
 			serializer.serialize(sourcePath);
+			serializer.serialize(assetPath);
 		}
 
 		void deserialize(Serializer& serializer)
 		{
-			int typeValue = (int)AssetType::UNKNOWN;
-			if (serializer.deserialize(typeValue) &&
-				serializer.deserialize(uuid) &&
+			if (serializer.deserialize(uuid) &&
 				serializer.deserialize(path) &&
 				serializer.deserialize(name) &&
-				serializer.deserialize(sourcePath))
+				serializer.deserialize(sourcePath) &&
+				serializer.deserialize(assetPath))
 			{
-				if (typeValue >= (int)AssetType::MAX)
-				{
-					type = AssetType::UNKNOWN;
-				}
-				else
-				{
-					type = AssetType(typeValue);
-				}
 			}
 		}
-
-	private:
-		std::string assetPath;
 	};
 }
 

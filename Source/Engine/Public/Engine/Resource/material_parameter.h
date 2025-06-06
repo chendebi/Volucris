@@ -6,7 +6,7 @@
 #include <memory>
 #include <Engine/Core/types_help.h>
 #include "soft_object_ptr.h"
-#include <Engine/Core/material_parameter_type.h>
+#include <Engine/Core/material_global.h>
 
 namespace volucris
 {
@@ -33,6 +33,10 @@ namespace volucris
 
 		virtual std::shared_ptr<UniformValue> createUniformValue() = 0;
 
+		virtual bool serialize(Serializer& serializer) const = 0;
+
+		virtual void deserialize(Serializer& serializer) = 0;
+
 	private:
 		uint8 m_dirty;
 		MaterialParameterType m_type;
@@ -56,6 +60,20 @@ namespace volucris
 			dirty();
 		}
 
+		bool serialize(Serializer& serializer) const override
+		{
+			serializer.serialize(m_value);
+			return true;
+		}
+
+		void deserialize(Serializer& serializer) override
+		{
+			serializer.deserialize(m_value);
+			dirty();
+		}
+
+		float getValue() const { return m_value; }
+
 	private:
 		float m_value;
 	};
@@ -77,6 +95,20 @@ namespace volucris
 			dirty();
 		}
 
+		glm::vec3 getValue() const { return m_value; }
+
+		bool serialize(Serializer& serializer) const override
+		{
+			serializer.serialize(m_value);
+			return true;
+		}
+
+		void deserialize(Serializer& serializer) override
+		{
+			serializer.deserialize(m_value);
+			dirty();
+		}
+
 	private:
 		glm::vec3 m_value;
 	};
@@ -93,6 +125,20 @@ namespace volucris
 		}
 
 		std::shared_ptr<UniformValue> createUniformValue() override;
+
+		TSoftObjectPtr<Texture2D> getTexture() const { return m_texture; }
+
+		bool serialize(Serializer& serializer) const override
+		{
+			serializer.serialize(m_texture);
+			return true;
+		}
+
+		void deserialize(Serializer& serializer) override
+		{
+			serializer.deserialize(m_texture);
+			dirty();
+		}
 
 	private:
 		int m_location;

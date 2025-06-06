@@ -118,16 +118,18 @@ namespace volucris
 				V_LOG_WARN(Editor, "add material failed. shader file not valid.");
 				return false;
 			}
-
-			const auto& resourcePath = m_pathWidget->getSelectedPathItem()->getResourceDirectory() + "/" + m_buffer.data();
-			V_LOG_INFO(Editor, "add material: {}", resourcePath);
+			auto material = std::make_shared<Material>(resource);
+			auto asset = material->getAsset();
+			asset.sourcePath = fmt::format("{};{}", vs, fs);
+			asset.path = m_pathWidget->getSelectedPathItem()->getResourceDirectory();
+			asset.name = m_buffer.data();
+			asset.assetPath = fmt::format("{}/{}", asset.path, asset.name);
+			V_LOG_INFO(Editor, "add material: {}", asset.getAssetPath());
 			V_LOG_INFO(Editor, " vertex shader {}", vs);
 			V_LOG_INFO(Editor, " fragment shader: {}", fs);
-			auto material = std::make_shared<Material>();
-			material->setShaderPath(vs, fs);
-			//material->setResourcePath(resourcePath);
-			material->setMaterialResource(resource);
-			ResourceRegistry::Instance().registry(material, resourcePath);
+
+			material->setAsset(asset);
+			ResourceRegistry::Instance().registry(material);
 			ResourceRegistry::Instance().save(material);
 			return true;
 		}
@@ -141,8 +143,8 @@ namespace volucris
 		{
 			for (const auto& resource : loader.getLoadedResouces())
 			{
-				const auto resPath = m_pathWidget->getSelectedPathItem()->getResourceDirectory() + "/" + resource->getResourcePath().name;
-				ResourceRegistry::Instance().registry(resource, resPath);
+				//const auto resPath = m_pathWidget->getSelectedPathItem()->getResourceDirectory() + "/" + resource->getResourcePath().name;
+				//ResourceRegistry::Instance().registry(resource, resPath);
 				// 保存操作放到后面执行
 				ResourceRegistry::Instance().save(resource);
 			}

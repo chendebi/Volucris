@@ -3,7 +3,7 @@ layout(location=0) in vec3 v_Position;
 
 layout (std140) uniform UPrimitiveInfo
 {
-    uniform mat4 modelMat;
+    mat4 modelMat;
 }
 
 layout (std140) uniform UCameraInfo

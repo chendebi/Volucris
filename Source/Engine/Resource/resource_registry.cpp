@@ -114,15 +114,18 @@ namespace volucris
 		AssetReader reader;
 		reader.setLoadPath(sysPath);
 		auto object = reader.load();
-		if (object && object->getAsset().getAssetPath() == path && object->getAsset().uuid.valid())
+		if (object)
 		{
-			m_assets.insert_or_assign(object->getAsset().uuid, path);
-			m_caches.insert({ path, object });
-			return object;
-		}
-		else
-		{
-			V_LOG_WARN(Engine, "asset load success, but object invalid. {}", path);
+			if (object->getAsset().getAssetPath() == path && object->getAsset().uuid.valid())
+			{
+				m_assets.insert_or_assign(object->getAsset().uuid, path);
+				m_caches.insert({ path, object });
+				return object;
+			}
+			else
+			{
+				V_LOG_WARN(Engine, "asset load success, but object invalid. {}", path);
+			}
 		}
 		return nullptr;
 	}
@@ -159,7 +162,7 @@ namespace volucris
 	bool ResourceRegistry::registry(const std::shared_ptr<ResourceObject>& resource)
 	{
 		auto asset = resource->getAsset();
-		if (asset.type == AssetType::UNKNOWN)
+		if (resource->getType() == Asset::UNKNOWN)
 		{
 			V_LOG_WARN(Engine, "registry asset failed. asset type not supported");
 			return false;
@@ -174,7 +177,7 @@ namespace volucris
 
 		asset.uuid = UUID::generate();
 		resource->setAsset(asset);
-
+		AssetRegistryed(resource);
 		return true;
 	}
 
@@ -192,7 +195,7 @@ namespace volucris
 		}
 		else
 		{
-			V_LOG_WARN(Engine, "save asset success.");
+			V_LOG_INFO(Engine, "save asset success.");
 		}
 	}
 

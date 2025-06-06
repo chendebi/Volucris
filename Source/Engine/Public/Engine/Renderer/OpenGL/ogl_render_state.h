@@ -46,7 +46,7 @@ namespace volucris
 	struct OGLProgramState
 	{
 		OGLProgramObject* program = nullptr;
-		MaterialInnerParameters engineDatas = 0;
+		MaterialUniformBlocks engineDatas = 0;
 		MaterialParameterRenderData* renderData = nullptr;
 	};
 

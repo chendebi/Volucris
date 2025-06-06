@@ -5,6 +5,8 @@
 
 namespace volucris 
 {
+	class Material;
+
 	class MaterialLoader
 	{
 	public:

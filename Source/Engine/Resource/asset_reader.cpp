@@ -63,6 +63,7 @@ namespace volucris
 		{
 			return false;
 		}
+		data = std::move(contentData);
 		return true;
 	}
 
@@ -81,6 +82,9 @@ namespace volucris
 			return nullptr;
 		}
 
+		int32 typeId = 0;
+		fin.read((char*)&typeId, sizeof(int32));
+
 		Asset asset;
 		if (!LoadAssetMeta(fin, asset))
 		{
@@ -96,15 +100,15 @@ namespace volucris
 		}
 
 		std::shared_ptr<ResourceObject> object;
-		switch (asset.type)
+		switch (typeId)
 		{
-		case AssetType::MATERIAL:
+		case Asset::MATERIAL:
 			object = std::make_shared<Material>();
 			break;
-		case AssetType::TEXTURE:
+		case Asset::TEXTURE:
 			object = std::make_shared<Texture2D>();
 			break;
-		case AssetType::STATIC_MESH:
+		case Asset::STATIC_MESH:
 			object = std::make_shared<StaticMesh>();
 			break;
 		default:
@@ -113,7 +117,7 @@ namespace volucris
 
 		if (!object)
 		{
-			V_LOG_WARN(Engine, "load asset from {} failed, , file type {} not supported. ", m_path, (int)asset.type);
+			V_LOG_WARN(Engine, "load asset from {} failed, , file type {} not supported. ", m_path, typeId);
 			return nullptr;
 		}
 
