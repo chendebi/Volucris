@@ -72,6 +72,11 @@ namespace volucris
 			return pos;
 		}
 
+		Point2D getRelativePoint(const Point2D& pos)
+		{
+			return getRelativePoint(pos.x, pos.y);
+		}
+
 		std::string toString() const
 		{
 			return "Rect(" + std::to_string(x) + ", " + std::to_string(y) + ", " +

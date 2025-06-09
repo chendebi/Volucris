@@ -6,8 +6,7 @@
 namespace volucris
 {
 	RenderTarget::RenderTarget(bool bClient)
-		: ResourceObject()
-		, m_dirty(true)
+		: m_dirty(true)
 		, m_isClient(bClient)
 		, m_rect({0,0,0,0})
 		, m_proxy()

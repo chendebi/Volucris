@@ -12,10 +12,23 @@
 namespace volucris
 {
 	StaticMesh::StaticMesh()
-		: ResourceObject()
+		: ResourceObject(Asset::STATIC_MESH)
 		, m_resource(nullptr)
 	{
 
+	}
+
+	StaticMesh::StaticMesh(const std::shared_ptr<StaticMesh>& parent)
+		: StaticMesh()
+	{
+		m_parent = parent;
+		setMeshResource(parent->getResource());
+	}
+
+	StaticMesh::StaticMesh(const std::shared_ptr<MeshResource>& resource)
+		: StaticMesh()
+	{
+		setMeshResource(resource);
 	}
 
 	void StaticMesh::setMeshResource(const std::shared_ptr<MeshResource>& resource)
@@ -26,11 +39,11 @@ namespace volucris
 		for (const auto& section : m_resource->getResourceData()->getSections())
 		{
 			// TODO: 设置为默认材质
-			m_materials[section.slot] = nullptr;
+			m_materials[section.slot] = TSoftObjectPtr<Material>("");
 		}
 	}
 
-	bool StaticMesh::setMaterial(const std::string& slot, const std::shared_ptr<Material>& mat)
+	bool StaticMesh::setMaterial(const std::string& slot, const TSoftObjectPtr<Material>& mat)
 	{
 		auto it = m_materials.find(slot);
 		if (it == m_materials.end())
@@ -51,60 +64,64 @@ namespace volucris
 	{
 		if (m_parent)
 		{
-			serializer << 1 << m_parent->getMetaData().guid;
+			serializer << (int32)1 << m_parent->getAsset().getAssetPath();
+		}
+		else if (m_resource)
+		{
+			serializer << (int32)2;
+			m_resource->serialize(serializer);
 		}
 		else
 		{
-			serializer << 2;
-			if (!m_resource->serialize(serializer))
-			{
-				return false;
-			}
+			return false;
 		}
 
-		uint32 matCount = m_materials.size();
-		serializer.serialize(matCount);
-		for (const auto& [slot, mat] : m_materials)
+		serializer.serialize((int32)m_materials.size());
+
+		for (const auto& [slot, material] : m_materials)
 		{
-			ResourceRegistry::Instance().makesureDependenceValid(mat);
 			serializer.serialize(slot);
-			ResourceRegistry::Instance().serializeDependenceTo(serializer, mat);
+			serializer.serialize(material);
 		}
-
+		
 		return true;
 	}
 
 	void StaticMesh::deserialize(Serializer& serializer)
 	{
-		int flag = 0;
-		serializer.deserialize(flag);
-		if (flag == 1)
+		int32 type = 0;
+		serializer >> type;
+		if (type == 1)
 		{
-			std::string guid;
-			serializer.deserialize(guid);
-			m_parent = ResourceRegistry::Instance().loadResource<StaticMesh>(GUID(guid));
-			setMeshResource(m_parent->getResource());
+			std::string parentPath;
+			serializer >> parentPath;
+			if (auto parent = ResourceRegistry::Instance().loadResource<StaticMesh>(parentPath))
+			{
+				m_parent = parent;
+				setMeshResource(parent->getResource());
+			}
 		}
-		else if (flag == 2)
+		else if (type == 2)
 		{
 			auto resource = std::make_shared<MeshResource>();
 			resource->deserialize(serializer);
 			setMeshResource(resource);
 		}
-		else
+		else 
 		{
-			V_LOG_WARN(Engine, "deserialize static mesh failed.");
+			V_LOG_ERROR(Engine, "deserialize static mesh failed. type: {}", type);
 			return;
 		}
 
-		uint32 matCount = 0;
-		serializer.deserialize(matCount);
-		for (auto idx = 0; idx < matCount; ++idx)
+		int32 materialCount = 0;
+		serializer.deserialize(materialCount);
+
+		for (auto idx = 0; idx < materialCount; ++idx)
 		{
-			std::string slot, guid;
+			std::string slot;
 			serializer.deserialize(slot);
-			serializer.deserialize(guid);
-			auto material = ResourceRegistry::Instance().loadResource<Material>(GUID(guid));
+			TSoftObjectPtr<Material> material;
+			material.deserialize(serializer);
 			setMaterial(slot, material);
 		}
 	}

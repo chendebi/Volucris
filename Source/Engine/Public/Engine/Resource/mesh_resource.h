@@ -2,14 +2,14 @@
 #define __volucris_mesh_resource_h__
 
 #include <memory>
-#include <Engine/Resource/resource_object.h>
+#include <Engine/Core/serializer.h>
 
 namespace volucris
 {
 	class MeshProxy;
 	class MeshResourceData;
 
-	class MeshResource : public ResourceObject
+	class MeshResource
 	{
 	public:
 		MeshResource(const std::shared_ptr<MeshResourceData>& data = nullptr);
@@ -18,9 +18,9 @@ namespace volucris
 
 		std::shared_ptr<MeshResourceData> getResourceData() const { return m_data; }
 
-		bool serialize(Serializer& serializer) const override;
+		bool serialize(Serializer& serializer) const;
 
-		void deserialize(Serializer& serializer) override;
+		void deserialize(Serializer& serializer);
 
 	private:
 		std::shared_ptr<MeshResourceData> m_data;

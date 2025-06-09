@@ -5,6 +5,7 @@
 #include <memory>
 #include "Engine/Core/types_help.h"
 #include "Engine/Renderer/OpenGL/ogl_buffer_object.h"
+#include <Engine/Renderer/material_inner_data.h>
 
 namespace volucris
 {
@@ -14,7 +15,7 @@ namespace volucris
 	class Texture2DObject;
 	class RenderBufferObject;
 	class FrameBufferObject;
-	class Uniform;
+	class MaterialParameterRenderData;
 
 	struct OGLClearState
 	{
@@ -35,12 +36,18 @@ namespace volucris
 	{
 		OGLBufferObject* ubo = nullptr;
 		OGLBufferObject::BlockID block;
+
+		bool valid() const
+		{
+			return ubo && block.valid();
+		}
 	};
 
 	struct OGLProgramState
 	{
 		OGLProgramObject* program = nullptr;
-		std::vector<std::shared_ptr<Uniform>> uniforms;
+		MaterialUniformBlocks engineDatas = 0;
+		MaterialParameterRenderData* renderData = nullptr;
 	};
 
 	struct OGLDrawState

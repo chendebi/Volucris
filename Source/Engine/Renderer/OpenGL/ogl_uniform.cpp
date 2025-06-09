@@ -3,71 +3,47 @@
 #include <glm/ext.hpp>
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include <Renderer/OpenGL/ogl_check.h>
+#include <Core/material_global.h>
 
 namespace volucris
 {
-	class Uniform::Uploader
+	void UniformUploader::upload(int location, float value)
 	{
-	public:
-		virtual ~Uploader() = default;
-		virtual void upload(int32 location, uint8* addr) = 0;
-	};
+		glUniform1f(location, value);
+	}
 
-	class FloatUploader : public Uniform::Uploader
+	void UniformUploader::upload(int location, glm::vec3 value)
 	{
-	public:
-		void upload(int32 location, uint8* addr) override
-		{
-			glUniform1f(location, *reinterpret_cast<float*>(addr));
-		}
-	};
+		glUniform3fv(location, 1, glm::value_ptr(value));
+	}
 
-	class Vec3Uploader : public Uniform::Uploader
+	void UniformUploader::upload(int location, glm::vec4 value)
 	{
-	public:
-		void upload(int32 location, uint8* addr) override
-		{
-			glUniform3fv(location, 1, reinterpret_cast<float*>(addr));
-		}
-	};
+		glUniform4fv(location, 1, glm::value_ptr(value));
+	}
 
-	class Mat4Uploader : public Uniform::Uploader
+	void UniformUploader::upload(int location, glm::mat4 value)
 	{
-	public:
-		void upload(int32 location, uint8* addr) override
-		{
-			glUniformMatrix4fv(location, 1, false, reinterpret_cast<float*>(addr));
-		}
-	};
+		glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
+	}
 
-	Uniform::Uniform(const std::shared_ptr<UniformDescription>& desc, uint8* table)
-		: m_desc(desc)
-		, m_uploader(nullptr)
-		, m_table(table)
+	BlockUniform::BlockUniform(MaterialUniformBlock block)
+		: Uniform(), m_block(block)
 	{
-		switch (desc->desc.type)
+		switch (block)
 		{
-		case MaterialParameterDesc::FLOAT:
-			m_uploader = std::make_shared<FloatUploader>();
+		case volucris::PRIMITIVE_INFO:
+			setName(std::string(MATERIAL_UNIFORM_PRIMITIVE_INFO));
 			break;
-		case MaterialParameterDesc::VEC3:
-			m_uploader = std::make_shared<Vec3Uploader>();
+		case volucris::CAMERA_INFO:
+			setName(std::string(MATERIAL_UNIFORM_CAMERA_INFO));
 			break;
-		case MaterialParameterDesc::MAT4:
-		case MaterialParameterDesc::MODEL_INFO:
-			m_uploader = std::make_shared<Mat4Uploader>();
+		case volucris::DIRECTION_LIGHT:
+			setName(std::string(MATERIAL_UNIFORM_DIRECTION_LIGHT));
 			break;
 		default:
+			V_LOG_WARN(Engine, "unsupport uniform block slot: {}", (int)block);
 			break;
 		}
 	}
-
-	void Uniform::upload()
-	{
-		if (valid())
-		{
-			m_uploader->upload(m_desc->location, m_table + m_desc->desc.offset);
-		}
-	}
-
 }

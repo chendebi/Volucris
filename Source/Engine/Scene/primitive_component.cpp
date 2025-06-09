@@ -11,24 +11,19 @@
 #include "Renderer/material_proxy.h"
 #include "Resource/mesh_resource.h"
 #include "Resource/material.h"
+#include <Renderer/primitive_proxy.h>
 
 namespace volucris
 {
 	PrimitiveComponent::PrimitiveComponent()
 		: SceneComponent()
-		, m_proxy(nullptr)
+		, m_proxy()
 		, m_resource(nullptr)
 	{
 	}
 
 	void PrimitiveComponent::setMeshResource(const std::shared_ptr<MeshResource>& resource)
 	{
-		if (m_proxy)
-		{
-			V_LOG_WARN(Engine, "not support set mesh resource while rendering");
-			return;
-		}
-
 		m_resource = resource;
 		std::unordered_map<std::string, std::shared_ptr<Material>> materials;
 
@@ -63,60 +58,29 @@ namespace volucris
 
 	void PrimitiveComponent::updateRenderState()
 	{
-		auto renderer = gApp->getRenderer();
-		auto sceneProxy = getScene()->getSceneProxy();
-		if (m_proxy)
+		auto proxy = m_proxy.lock();
+		if (!proxy)
 		{
-			if (sceneProxy)
-			{
-				renderer->pushCommand([sceneProxy, proxy = m_proxy]() {
-					sceneProxy->removePrimitiveProxy(proxy);
-					});
-			}
-
-			m_proxy = nullptr;
-		}
-
-		if (!getScene()->getSceneProxy())
-		{
+			proxy = std::make_shared<PrimitiveProxy>();
+			proxy->initialize(this);
+			m_proxy = proxy;
 			return;
 		}
 
-		if (isAttached() && m_resource)
-		{
-			for (const auto& [slot, mat] : m_materials)
-			{
-				const auto& param = mat->getParameterByType(MaterialParameterDesc::MODEL_INFO);
-				if (!param)
-				{
-					V_LOG_WARN(Engine, "material with no model uniform for primitive component.");
-				}
-				else
-				{
-					m_modelMatParameters.push_back(param);
-				}
-			}
-			onTransformChanged();
-			// 创建
-			m_proxy = renderer->createPrimitiveProxy(this);
-		}
+		auto renderer = gApp->getRenderer();
+		auto sceneProxy = getScene()->getSceneProxy();
+		
 	}
 
 	void PrimitiveComponent::onTransformChanged()
 	{
 		const auto& modelMat = getWorldTransform();
-		for (const auto& parameter : m_modelMatParameters)
-		{
-			parameter->setValue(modelMat);
-		}
+		
 	}
 
 	void PrimitiveComponent::updateTransform()
 	{
-		for (const auto& parameter : m_modelMatParameters)
-		{
-			parameter->getMaterial()->updateParametersToRenderer();
-		}
+		
 	}
 
 }

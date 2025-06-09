@@ -28,58 +28,16 @@ namespace volucris
 		return nullptr;
 	}
 
-	void Level::dispatchMousePressEvent(const MouseEvent& event)
+
+	void Level::dispatchEvent(ClientEvent* e)
 	{
 		for (const auto& client : m_clients)
 		{
 			if (client->isHardwareClient())
 			{
-				client->dispatchMousePressEvent(event);
+				client->dispatchEvent(e);
 			}
 		}
 	}
 
-	void Level::dispatchMouseReleaseEvent(const MouseEvent& event)
-	{
-		for (const auto& client : m_clients)
-		{
-			if (client->isHardwareClient())
-			{
-				client->dispatchMouseReleaseEvent(event);
-			}
-		}
-	}
-
-	void Level::dispatchMouseMoveEvent(int x, int y)
-	{
-		for (const auto& client : m_clients)
-		{
-			if (client->isHardwareClient())
-			{
-				client->dispatchMouseMoveEvent(x, y);
-			}
-		}
-	}
-
-	void Level::dispatchKeyPressedEvent(Key key, Modifiers modifiers)
-	{
-		for (const auto& client : m_clients)
-		{
-			if (client->isHardwareClient())
-			{
-				client->dispatchKeyPressedEvent(key, modifiers);
-			}
-		}
-	}
-
-	void Level::dispatchKeyReleasedEvent(Key key, Modifiers modifiers)
-	{
-		for (const auto& client : m_clients)
-		{
-			if (client->isHardwareClient())
-			{
-				client->dispatchKeyReleasedEvent(key, modifiers);
-			}
-		}
-	}
 }

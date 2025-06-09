@@ -2,39 +2,36 @@
 #include "Core/assert.h"
 #include "Core/volucris.h"
 #include <glm/ext.hpp>
+#include <Resource/resource_registry.h>
+#include <Resource/texture2d.h>
+#include <Resource/material.h>
+#include <Renderer/OpenGL/ogl_uniform.h>
 
 namespace volucris
 {
 
-	MaterialParameter::MaterialParameter(Material* material, const MaterialParameterDesc& desc, uint8* table)
-		: m_material(material)
-		, m_desc(desc)
-		, m_dataTable(table)
+	MaterialParameter::MaterialParameter(std::string name, MaterialParameterType type)
+		: m_dirty(true)
+		, m_type(type)
+		, m_name(std::move(name))
 	{
-
+		
 	}
 
-	MaterialParameter::~MaterialParameter()
+	std::shared_ptr<UniformValue> MaterialParameterFloat::createUniformValue()
 	{
-		//V_LOG_DEBUG(Engine, "destroy material parameter: {}", m_desc.name);
+		return std::make_shared<UniformValueFloat>(m_value);
 	}
 
-	void MaterialParameter::setValue(float value)
+	std::shared_ptr<UniformValue> MaterialParameterVec3::createUniformValue()
 	{
-		check(m_desc.type == MaterialParameterDesc::FLOAT && m_dataTable);
-		memcpy(m_dataTable, &value, sizeof(float));
+		return std::make_shared<UniformValueVec3>(m_value);
 	}
 
-	void MaterialParameter::setValue(const glm::vec3& value)
+	std::shared_ptr<UniformValue> MaterialParameterTexture2D::createUniformValue()
 	{
-		check(m_desc.type == MaterialParameterDesc::VEC3 && m_dataTable);
-		memcpy(m_dataTable+m_desc.offset, glm::value_ptr(value), sizeof(glm::vec3));
-	}
-
-	void MaterialParameter::setValue(const glm::mat4& value)
-	{
-		//check(m_desc.type == MaterialParameterDesc::MAT4 && m_dataTable);
-		memcpy(m_dataTable + m_desc.offset, glm::value_ptr(value), sizeof(glm::mat4));
+		//return std::make_shared<UniformValueVec3>(m_value);
+		return nullptr;
 	}
 
 }

@@ -79,20 +79,8 @@ namespace volucris
 		}
 
 		m_window->FrameSizeChanged.addObject(m_renderer.get(), & Renderer::setWindowFrameSize);
-		m_window->MouseMove.addLambda([this](int x, int y) {
-			m_level->dispatchMouseMoveEvent(x, y);
-			});
-		m_window->MousePressed.addLambda([this](const MouseEvent& e) {
-			m_level->dispatchMousePressEvent(e);
-			});
-		m_window->MouseReleased.addLambda([this](const MouseEvent& e) {
-			m_level->dispatchMouseReleaseEvent(e);
-			});
-		m_window->KeyPressed.addLambda([this](Key key, Modifiers modifiers) {
-			m_level->dispatchKeyPressedEvent(key, modifiers);
-			});
-		m_window->KeyReleased.addLambda([this](Key key, Modifiers modifiers) {
-			m_level->dispatchKeyReleasedEvent(key, modifiers);
+		m_window->WindowEvent.addLambda([this](ClientEvent* e) {
+			m_level->dispatchEvent(e);
 			});
 
 		m_initialized = true;

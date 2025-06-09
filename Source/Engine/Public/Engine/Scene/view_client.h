@@ -17,6 +17,11 @@ namespace volucris
 
 	class ViewClient : public SceneObject
 	{
+	public:
+		enum class EventScope {
+			ClientOnly, // 只接受当前视口的事件
+			WholeWindow      // 接收整个窗口事件
+		};
 
 	public:
 		ViewClient(const std::shared_ptr<RenderTarget>& target);
@@ -46,7 +51,13 @@ namespace volucris
 
 		void removeEventHandler(EventHandler* handler);
 
+		void setEventScope(EventScope scope) { m_scope = scope; }
+
+		EventScope getEventScope() const { return m_scope; }
+
 		bool isHardwareClient() const;
+
+		void dispatchEvent(ClientEvent* event);
 
 		void dispatchMousePressEvent(const MouseEvent& event);
 		
@@ -63,6 +74,7 @@ namespace volucris
 	private:
 		friend class Scene;
 		friend class SceneProxy;
+		EventScope m_scope;
 		Rect m_rect;
 		std::weak_ptr<ViewProxy> m_proxy;
 		uint32 m_targetGLTextureID;

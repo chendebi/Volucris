@@ -27,7 +27,9 @@ namespace volucris
 
 		const glm::mat4& getRortationTransform() const { return m_rotationTransform; }
 
-		glm::vec3 getForwardDirection() const { return m_forward; }
+		glm::vec3 getForwardDirection() const;
+
+		glm::vec3 getRightDirection() const;
 
 	protected:
 		void transformChanged();
@@ -40,7 +42,6 @@ namespace volucris
 		glm::vec3 m_position;
 		glm::vec3 m_rotation;
 		glm::vec3 m_scale;
-		glm::vec3 m_forward;
 		glm::mat4 m_rotationTransform;
 		glm::mat4 m_relativeTransform;
 		glm::mat4 m_worldTransform;

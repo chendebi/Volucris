@@ -18,38 +18,37 @@ namespace volucris
 	public:
 		Material();
 
-		~Material();
+		Material(const std::shared_ptr<MaterialResource>& resource);
 
-		void setShaderPath(const std::string& vs, const std::string& fs);
+		Material(const std::shared_ptr<Material>& parent);
+
+		~Material();
 
 		std::shared_ptr<MaterialProxy> getRenderProxy();
 
-		void updateParametersToRenderer();
+		void update();
 
 		std::shared_ptr<MaterialResource> getResource() const { return m_resource; }
 
-		std::vector<uint8> getParameterData() const { return  m_parameterData; }
-
 		MaterialParameter* getParameterByName(const std::string& name);
 
-		MaterialParameter* getParameterByType(MaterialParameterDesc::Type type);
-
-		void setMaterialResource(const std::shared_ptr<MaterialResource>& resource);
-
-	protected:
+		const std::vector<std::shared_ptr<MaterialParameter>>& getParameters() const { return m_parameters; }
 
 		bool serialize(Serializer& serializer) const override;
 
 		void deserialize(Serializer& serializer) override;
 
+	protected:
+		void setMaterialResource(const std::shared_ptr<MaterialResource>& resource);
+
+		void onSourceRebuild(MaterialResource* resource);
+
 	private:
 		std::shared_ptr<Material> m_parent;
-		std::string m_vsFilePath;
-		std::string m_fsFilePath;
 		std::shared_ptr<MaterialResource> m_resource;
-		std::vector<std::unique_ptr<MaterialParameter>> m_parameters;
-		std::vector<uint8> m_parameterData;
+		std::vector<std::shared_ptr<MaterialParameter>> m_parameters;
 		std::weak_ptr<MaterialProxy> m_proxy;
+
 	};
 }
 

@@ -1,16 +1,19 @@
 #include "Resource/resource_object.h"
 #include "Resource/resource_registry.h"
 #include <fmt/format.h>
+#include <Core/volucris.h>
 
 namespace volucris
 {
-    void ResourceObject::setResourceName(const std::string& name)
+    ResourceObject::ResourceObject(Asset::Type type)
+        : m_dirty(true)
+        , m_type(type)
+        , m_asset()
     {
-        m_path.name = name;
-        if (m_metaData.isValid())
-        {
-            const auto fullpath = fmt::format("{}/{}", m_path.path, name);
-            ResourceRegistry::Instance().updateResourcePath(this, fullpath);
-        }
+    }
+
+    void ResourceObject::setAsset(const Asset& asset)
+    {
+        m_asset = asset;
     }
 }

@@ -10,7 +10,7 @@
 namespace volucris
 {
 	Material::Material()
-		: ResourceObject()
+		: ResourceObject(Asset::MATERIAL)
 		, m_resource(nullptr)
 		, m_parameters()
 		, m_proxy()
@@ -18,14 +18,27 @@ namespace volucris
 		
 	}
 
-	Material::~Material()
+	Material::Material(const std::shared_ptr<MaterialResource>& resource)
+		: Material()
 	{
+		setMaterialResource(resource);
 	}
 
-	void Material::setShaderPath(const std::string& vs, const std::string& fs)
+	Material::Material(const std::shared_ptr<Material>& parent)
+		: Material()
 	{
-		m_vsFilePath = vs;
-		m_fsFilePath = fs;
+		m_parent = parent;
+		setMaterialResource(m_parent->getResource());
+	}
+
+	Material::~Material()
+	{
+#if WITH_EDITOR
+		if (m_resource)
+		{
+			m_resource->Rebuild.removeAll(this);
+		}
+#endif
 	}
 
 	std::shared_ptr<MaterialProxy> Material::getRenderProxy()
@@ -33,41 +46,73 @@ namespace volucris
 		auto proxy = m_proxy.lock();
 		if (!proxy)
 		{
-			proxy = std::make_shared<MaterialProxy>(this);
+			proxy = std::make_shared<MaterialProxy>();
+			MaterialParameterRenderData renderData;
+			for (const auto& parameter : m_parameters)
+			{
+				renderData.values.push_back(parameter->createUniformValue());
+			}
+			renderData.textures = {};
+			proxy->updateParameterRenderData(renderData);
 			m_proxy = proxy;
 
-			V_LOG_DEBUG(Engine, "create material: {}", getResourcePath().fullpath)
+			V_LOG_DEBUG(Engine, "create material: {}", getAsset().getAssetPath())
 		}
 		return proxy;
 	}
 
-	void Material::updateParametersToRenderer()
+	void Material::update()
 	{
-		if (auto proxy = m_proxy.lock())
+		if (isDirty())
 		{
-			gApp->getRenderer()->pushCommand([proxy, data = m_parameterData]() {
-				proxy->updateParameters(data);
-				});
+			if (auto proxy = m_proxy.lock())
+			{
+				MaterialParameterRenderData renderData;
+				for (const auto& parameter : m_parameters)
+				{
+					renderData.values.push_back(parameter->createUniformValue());
+				}
+				renderData.textures = {};
+				gApp->getRenderer()->pushCommand([proxy, renderData]() {
+					proxy->updateParameterRenderData(std::move(renderData));
+					});
+			}
+			markDirty(false);
+		}
+		else
+		{
+			bool update = false;
+			for (const auto& paramter : m_parameters)
+			{
+				if (paramter->isDirty())
+				{
+					update = true;
+				}
+			}
+			if (!update)
+			{
+				return;
+			}
+			if (auto proxy = m_proxy.lock())
+			{
+				MaterialParameterRenderData renderData;
+				for (const auto& parameter : m_parameters)
+				{
+					renderData.values.push_back(parameter->createUniformValue());
+				}
+				renderData.textures = {};
+				gApp->getRenderer()->pushCommand([proxy, renderData]() {
+					proxy->updateParameterRenderData(std::move(renderData));
+					});
+			}
 		}
 	}
 
 	MaterialParameter* Material::getParameterByName(const std::string& name)
 	{
-		for (const auto& parameter : m_parameters)
+		for (auto& parameter : m_parameters)
 		{
-			if (parameter->getDescription().name == name)
-			{
-				return parameter.get();
-			}
-		}
-		return nullptr;
-	}
-
-	MaterialParameter* Material::getParameterByType(MaterialParameterDesc::Type type)
-	{
-		for (const auto& parameter : m_parameters)
-		{
-			if (parameter->getDescription().type == type)
+			if (parameter->getName() == name)
 			{
 				return parameter.get();
 			}
@@ -79,87 +124,111 @@ namespace volucris
 	{
 		if (m_parent)
 		{
-			if (m_parent->getMetaData().guid.empty())
-			{
-				return false;
-			}
-			serializer << 1 << m_parent->getMetaData().guid;
+			serializer << 1 << m_parent->getAsset().getAssetPath();
 		}
 		else
 		{
-			serializer << 2 << m_vsFilePath << m_fsFilePath;
+			serializer << 2;
 			m_resource->serialize(serializer);
 		}
-		serializer.serialize(m_parameterData.data(), m_parameterData.size());
+		
+		serializer << (int32)m_parameters.size();
+
+		for (const auto& parameter : m_parameters)
+		{
+			int32 type = (int32)parameter->getType();
+			serializer << type;
+			serializer << parameter->getName();
+			parameter->serialize(serializer);
+		}
+
 		return true;
 	}
 
 	void Material::deserialize(Serializer& serializer)
 	{
-		int type = 0;
-		if (!serializer.deserialize(type))
-		{
-			return;
-		}
-
+		int32 type = 0;
+		serializer >> type;
 		if (type == 1)
 		{
-			// Load material from GUID
-			std::string guid;
-			if (!serializer.deserialize(guid))
-			{
-				return;
-			}
-
-			if (auto parent = ResourceRegistry::Instance().loadResource<Material>(GUID(guid)))
+			std::string parentPath;
+			serializer >> parentPath;
+			if (auto parent = ResourceRegistry::Instance().loadResource<Material>(parentPath))
 			{
 				m_parent = parent;
-				size_t paramDataSize;
-				serializer.deserialize(m_parameterData, paramDataSize);
-				setMaterialResource(parent->getResource());
+				setMaterialResource(m_parent->getResource());
+			}
+			else
+			{
+				V_LOG_ERROR(Engine, "Failed to load material parent: {}", parentPath);
 			}
 		}
 		else if (type == 2)
 		{
-			// Load material from shader paths
-			if (serializer.deserialize(m_vsFilePath) && serializer.deserialize(m_fsFilePath))
-			{
-				auto resource = std::make_shared<MaterialResource>();
-				resource->deserialize(serializer);
-				size_t paramDataSize;
-				serializer.deserialize(m_parameterData, paramDataSize);
-				setMaterialResource(resource);
-			}
-			else
-			{
-				V_LOG_ERROR(Engine, "Failed to deserialize shader paths for material");
-				return;
-			}
+			auto resource = std::make_shared<MaterialResource>();
+			resource->deserialize(serializer);
+			setMaterialResource(resource);
 		}
-		
+
+		int32 parameterCount = 0;
+		serializer >> parameterCount;
+		for (size_t i = 0; i < parameterCount; i++)
+		{
+			if (i >= m_parameters.size())
+			{
+				V_LOG_ERROR(Engine, "Material parameter count mismatch, expected {}, got {}", m_parameters.size(), parameterCount);
+				break;
+			}
+
+			int32 paramType = 0;
+			serializer >> paramType;
+			std::string paramName;
+			serializer >> paramName;
+			auto& parameter = m_parameters[i];
+			if (parameter->getType() != (MaterialParameterType)paramType || parameter->getName() != paramName)
+			{
+				V_LOG_ERROR(Engine, "Material parameter type mismatch, expected {}, got {}", (int)parameter->getType(), paramType);
+				continue;
+			}
+			parameter->deserialize(serializer);
+		}
 	}
 
 	void Material::setMaterialResource(const std::shared_ptr<MaterialResource>& resource)
 	{
-		check(!m_resource)
 		m_resource = resource;
-		size_t tableSize = 0;
-		std::vector<MaterialParameterDesc> descriptions;
-		for (auto desc : resource->getParameterDescriptions())
-		{
-			auto size = MaterialParameterDesc::sizeOfType(desc.type);
-			if (size > 0)
-			{
-				desc.offset = tableSize;
-				tableSize += size;
-			}
-			descriptions.push_back(desc);
-		}
+		onSourceRebuild(resource.get());
+#if WITH_EDITOR
+		resource->Rebuild.addObject(this, &Material::onSourceRebuild);
+#endif
+	}
 
-		m_parameterData.resize(tableSize);
-		for (const auto& desc : descriptions)
+	void Material::onSourceRebuild(MaterialResource* resource)
+	{
+		check(resource == m_resource.get());
+		m_parameters.clear();
+		const auto& descriptions = resource->getParameterDescriptions();
+		m_parameters.reserve(descriptions.size());
+		for (const auto& description : descriptions)
 		{
-			m_parameters.push_back(std::make_unique<MaterialParameter>(this, desc, m_parameterData.data()));
+			switch (description.type)
+			{
+			case MaterialParameterType::FLOAT:
+				m_parameters.push_back(std::make_shared<MaterialParameterFloat>(description.name));
+				break;
+			case MaterialParameterType::VEC2:
+				break;
+			case MaterialParameterType::VEC3:
+				m_parameters.push_back(std::make_shared<MaterialParameterVec3>(description.name));
+				break;
+			case MaterialParameterType::VEC4:
+				break;
+			case MaterialParameterType::TEXTURE2D:
+				break;
+			default:
+				break;
+			}
 		}
+		dirty();
 	}
 }

@@ -26,6 +26,16 @@ namespace volucris
 
 		void addActor(const std::shared_ptr<Actor>& actor);
 
+		template<typename T>
+		std::shared_ptr<T> addActor()
+		{
+			auto comp = std::make_shared<T>();
+			auto actor = std::make_shared<Actor>();
+			actor->setRootComponent(comp);
+			addActor(actor);
+			return comp;
+		}
+
 		void addViewClient(const std::shared_ptr<ViewClient>& client);
 
 		void tick(const double& delta);

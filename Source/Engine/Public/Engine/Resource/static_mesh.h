@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <Engine/Resource/resource_object.h>
+#include <Engine/Resource/soft_object_ptr.h>
 
 namespace volucris
 {
@@ -16,23 +17,27 @@ namespace volucris
 	public:
 		StaticMesh();
 
-		void setMeshResource(const std::shared_ptr<MeshResource>& resource);
+		StaticMesh(const std::shared_ptr<StaticMesh>& parent);
 
-		bool setMaterial(const std::string& slot, const std::shared_ptr<Material>& mat);
+		StaticMesh(const std::shared_ptr<MeshResource>& resource);
 
-		const std::unordered_map<std::string, std::shared_ptr<Material>>& getMaterials() const { return m_materials; }
+		bool setMaterial(const std::string& slot, const TSoftObjectPtr<Material>& mat);
+
+		const std::unordered_map<std::string, TSoftObjectPtr<Material>>& getMaterials() const { return m_materials; }
 
 		std::shared_ptr<MeshResource> getResource() const;
 
-	protected:
 		bool serialize(Serializer& serializer) const override;
 
 		void deserialize(Serializer& serializer) override;
 
 	private:
+		void setMeshResource(const std::shared_ptr<MeshResource>& resource);
+
+	private:
 		std::shared_ptr<StaticMesh> m_parent = nullptr;
 		std::shared_ptr<MeshResource> m_resource;
-		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
+		std::unordered_map<std::string, TSoftObjectPtr<Material>> m_materials;
 	};
 }
 

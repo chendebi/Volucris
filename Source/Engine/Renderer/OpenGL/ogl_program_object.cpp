@@ -1,6 +1,7 @@
 #include "Renderer/OpenGL/ogl_program_object.h"
 #include "Renderer/OpenGL/ogl_check.h"
 #include "Renderer/OpenGL/ogl_uniform.h"
+#include <Core/material_global.h>
 
 namespace volucris
 {
@@ -8,6 +9,7 @@ namespace volucris
         : m_type(type)
         , m_id(0)
         , m_source(source)
+        , m_dirty(true)
     {
     }
 
@@ -16,9 +18,27 @@ namespace volucris
         release();
     }
 
+    bool OGLShaderObject::create()
+    {
+        if (m_id == 0)
+        {
+            m_id = glCreateShader(m_type);
+        }
+        return m_id > 0;
+    }
+
     bool volucris::OGLShaderObject::initialize()
     {
-        m_id = glCreateShader(m_type);
+        if (!m_dirty)
+        {
+            return true;
+        }
+
+        if (m_id == 0)
+        {
+            return false;
+        }
+
         const auto ss = m_source.c_str();
         glShaderSource(m_id, 1, &ss, nullptr);
         glCompileShader(m_id);
@@ -34,6 +54,7 @@ namespace volucris
             return false;
         }
         GL_CHECK();
+        m_dirty = false;
         return true;
     }
 
@@ -47,9 +68,12 @@ namespace volucris
     }
 
     OGLProgramObject::OGLProgramObject()
-        : m_id(0)
+        : m_dirty(true)
         , m_autoReleaseShader(false)
+        , m_id(0)
         , m_shaders()
+        , m_parameterUniforms()
+        , m_blockUniforms()
     {
     }
 
@@ -58,11 +82,25 @@ namespace volucris
         release();
     }
 
+    bool OGLProgramObject::create()
+    {
+        if (m_id == 0)
+        {
+            m_id = glCreateProgram();
+        }
+        return m_id > 0;
+    }
+
     bool OGLProgramObject::initialize()
     {
+        if (!m_dirty)
+        {
+            return true;
+        }
+        
         for (const auto& shader : m_shaders)
         {
-            if (shader->getID() == 0 && !shader->initialize())
+            if (!(shader->isDirty() && shader->create() && shader->initialize()))
             {
                 V_LOG_WARN(Engine, "initialize program failed. some shader invalid.");
                 return false;
@@ -71,16 +109,20 @@ namespace volucris
 
         if (m_id == 0)
         {
-            m_id = glCreateProgram();
+            V_LOG_WARN(Engine, "initialize program failed. program not generated.");
+            return false;
         }
+
         for (const auto& shader : m_shaders)
         {
             glAttachShader(m_id, shader->getID());
         }
 
         glLinkProgram(m_id);
+
         int success;
         char infoLog[512];
+
         glGetProgramiv(m_id, GL_LINK_STATUS, &success);
         if (!success)
         {
@@ -91,18 +133,21 @@ namespace volucris
             return false;
         }
 
-        for (auto& desc : m_uniformDescriptions)
+        for (const auto& uniform : m_parameterUniforms)
         {
-            desc->location = glGetUniformLocation(m_id, desc->desc.name.c_str());
+            auto location = glGetUniformLocation(m_id, uniform->getName().c_str());
+            uniform->setLocation(location);
         }
 
-        for (auto& desc : m_uniformBlockDescriptions)
+        for (const auto& uniform : m_blockUniforms)
         {
-            desc.location = glGetUniformBlockIndex(m_id, desc.desc.name.c_str());
+            auto location = glGetUniformBlockIndex(m_id, uniform->getName().c_str());
+            uniform->setLocation(location);
         }
 
         autoReleaseShaders();
         GL_CHECK();
+        m_dirty = false;
         return true;
     }
 
@@ -113,12 +158,6 @@ namespace volucris
         {
             glDeleteProgram(m_id);
         }
-    }
-
-    void OGLProgramObject::setUniformDescriptions(const std::vector<std::shared_ptr<UniformDescription>>& descritions, const std::vector<UniformDescription>& uniformBlockDescriptions)
-    {
-        m_uniformDescriptions = descritions;
-        m_uniformBlockDescriptions = uniformBlockDescriptions;
     }
 
     void OGLProgramObject::autoReleaseShaders()

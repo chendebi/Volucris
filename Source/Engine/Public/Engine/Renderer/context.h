@@ -25,7 +25,7 @@ namespace volucris
 
 		void bindUniformBuffer(OGLBufferObject* buffer, uint32 index=0);
 
-		void bindUniformBlock(const UniformBlock& block, uint32 index);
+		void bindUniformBlock(UniformBlock*  block, uint32 index);
 
 		void bindVertexArrayObject(OGLVertexArrayObject* vao);
 
@@ -35,7 +35,9 @@ namespace volucris
 
 		void bindFrameBuffer(FrameBufferObject* fbo);
 
-		void setCameraInfoBlock(const UniformBlock& block);
+		void setCameraInfoBlock(UniformBlock* block);
+
+		void setDirectionLightBlock(UniformBlock* block);
 
 		void setViewport(int x, int y, int w, int h);
 
@@ -52,7 +54,7 @@ namespace volucris
 	protected:
 		bool prepareDrawState(const OGLDrawState& state);
 
-		bool prepareUniformBlock(const UniformBlock& block);
+		bool prepareUniformBlock(UniformBlock* block);
 
 	private:
 		struct Impl;
@@ -60,7 +62,8 @@ namespace volucris
 		OGLRenderState m_renderState;
 		OGLClearState m_clearState;
 		Rect m_viewport;
-		UniformBlock m_cameraInfoBlock;
+		UniformBlock* m_cameraInfoBlock;
+		UniformBlock* m_directonLightBlock;
 	};
 }
 

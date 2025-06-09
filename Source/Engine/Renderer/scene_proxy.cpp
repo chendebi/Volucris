@@ -5,7 +5,7 @@
 #include "Renderer/primitive_proxy.h"
 #include "Core/vector_help.h"
 #include <Renderer/OpenGL/ogl_render_state.h>
-
+#include <Renderer/context.h>
 
 namespace volucris
 {
@@ -31,7 +31,15 @@ namespace volucris
 		for (const auto& view : m_views)
 		{
 			view->update(m_primitives);
+
+			if (m_directionLightBlock.valid())
+			{
+				context->setDirectionLightBlock(&m_directionLightBlock);
+			}
+
 			view->render(context);
+
+			context->setDirectionLightBlock(nullptr);
 		}
 
 		// todo: 合并渲染结果
@@ -68,14 +76,16 @@ namespace volucris
 		}
 	}
 
-	UniformBlock SceneProxy::addSceneData(uint8* data, size_t size)
+	void SceneProxy::setDirectionLightData(const DirectionLight& light)
 	{
-		auto block = m_ubo->addData(data, size);
-		return { m_ubo.get(), block };
-	}
-
-	void SceneProxy::setSceneData(const UniformBlock& block, uint8* data)
-	{
-		m_ubo->setBlockData(block.block, data);
+		if (!m_directionLightBlock.valid())
+		{
+			m_directionLightBlock.block = m_ubo->addData((uint8*)&light, sizeof(DirectionLight));
+			m_directionLightBlock.ubo = m_ubo.get();
+		}
+		else
+		{
+			m_ubo->setBlockData(m_directionLightBlock.block, (uint8*)&light);
+		}
 	}
 }

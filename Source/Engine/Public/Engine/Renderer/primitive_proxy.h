@@ -12,6 +12,7 @@ namespace volucris
 	class SectionRenderData;
 	class MaterialProxy;
 	class MeshProxy;
+	class UniformValueMat4;
 
 	class MeshRenderInfo;
 
@@ -45,7 +46,9 @@ namespace volucris
 	class PrimitiveProxy
 	{
 	public:
-		PrimitiveProxy(PrimitiveComponent* Primitive);
+		PrimitiveProxy();
+
+		void initialize(PrimitiveComponent* Primitive);
 
 		std::vector<PrimitiveDrawBatch> getDrawBatch() const { return m_batches; }
 
