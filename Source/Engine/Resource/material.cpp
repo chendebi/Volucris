@@ -6,6 +6,8 @@
 #include "Renderer/renderer.h"
 #include "Core/assert.h"
 #include <Resource/resource_registry.h>
+#include <Resource/material_parameter.h>
+#include <Resource/texture2d.h>
 
 namespace volucris
 {
@@ -47,13 +49,20 @@ namespace volucris
 		if (!proxy)
 		{
 			proxy = std::make_shared<MaterialProxy>();
-			MaterialParameterRenderData renderData;
-			for (const auto& parameter : m_parameters)
+			std::vector<std::shared_ptr<Texture2DProxy>> textures;
+			for (const auto& parameter : m_textureParameters)
 			{
-				renderData.values.push_back(parameter->createUniformValue());
+				if (auto texture2d = parameter->getTexture().tryLoad())
+				{
+					textures.push_back(texture2d->getProxy());
+				}
+				else
+				{
+					textures.push_back(nullptr);
+				}
 			}
-			renderData.textures = {};
-			proxy->updateParameterRenderData(renderData);
+			proxy->setResource(m_resource->getRenderProxy());
+			proxy->updateParameterRenderData(m_bufferData, std::move(textures));
 			m_proxy = proxy;
 
 			V_LOG_DEBUG(Engine, "create material: {}", getAsset().getAssetPath())
@@ -65,16 +74,26 @@ namespace volucris
 	{
 		if (isDirty())
 		{
+			m_resource->update();
 			if (auto proxy = m_proxy.lock())
 			{
-				MaterialParameterRenderData renderData;
-				for (const auto& parameter : m_parameters)
+				auto resource = m_resource->getRenderProxy();
+				std::vector<std::shared_ptr<Texture2DProxy>> textures;
+				for (const auto& parameter : m_textureParameters)
 				{
-					renderData.values.push_back(parameter->createUniformValue());
+					if (auto texture2d = parameter->getTexture().tryLoad())
+					{
+						textures.push_back(texture2d->getProxy());
+					}
+					else
+					{
+						textures.push_back(nullptr);
+					}
 				}
-				renderData.textures = {};
-				gApp->getRenderer()->pushCommand([proxy, renderData]() {
-					proxy->updateParameterRenderData(std::move(renderData));
+				
+				gApp->getRenderer()->pushCommand([proxy, resource, bufferData = m_bufferData, textures]() {
+					proxy->setResource(resource);
+					proxy->updateParameterRenderData(bufferData, std::move(textures));
 					});
 			}
 			markDirty(false);
@@ -86,6 +105,7 @@ namespace volucris
 			{
 				if (paramter->isDirty())
 				{
+					updateParameterData(m_bufferData.data(), paramter->getDescription().offset, paramter->getDescription().size);
 					update = true;
 				}
 			}
@@ -95,14 +115,21 @@ namespace volucris
 			}
 			if (auto proxy = m_proxy.lock())
 			{
-				MaterialParameterRenderData renderData;
-				for (const auto& parameter : m_parameters)
+				std::vector<std::shared_ptr<Texture2DProxy>> textures;
+				for (const auto& parameter : m_textureParameters)
 				{
-					renderData.values.push_back(parameter->createUniformValue());
+					if (auto texture2d = parameter->getTexture().tryLoad())
+					{
+						textures.push_back(texture2d->getProxy());
+					}
+					else
+					{
+						textures.push_back(nullptr);
+					}
 				}
-				renderData.textures = {};
-				gApp->getRenderer()->pushCommand([proxy, renderData]() {
-					proxy->updateParameterRenderData(std::move(renderData));
+
+				gApp->getRenderer()->pushCommand([proxy, bufferData = m_bufferData, textures]() {
+					proxy->updateParameterRenderData(bufferData, std::move(textures));
 					});
 			}
 		}
@@ -112,7 +139,7 @@ namespace volucris
 	{
 		for (auto& parameter : m_parameters)
 		{
-			if (parameter->getName() == name)
+			if (parameter->getDescription().name == name)
 			{
 				return parameter.get();
 			}
@@ -132,14 +159,13 @@ namespace volucris
 			m_resource->serialize(serializer);
 		}
 		
-		serializer << (int32)m_parameters.size();
+		serializer.serialize(m_bufferData.data(), m_bufferData.size());
 
-		for (const auto& parameter : m_parameters)
+		uint32 textureParameterSize = m_textureParameters.size();
+		serializer.serialize(textureParameterSize);
+		for (const auto& texture : m_textureParameters)
 		{
-			int32 type = (int32)parameter->getType();
-			serializer << type;
-			serializer << parameter->getName();
-			parameter->serialize(serializer);
+			serializer.serialize(texture->getTexture());
 		}
 
 		return true;
@@ -170,27 +196,22 @@ namespace volucris
 			setMaterialResource(resource);
 		}
 
-		int32 parameterCount = 0;
-		serializer >> parameterCount;
-		for (size_t i = 0; i < parameterCount; i++)
-		{
-			if (i >= m_parameters.size())
-			{
-				V_LOG_ERROR(Engine, "Material parameter count mismatch, expected {}, got {}", m_parameters.size(), parameterCount);
-				break;
-			}
+		std::vector<uint8> bufferData;
+		size_t size = 0;
+		serializer.deserialize(bufferData, size);
 
-			int32 paramType = 0;
-			serializer >> paramType;
-			std::string paramName;
-			serializer >> paramName;
-			auto& parameter = m_parameters[i];
-			if (parameter->getType() != (MaterialParameterType)paramType || parameter->getName() != paramName)
-			{
-				V_LOG_ERROR(Engine, "Material parameter type mismatch, expected {}, got {}", (int)parameter->getType(), paramType);
-				continue;
-			}
-			parameter->deserialize(serializer);
+		check(size == m_resource->getBufferSize());
+
+		m_bufferData = std::move(bufferData);
+
+		uint32 textureParameterSize = 0;
+		serializer.deserialize(textureParameterSize);
+		check(textureParameterSize == m_textureParameters.size())
+		for (auto idx = 0; idx < textureParameterSize; ++idx)
+		{
+			TSoftObjectPtr<Texture2D> texture;
+			serializer.deserialize(texture);
+			m_textureParameters[idx]->setTexture(texture);
 		}
 	}
 
@@ -209,26 +230,35 @@ namespace volucris
 		m_parameters.clear();
 		const auto& descriptions = resource->getParameterDescriptions();
 		m_parameters.reserve(descriptions.size());
+		m_bufferData.resize(resource->getBufferSize());
+		int texSlot = 0;
 		for (const auto& description : descriptions)
 		{
 			switch (description.type)
 			{
 			case MaterialParameterType::FLOAT:
-				m_parameters.push_back(std::make_shared<MaterialParameterFloat>(description.name));
+				m_parameters.push_back(std::make_shared<MaterialParameterFloat>(description));
 				break;
 			case MaterialParameterType::VEC2:
 				break;
 			case MaterialParameterType::VEC3:
-				m_parameters.push_back(std::make_shared<MaterialParameterVec3>(description.name));
+				m_parameters.push_back(std::make_shared<MaterialParameterVec3>(description));
 				break;
 			case MaterialParameterType::VEC4:
 				break;
 			case MaterialParameterType::TEXTURE2D:
+				updateParameterData(&texSlot, description.offset, description.size);
+				m_textureParameters.push_back(std::make_shared<MaterialParameterTexture2D>(description));
 				break;
 			default:
 				break;
 			}
 		}
 		dirty();
+	}
+
+	void Material::updateParameterData(void* data, size_t offset, size_t size)
+	{
+		memcpy(m_bufferData.data() + offset, data, size);
 	}
 }

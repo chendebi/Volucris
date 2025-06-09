@@ -72,8 +72,6 @@ namespace volucris
         , m_autoReleaseShader(false)
         , m_id(0)
         , m_shaders()
-        , m_parameterUniforms()
-        , m_blockUniforms()
     {
     }
 
@@ -133,22 +131,33 @@ namespace volucris
             return false;
         }
 
-        for (const auto& uniform : m_parameterUniforms)
-        {
-            auto location = glGetUniformLocation(m_id, uniform->getName().c_str());
-            uniform->setLocation(location);
-        }
-
-        for (const auto& uniform : m_blockUniforms)
-        {
-            auto location = glGetUniformBlockIndex(m_id, uniform->getName().c_str());
-            uniform->setLocation(location);
-        }
-
         autoReleaseShaders();
         GL_CHECK();
         m_dirty = false;
         return true;
+    }
+
+    int32 OGLProgramObject::findUniformLocation(const std::string& name)
+    {
+        if (m_dirty)
+        {
+            return -1;
+        }
+        return glGetUniformLocation(m_id, name.c_str());
+    }
+
+    int32 OGLProgramObject::findUniformBlockLocation(const std::string& name)
+    {
+        if (m_dirty)
+        {
+            return -1;
+        }
+        auto location = glGetUniformBlockIndex(m_id, name.c_str());
+        if (location == GL_INVALID_INDEX)
+        {
+            return -1;
+        }
+        return location;
     }
 
     void OGLProgramObject::release()

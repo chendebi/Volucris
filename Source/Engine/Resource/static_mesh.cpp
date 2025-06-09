@@ -55,6 +55,16 @@ namespace volucris
 		return true;
 	}
 
+	std::vector<std::string> StaticMesh::getMaterialSlots() const
+	{
+		std::vector<std::string> slots;
+		for (const auto& [slot, mat] : m_materials)
+		{
+			slots.push_back(slot);
+		}
+		return slots;
+	}
+
 	std::shared_ptr<MeshResource> StaticMesh::getResource() const
 	{
 		return m_resource;

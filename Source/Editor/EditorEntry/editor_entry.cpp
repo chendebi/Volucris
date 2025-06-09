@@ -15,6 +15,8 @@
 #include <Engine/Resource/material.h>
 #include <Engine/Scene/direction_light_component.h>
 #include <ContentBrowser/material_loader.h>
+#include <Engine/Scene/static_mesh_component.h>
+#include <ContentBrowser/mesh_loader.h>
 
 using namespace volucris;
 
@@ -40,7 +42,28 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	if (true)
 	{
-		auto mat = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/Cube");
+		/*auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/Cube");
+		auto actor = level->addActor<StaticMeshComponent>(mesh);*/
+
+		MaterialLoader loader;
+		std::string vsf, fsf;
+		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.vert", vsf);
+		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.frag", fsf);
+		auto resource = loader.load(vsf, fsf);
+		auto material = std::make_shared<Material>(resource);
+
+		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.frag", fsf);
+		MeshLoader meshLoader = MeshLoader("");
+		meshLoader.load("D:\\Projects\\Volucris\\Assets\\simple_cube.fbx");
+		auto meshes = meshLoader.getLoadedStaticMeshes();
+		for (const auto& mesh : meshes)
+		{
+			for (const auto& slot : mesh->getMaterialSlots())
+			{
+				mesh->setMaterial(slot, material);
+			}
+			level->addActor<StaticMeshComponent>(mesh);
+		}
 	}
 
 	gApp->setLevel(level);

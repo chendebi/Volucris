@@ -26,10 +26,10 @@ namespace volucris
 
 		void addActor(const std::shared_ptr<Actor>& actor);
 
-		template<typename T>
-		std::shared_ptr<T> addActor()
+		template<typename T, typename ...Args>
+		std::shared_ptr<T> addActor(Args&& ...args)
 		{
-			auto comp = std::make_shared<T>();
+			auto comp = std::make_shared<T>(std::move(std::forward<Args>(args)...));
 			auto actor = std::make_shared<Actor>();
 			actor->setRootComponent(comp);
 			addActor(actor);

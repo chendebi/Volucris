@@ -248,18 +248,15 @@ namespace volucris
 			return;
 		}
 
-		if (state.programState.program != m_renderState.drawState.programState.program)
+		if (state.programState.material != m_renderState.drawState.programState.material)
 		{
-			m_renderState.drawState.programState.program = state.programState.program;
-			glUseProgram(state.programState.program->getID());
+			m_renderState.drawState.programState.material = state.programState.material;
+			glUseProgram(m_renderState.drawState.programState.material->getProgramObject()->getID());
 		}
 
-		if (auto renderData = state.programState.renderData)
+		for (const auto& uniform : state.programState.uniforms)
 		{
-			for (const auto& uniform : renderData->values)
-			{
-				uniform->upload();
-			}
+			uniform->upload();
 		}
 
 		
@@ -281,7 +278,7 @@ namespace volucris
 
 	bool Context::prepareDrawState(const OGLDrawState& state)
 	{
-		if (!state.ebo || !state.programState.program || !state.vao)
+		if (!state.ebo || !state.programState.material || !state.vao)
 		{
 			return false;
 		}
@@ -300,37 +297,11 @@ namespace volucris
 			return false;
 		}
 
-		if (!state.programState.program->valid() && !state.programState.program->initialize())
+		if (!state.programState.material->ready())
 		{
 			return false;
 		}
 
-		uint32 slot = 0;
-		for (const auto& uniformBlock : state.programState.program->getBlockUniforms())
-		{
-			glUniformBlockBinding(state.programState.program->getID(), uniformBlock->getLocation(), slot);
-			switch (uniformBlock->getBlockSlot())
-			{
-			case MaterialUniformBlock::CAMERA_INFO:
-				if (!prepareUniformBlock(m_cameraInfoBlock))
-				{
-					return false;
-				}
-				bindUniformBlock(m_cameraInfoBlock, slot);
-				break;
-			case MaterialUniformBlock::DIRECTION_LIGHT:
-				if (!prepareUniformBlock(m_directonLightBlock))
-				{
-					return false;
-				}
-				bindUniformBlock(m_directonLightBlock, slot);
-				break;
-			default:
-				break;
-			}
-			++slot;
-			GL_CHECK();
-		}
 		GL_CHECK();
 		return true;
 	}

@@ -25,6 +25,8 @@ namespace volucris
 
 		const std::unordered_map<std::string, TSoftObjectPtr<Material>>& getMaterials() const { return m_materials; }
 
+		std::vector<std::string> getMaterialSlots() const;
+
 		std::shared_ptr<MeshResource> getResource() const;
 
 		bool serialize(Serializer& serializer) const override;

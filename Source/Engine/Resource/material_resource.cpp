@@ -10,8 +10,8 @@ namespace volucris
 		: m_dirty(false)
 		, m_vss()
 		, m_fss()
-		, m_innerParameters(0)
 		, m_descriptions()
+		, m_bufferSize(0)
 		, m_proxy()
 	{
 	}
@@ -32,14 +32,36 @@ namespace volucris
 		m_fss = fss;
 	}
 
-	void MaterialResource::setParameterDescriptions(const std::vector<MaterialParameterDescription>& descriptions)
+	void MaterialResource::addParameter(const std::string& name, MaterialParameterType type)
 	{
-		m_descriptions = descriptions;
-	}
-
-	void MaterialResource::setBindingUniformBlocks(MaterialUniformBlocks blocks)
-	{
-		m_innerParameters = blocks;
+		MaterialParameterDescription description;
+		description.name = name;
+		description.type = type;
+		description.offset = m_bufferSize;
+		switch (type)
+		{
+		case volucris::MaterialParameterType::NONE:
+			check(false);
+			break;
+		case volucris::MaterialParameterType::FLOAT:
+			description.size = sizeof(float);
+			break;
+		case volucris::MaterialParameterType::VEC2:
+			description.size = sizeof(glm::vec2);
+			break;
+		case volucris::MaterialParameterType::VEC3:
+			description.size = sizeof(glm::vec3);
+			break;
+		case volucris::MaterialParameterType::VEC4:
+			description.size = sizeof(glm::vec4);
+			break;
+		case volucris::MaterialParameterType::TEXTURE2D:
+			description.size = sizeof(int32);
+			break;
+		default:
+			break;
+		}
+		m_bufferSize += description.size;
 	}
 
 	void MaterialResource::dirty()
@@ -59,11 +81,7 @@ namespace volucris
 				MaterialRenderData renderData;
 				renderData.vss = m_vss;
 				renderData.fss = m_fss;
-				for (const auto& desc : m_descriptions)
-				{
-					renderData.parameterNames.push_back(desc.name);
-				}
-				renderData.engineParameters = m_innerParameters;
+				renderData.descriptions = m_descriptions;
 				gApp->getRenderer()->pushCommand([proxy, renderData]() {
 					proxy->update(renderData);
 					});
@@ -80,11 +98,7 @@ namespace volucris
 			MaterialRenderData renderData;
 			renderData.vss = m_vss;
 			renderData.fss = m_fss;
-			for (const auto& desc : m_descriptions)
-			{
-				renderData.parameterNames.push_back(desc.name);
-			}
-			renderData.engineParameters = m_innerParameters;
+			renderData.descriptions = m_descriptions;
 			proxy = std::make_shared<MaterialResourceProxy>();
 			proxy->update(std::move(renderData));
 			m_proxy = proxy;
@@ -96,7 +110,6 @@ namespace volucris
 	{
 		serializer.serialize(m_vss);
 		serializer.serialize(m_fss);
-		serializer.serialize(m_innerParameters);
 		serializer.serialize(m_descriptions);
 		return true;
 	}
@@ -115,7 +128,6 @@ namespace volucris
 
 		m_vss = std::move(vss);
 		m_fss = std::move(fss);
-		m_innerParameters = engineDatas;
 		m_descriptions = std::move(descriptions);
 	}
 }

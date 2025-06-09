@@ -15,7 +15,8 @@ namespace volucris
 	class Texture2DObject;
 	class RenderBufferObject;
 	class FrameBufferObject;
-	class MaterialParameterRenderData;
+	class UniformValue;
+	class MaterialResourceProxy;
 
 	struct OGLClearState
 	{
@@ -43,18 +44,18 @@ namespace volucris
 		}
 	};
 
-	struct OGLProgramState
+	struct MaterialState
 	{
-		OGLProgramObject* program = nullptr;
-		MaterialUniformBlocks engineDatas = 0;
-		MaterialParameterRenderData* renderData = nullptr;
+		MaterialResourceProxy* material = nullptr;
+		std::vector<UniformValue*> uniforms = {};
+		std::vector<Texture2DObject*> textures = {};
 	};
 
 	struct OGLDrawState
 	{
 		OGLBufferObject* ebo = nullptr;
 		OGLVertexArrayObject* vao = nullptr;
-		OGLProgramState programState;
+		MaterialState programState;
 	};
 
 	struct OGLRenderState

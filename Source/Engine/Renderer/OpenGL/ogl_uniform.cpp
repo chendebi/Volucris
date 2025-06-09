@@ -26,24 +26,4 @@ namespace volucris
 	{
 		glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
 	}
-
-	BlockUniform::BlockUniform(MaterialUniformBlock block)
-		: Uniform(), m_block(block)
-	{
-		switch (block)
-		{
-		case volucris::PRIMITIVE_INFO:
-			setName(std::string(MATERIAL_UNIFORM_PRIMITIVE_INFO));
-			break;
-		case volucris::CAMERA_INFO:
-			setName(std::string(MATERIAL_UNIFORM_CAMERA_INFO));
-			break;
-		case volucris::DIRECTION_LIGHT:
-			setName(std::string(MATERIAL_UNIFORM_DIRECTION_LIGHT));
-			break;
-		default:
-			V_LOG_WARN(Engine, "unsupport uniform block slot: {}", (int)block);
-			break;
-		}
-	}
 }

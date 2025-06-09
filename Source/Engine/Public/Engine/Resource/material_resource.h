@@ -31,9 +31,7 @@ namespace volucris
 
 		void setSource(const std::string& vss, const std::string& fss);
 
-		void setParameterDescriptions(const std::vector<MaterialParameterDescription>& descriptions);
-
-		void setBindingUniformBlocks(MaterialUniformBlocks blocks);
+		void addParameter(const std::string& name, MaterialParameterType type);
 
 		void dirty();
 
@@ -45,9 +43,9 @@ namespace volucris
 
 		std::string getFragmentShaderSource() const { return m_fss; }
 
-		MaterialUniformBlocks getEngineInnerParameters() const { return m_innerParameters; }
-
 		const std::vector<MaterialParameterDescription>& getParameterDescriptions() const { return m_descriptions; }
+
+		size_t getBufferSize() const { return m_bufferSize; }
 
 		bool serialize(Serializer& serializer) const;
 
@@ -57,8 +55,8 @@ namespace volucris
 		uint8 m_dirty;
 		std::string m_vss;
 		std::string m_fss;
-		MaterialUniformBlocks m_innerParameters;
 		std::vector<MaterialParameterDescription> m_descriptions;
+		size_t m_bufferSize;
 		std::weak_ptr<MaterialResourceProxy> m_proxy;
 	};
 

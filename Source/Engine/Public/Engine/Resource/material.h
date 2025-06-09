@@ -6,12 +6,13 @@
 #include <vector>
 #include <map>
 #include <Engine/Resource/resource_object.h>
-#include <Engine/Resource/material_parameter.h>
 
 namespace volucris
 {
 	class MaterialResource;
 	class MaterialProxy;
+	class MaterialParameter;
+	class MaterialParameterTexture2D;
 
 	class Material : public ResourceObject
 	{
@@ -44,10 +45,15 @@ namespace volucris
 		void onSourceRebuild(MaterialResource* resource);
 
 	private:
+		void updateParameterData(void* data, size_t offset, size_t size);
+
+	private:
 		std::shared_ptr<Material> m_parent;
 		std::shared_ptr<MaterialResource> m_resource;
 		std::vector<std::shared_ptr<MaterialParameter>> m_parameters;
+		std::vector<std::shared_ptr<MaterialParameterTexture2D>> m_textureParameters;
 		std::weak_ptr<MaterialProxy> m_proxy;
+		std::vector<uint8> m_bufferData;
 
 	};
 }

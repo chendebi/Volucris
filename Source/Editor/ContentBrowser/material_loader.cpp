@@ -106,8 +106,7 @@ namespace volucris
 			return nullptr;
 		}
 
-		std::vector<MaterialParameterDescription> descs;
-		size_t offset = 0;
+		auto resource = std::make_shared<MaterialResource>(vss, fss);
 		for (const auto& [type, names] : map)
 		{
 			if (type == MaterialParameterType::NONE)
@@ -117,16 +116,11 @@ namespace volucris
 
 			for (const auto& name : names)
 			{
-				MaterialParameterDescription desc;
-				desc.name = name;
-				desc.type = type;
-				descs.push_back(desc);
+				resource->addParameter(name, type);
 			}
 		}
 
-		auto resource = std::make_shared<MaterialResource>(vss, fss);
-		resource->setParameterDescriptions(descs);
-		//resource->setBindingUniformBlocks(blocks);
+
 		return resource;
 	}
 

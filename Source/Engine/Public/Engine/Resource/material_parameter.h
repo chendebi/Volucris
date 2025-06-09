@@ -7,6 +7,7 @@
 #include <Engine/Core/types_help.h>
 #include "soft_object_ptr.h"
 #include <Engine/Core/material_global.h>
+#include <Engine/Core/assert.h>
 
 namespace volucris
 {
@@ -17,7 +18,7 @@ namespace volucris
 	{
 
 	public:
-		MaterialParameter(std::string name, MaterialParameterType type);
+		MaterialParameter(const MaterialParameterDescription& description);
 
 		virtual ~MaterialParameter() = default;
 
@@ -27,48 +28,26 @@ namespace volucris
 
 		bool isDirty() const { return m_dirty; }
 
-		const std::string& getName() const { return m_name; }
-
-		MaterialParameterType getType() const { return m_type; }
-
-		virtual std::shared_ptr<UniformValue> createUniformValue() = 0;
-
-		virtual bool serialize(Serializer& serializer) const = 0;
-
-		virtual void deserialize(Serializer& serializer) = 0;
+		const MaterialParameterDescription& getDescription() const { return m_description; }
 
 	private:
 		uint8 m_dirty;
-		MaterialParameterType m_type;
-		std::string m_name;
+		MaterialParameterDescription m_description;
 	};
 
 	class MaterialParameterFloat : public MaterialParameter
 	{
 	public:
-		MaterialParameterFloat(std::string name)
-			: MaterialParameter(name, MaterialParameterType::FLOAT)
+		MaterialParameterFloat(const MaterialParameterDescription& description)
+			: MaterialParameter(description)
 			, m_value()
 		{
+			check(description.type == MaterialParameterType::FLOAT)
 		}
-
-		std::shared_ptr<UniformValue> createUniformValue() override;
 
 		void setValue(float value)
 		{
 			m_value = value;
-			dirty();
-		}
-
-		bool serialize(Serializer& serializer) const override
-		{
-			serializer.serialize(m_value);
-			return true;
-		}
-
-		void deserialize(Serializer& serializer) override
-		{
-			serializer.deserialize(m_value);
 			dirty();
 		}
 
@@ -81,13 +60,12 @@ namespace volucris
 	class MaterialParameterVec3 : public MaterialParameter
 	{
 	public:
-		MaterialParameterVec3(std::string name)
-			: MaterialParameter(name, MaterialParameterType::VEC3)
+		MaterialParameterVec3(const MaterialParameterDescription& description)
+			: MaterialParameter(description)
 			, m_value()
 		{
+			check(description.type == MaterialParameterType::VEC3)
 		}
-
-		std::shared_ptr<UniformValue> createUniformValue() override;
 
 		void setValue(const glm::vec3& value)
 		{
@@ -97,17 +75,6 @@ namespace volucris
 
 		glm::vec3 getValue() const { return m_value; }
 
-		bool serialize(Serializer& serializer) const override
-		{
-			serializer.serialize(m_value);
-			return true;
-		}
-
-		void deserialize(Serializer& serializer) override
-		{
-			serializer.deserialize(m_value);
-			dirty();
-		}
 
 	private:
 		glm::vec3 m_value;
@@ -116,32 +83,21 @@ namespace volucris
 	class MaterialParameterTexture2D : public MaterialParameter
 	{
 	public:
-		MaterialParameterTexture2D(std::string name, std::string assetPath, int location)
-			: MaterialParameter(name, MaterialParameterType::TEXTURE2D)
-			, m_location(location)
-			, m_texture(std::move(assetPath))
+		MaterialParameterTexture2D(const MaterialParameterDescription& description)
+			: MaterialParameter(description)
+			, m_texture()
 		{
-
+			check(description.type == MaterialParameterType::TEXTURE2D)
 		}
-
-		std::shared_ptr<UniformValue> createUniformValue() override;
 
 		TSoftObjectPtr<Texture2D> getTexture() const { return m_texture; }
 
-		bool serialize(Serializer& serializer) const override
+		void setTexture(const TSoftObjectPtr<Texture2D>& texture)
 		{
-			serializer.serialize(m_texture);
-			return true;
-		}
-
-		void deserialize(Serializer& serializer) override
-		{
-			serializer.deserialize(m_texture);
-			dirty();
+			m_texture = texture;
 		}
 
 	private:
-		int m_location;
 		TSoftObjectPtr<Texture2D> m_texture;
 	};
 }

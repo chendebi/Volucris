@@ -14,29 +14,33 @@ namespace volucris
 	struct MaterialParameterDescription
 	{
 		MaterialParameterType type = MaterialParameterType::NONE;
+		uint32 offset = 0;
+		uint32 size = 0;
 		std::string name = {};
 
 		void serialize(Serializer& serializer)
 		{
 			int32 typeInt = static_cast<int32>(type);
 			serializer.serialize(typeInt);
+			serializer.serialize(offset);
+			serializer.serialize(size);
 			serializer.serialize(name);
 		}
 
 		void deserialize(Serializer& serializer)
 		{
 			int32 typeInt = 0;
+			uint32 offset, size;
 			std::string sname;
 			if (serializer.deserialize(typeInt) &&
+				serializer.deserialize(offset) &&
+				serializer.deserialize(size) &&
 				serializer.deserialize(sname))
 			{
 				type = static_cast<MaterialParameterType>(typeInt);
 				name = std::move(sname);
-			}
-			else
-			{
-				type = MaterialParameterType::NONE;
-				name.clear();
+				this->offset = offset;
+				this->size = size;
 			}
 		}
 	};

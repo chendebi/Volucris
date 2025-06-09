@@ -12,7 +12,6 @@ namespace volucris
 	class SectionRenderData;
 	class MaterialProxy;
 	class MeshProxy;
-	class UniformValueMat4;
 
 	class MeshRenderInfo;
 

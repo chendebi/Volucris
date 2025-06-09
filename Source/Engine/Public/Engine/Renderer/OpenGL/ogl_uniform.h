@@ -6,7 +6,8 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include <Engine/Renderer/material_inner_data.h>
+#include <Engine/Core/material_global.h>
+#include <Engine/Core/assert.h>
 
 namespace volucris
 {
@@ -43,17 +44,6 @@ namespace volucris
 		int m_location;
 	};
 
-	class BlockUniform : public Uniform
-	{
-	public:
-		BlockUniform(MaterialUniformBlock block);
-
-		MaterialUniformBlock getBlockSlot() const { return m_block; }
-
-	private:
-		MaterialUniformBlock m_block;
-	};
-
 	namespace UniformUploader
 	{
 		void upload(int location, float value);
@@ -66,8 +56,9 @@ namespace volucris
 	class UniformValue
 	{
 	public:
-		UniformValue()
+		UniformValue(const MaterialParameterDescription& description)
 			: m_uniform(nullptr)
+			, m_description(description)
 		{
 
 		}
@@ -77,51 +68,103 @@ namespace volucris
 			m_uniform = uniform;
 		}
 
+		virtual void updateValue(const std::vector<uint8>& data) = 0;
+
 		const std::shared_ptr<Uniform>& getUniform() const { return m_uniform; }
 
 		virtual ~UniformValue() = default;
 
 		virtual void upload() = 0;
+
 	protected:
 		std::shared_ptr<Uniform> m_uniform;
+		MaterialParameterDescription m_description;
 	};
 
-	template <typename T>
-	class UniformValueTemplate : public UniformValue
+	class UniformValueFloat : public UniformValue
 	{
 	public:
-		UniformValueTemplate()
-			: UniformValue()
+		UniformValueFloat(const MaterialParameterDescription& description)
+			: UniformValue(description)
 			, m_value()
 		{
+			check(description.type == MaterialParameterType::FLOAT);
 		}
 
-		UniformValueTemplate(const T& value)
-			: UniformValue()
-			, m_value(value)
-		{ }
-
-		void setValue(const T& value)
+		void updateValue(const std::vector<uint8>& data) override
 		{
-			m_value = value;
+			check((m_description.offset+ m_description.size) <= data.size())
+			memcpy(&m_value, data.data() + m_description.offset, m_description.size);
 		}
 
 		void upload() override
-		{
-			auto location = m_uniform->getLocation();
-			if (location >= 0)
+		{ 
+			if (m_uniform && m_uniform->getLocation() >= 0)
 			{
-				UniformUploader::upload(location, m_value);
+				UniformUploader::upload(m_uniform->getLocation(), m_value);
 			}
 		}
 
 	private:
-		T m_value;
+		float m_value;
 	};
 
-	using UniformValueFloat = UniformValueTemplate<float>;
-	using UniformValueVec3 = UniformValueTemplate<glm::vec3>;
-	//using UniformValueMat4 = UniformValueTemplate<glm::mat4>;
+	class UniformValueVec3 : public UniformValue
+	{
+	public:
+		UniformValueVec3(const MaterialParameterDescription& description)
+			: UniformValue(description)
+			, m_value()
+		{
+			check(description.type == MaterialParameterType::VEC3);
+		}
+
+		void updateValue(const std::vector<uint8>& data) override
+		{
+			check((m_description.offset + m_description.size) <= data.size())
+				memcpy(&m_value, data.data() + m_description.offset, m_description.size);
+		}
+
+		void upload() override
+		{
+			if (m_uniform && m_uniform->getLocation() >= 0)
+			{
+				UniformUploader::upload(m_uniform->getLocation(), m_value);
+			}
+		}
+
+	private:
+		glm::vec3 m_value;
+	};
+
+
+	class UniformValueVec4 : public UniformValue
+	{
+	public:
+		UniformValueVec4(const MaterialParameterDescription& description)
+			: UniformValue(description)
+			, m_value()
+		{
+			check(description.type == MaterialParameterType::VEC4);
+		}
+
+		void updateValue(const std::vector<uint8>& data) override
+		{
+			check((m_description.offset + m_description.size) <= data.size())
+				memcpy(&m_value, data.data() + m_description.offset, m_description.size);
+		}
+
+		void upload() override
+		{
+			if (m_uniform && m_uniform->getLocation() >= 0)
+			{
+				UniformUploader::upload(m_uniform->getLocation(), m_value);
+			}
+		}
+
+	private:
+		glm::vec4 m_value;
+	};
 }
 
 #endif // !__volucris_ogl_uniform_h__
