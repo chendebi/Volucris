@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include "ContentBrowser/content_browser_widget.h"
 #include <LogWidget/log_widget.h>
+#include <PropertyWidget/property_widget.h>
 
 namespace volucris
 {
@@ -31,10 +32,8 @@ namespace volucris
 			m_logWidget->build();
 		}
 
-		ImGui::Begin("Properties");
-		ImGui::SliderFloat("Value", &m_value, 0.0f, 1.0f);
-		ImGui::End();
-
+		m_propertyWidget->build();
+		
 		m_browserWidget->build();
 	}
 }

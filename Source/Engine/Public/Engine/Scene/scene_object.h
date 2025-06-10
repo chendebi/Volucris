@@ -2,12 +2,15 @@
 #define __volucris_scene_object_h__
 
 #include <string>
+#include <rttr/registration.h>
+#include <rttr/rttr_enable.h>
 
 namespace volucris
 {
 	class Scene;
 	class SceneObject
 	{
+		RTTR_ENABLE()
 	public:
 		SceneObject() : m_scene(nullptr) {}
 
@@ -24,7 +27,6 @@ namespace volucris
 		void setDisplayName(const std::string& name) { m_displayName = name; }
 
 		std::string getDisplayName() const { return m_displayName; }
-
 	protected:
 		virtual void attached() {}
 

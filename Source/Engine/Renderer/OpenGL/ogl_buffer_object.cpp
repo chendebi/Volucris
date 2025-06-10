@@ -55,7 +55,9 @@ namespace volucris
 			m_data.resize(newSize);
 		}
 		memcpy(m_data.data() + currSize, data, size);
-		return { currSize, size };
+		OGLBufferObject::BlockID id = BlockID({ currSize, size });
+		dirtyBlock(id);
+		return id;
 	}
 
 	void OGLBufferObject::setBlockData(const BlockID& id, uint8* data)

@@ -13,6 +13,8 @@ namespace volucris
 
 	class PrimitiveComponent : public SceneComponent
 	{
+		RTTR_ENABLE(SceneComponent)
+
 	public:
 		PrimitiveComponent();
 

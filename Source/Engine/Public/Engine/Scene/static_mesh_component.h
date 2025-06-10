@@ -9,6 +9,7 @@ namespace volucris
 
 	class StaticMeshComponent : public PrimitiveComponent
 	{
+		RTTR_ENABLE(PrimitiveComponent)
 	public:
 		StaticMeshComponent(const std::shared_ptr<StaticMesh>& mesh);
 

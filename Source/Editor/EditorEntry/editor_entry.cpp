@@ -17,6 +17,7 @@
 #include <ContentBrowser/material_loader.h>
 #include <Engine/Scene/static_mesh_component.h>
 #include <ContentBrowser/mesh_loader.h>
+#include <PropertyWidget/property_widget.h>
 
 using namespace volucris;
 
@@ -32,7 +33,9 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 	app->setWindow(window);
 	auto widget = std::make_shared<MainWidget>();
 	auto logWidget = std::make_shared<LogWidget>();
+	auto propertyWidget = std::make_shared<PropertyWidget>();
 	widget->setLogWidget(logWidget);
+	widget->setPropertyWidget(propertyWidget);
 	app->setMainWidget(widget);
 
 	auto renderer = std::make_shared<Renderer>();
@@ -64,6 +67,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 			}
 			auto comp = level->addActor<StaticMeshComponent>(mesh);
 			comp->setScale({ 100,100,100 });
+			propertyWidget->setSceneObject(comp.get());
 		}
 	}
 

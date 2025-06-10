@@ -9,6 +9,7 @@ namespace volucris
 {
 	class Actor : public SceneObject
 	{
+		RTTR_ENABLE(SceneObject)
 	public:
 		Actor();
 

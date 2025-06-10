@@ -9,6 +9,7 @@ namespace volucris
 {
 	class SceneComponent : public Component
 	{
+		RTTR_ENABLE(Component)
 	public:
 		SceneComponent();
 
