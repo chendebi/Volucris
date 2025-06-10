@@ -8,6 +8,7 @@
 #include "soft_object_ptr.h"
 #include <Engine/Core/material_global.h>
 #include <Engine/Core/assert.h>
+#include <rttr/registration>
 
 namespace volucris
 {
@@ -42,7 +43,7 @@ namespace volucris
 			: MaterialParameter(description)
 			, m_value()
 		{
-			check(description.type == MaterialParameterType::FLOAT)
+			v_check(description.type == MaterialParameterType::FLOAT)
 		}
 
 		void setValue(float value)
@@ -53,7 +54,7 @@ namespace volucris
 
 		float getValue() const { return m_value; }
 
-	private:
+	public:
 		float m_value;
 	};
 
@@ -64,7 +65,7 @@ namespace volucris
 			: MaterialParameter(description)
 			, m_value()
 		{
-			check(description.type == MaterialParameterType::VEC3)
+			v_check(description.type == MaterialParameterType::VEC3)
 		}
 
 		void setValue(const glm::vec3& value)
@@ -76,7 +77,7 @@ namespace volucris
 		glm::vec3 getValue() const { return m_value; }
 
 
-	private:
+	public:
 		glm::vec3 m_value;
 	};
 
@@ -87,7 +88,7 @@ namespace volucris
 			: MaterialParameter(description)
 			, m_texture()
 		{
-			check(description.type == MaterialParameterType::TEXTURE2D)
+			v_check(description.type == MaterialParameterType::TEXTURE2D)
 		}
 
 		TSoftObjectPtr<Texture2D> getTexture() const { return m_texture; }
@@ -97,9 +98,12 @@ namespace volucris
 			m_texture = texture;
 		}
 
-	private:
+	public:
 		TSoftObjectPtr<Texture2D> m_texture;
 	};
+
 }
+
+
 
 #endif // !__volucris_material_parameter_h__

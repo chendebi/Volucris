@@ -168,7 +168,7 @@ namespace volucris
 		glGenBuffers(ids.size(), ids.data());
 		for (auto idx = 0; idx < ids.size(); ++idx)
 		{
-			check(ids[idx] > 0);
+			v_check(ids[idx] > 0);
 			buffers[idx]->m_id = ids[idx];
 		}
 		return true;

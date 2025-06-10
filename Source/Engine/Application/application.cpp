@@ -35,7 +35,7 @@ namespace volucris
 		, m_level(nullptr)
 		, m_queue(1024)
 	{
-		checkq(!Inst, Engine, "application already exist");
+		v_checkq(!Inst, Engine, "application already exist");
 		Inst = this;
 	}
 

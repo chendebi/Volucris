@@ -88,12 +88,12 @@ namespace volucris
 			: UniformValue(description)
 			, m_value()
 		{
-			check(description.type == MaterialParameterType::FLOAT);
+			v_check(description.type == MaterialParameterType::FLOAT);
 		}
 
 		void updateValue(const std::vector<uint8>& data) override
 		{
-			check((m_description.offset+ m_description.size) <= data.size())
+			v_check((m_description.offset+ m_description.size) <= data.size())
 			memcpy(&m_value, data.data() + m_description.offset, m_description.size);
 		}
 
@@ -116,12 +116,12 @@ namespace volucris
 			: UniformValue(description)
 			, m_value()
 		{
-			check(description.type == MaterialParameterType::VEC3);
+			v_check(description.type == MaterialParameterType::VEC3);
 		}
 
 		void updateValue(const std::vector<uint8>& data) override
 		{
-			check((m_description.offset + m_description.size) <= data.size())
+			v_check((m_description.offset + m_description.size) <= data.size())
 				memcpy(&m_value, data.data() + m_description.offset, m_description.size);
 		}
 
@@ -145,12 +145,12 @@ namespace volucris
 			: UniformValue(description)
 			, m_value()
 		{
-			check(description.type == MaterialParameterType::VEC4);
+			v_check(description.type == MaterialParameterType::VEC4);
 		}
 
 		void updateValue(const std::vector<uint8>& data) override
 		{
-			check((m_description.offset + m_description.size) <= data.size())
+			v_check((m_description.offset + m_description.size) <= data.size())
 				memcpy(&m_value, data.data() + m_description.offset, m_description.size);
 		}
 

@@ -41,7 +41,7 @@ namespace volucris
 		switch (type)
 		{
 		case volucris::MaterialParameterType::NONE:
-			check(false);
+			v_check(false);
 			break;
 		case volucris::MaterialParameterType::FLOAT:
 			description.size = sizeof(float);

@@ -7,7 +7,7 @@ namespace volucris
 {
 	SceneObject::~SceneObject()
 	{
-		checkf(!m_scene, Engine, "delete scene object with attached")
+		v_checkf(!m_scene, Engine, "delete scene object with attached")
 	}
 
 	void SceneObject::attach(Scene* scene)

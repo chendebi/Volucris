@@ -52,3 +52,8 @@ target_include_directories(${TARGET} PRIVATE
 
 target_compile_definitions(${TARGET} PRIVATE VOLUCRIS_ENGINE_ROOT="${VOLUCRIS_ENGINE_ROOT}")
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)
+
+if (BUILD_WITH_EDITOR)
+    target_link_libraries(${TARGET} PUBLIC ${VOLUCRIS_RTTR_DIRECTORY}/lib/rttr_core.lib)
+    target_include_directories(${TARGET} PUBLIC ${VOLUCRIS_RTTR_DIRECTORY}/include)
+endif()

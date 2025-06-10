@@ -40,7 +40,7 @@ namespace volucris
 			sectionRenderData.offset = section.offset * sizeof(uint32);
 			auto mat = primitive->getMaterial(section.slot);
 
-			check(mat != nullptr);
+			v_check(mat != nullptr);
 
 			auto matProxy = mat->getRenderProxy();
 			auto sectionIt = sections.find(matProxy);

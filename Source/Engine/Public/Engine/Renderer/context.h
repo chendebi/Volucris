@@ -45,13 +45,15 @@ namespace volucris
 
 		void setViewport(const Rect& rect);
 
+		void setPrimitiveInfo(PrimitiveInfo* ptimitiveInfo);
+
 		bool beginRenderPass(FrameBufferObject* target = nullptr);
 
 		void clear(const OGLClearState& state);
 
 		void draw(const OGLDrawState& state, const SectionRenderData& section);
 
-		void draw(const MaterialProxy* material, PrimitiveInfo* ptimitiveInfo, const SectionDrawData& section);
+		void draw(const MaterialProxy* material, const SectionDrawData& section);
 
 	protected:
 		bool prepareDrawState(const OGLDrawState& state);

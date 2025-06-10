@@ -65,7 +65,7 @@ namespace volucris
 		Texture2DObject* texture2d = nullptr;
 		RenderBufferObject* rbo = nullptr;
 		FrameBufferObject* fbo = nullptr;
-		std::unordered_map<uint32, OGLBufferObject*> ubos;
+		std::vector<OGLBufferObject*> ubos;
 		OGLDrawState drawState;
 	};
 }

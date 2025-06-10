@@ -54,7 +54,6 @@ namespace volucris
 		std::vector<std::shared_ptr<MaterialParameterTexture2D>> m_textureParameters;
 		std::weak_ptr<MaterialProxy> m_proxy;
 		std::vector<uint8> m_bufferData;
-
 	};
 }
 

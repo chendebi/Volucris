@@ -28,7 +28,7 @@ namespace volucris
 		default:
 			break;
 		}
-		check(false);
+		v_check(false);
 		return GL_NONE;
 	}
 
@@ -41,6 +41,11 @@ namespace volucris
 		: m_impl(new Impl)
 		, m_primitiveUniformBuffer(std::make_unique<OGLBufferObject>(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW))
 	{
+		m_renderState.ubos.resize(16);
+		for (auto& ubo : m_renderState.ubos)
+		{
+			ubo = nullptr;
+		}
 		auto window = Application::Instance()->getWindow();
 		m_impl->window = static_cast<GLFWwindow*>(window->getHandle());
 		makeCurrent();
@@ -92,24 +97,17 @@ namespace volucris
 
 	void Context::bindUniformBuffer(OGLBufferObject* ubo, uint32 index)
 	{
-		if (!ubo || (!ubo->valid() && (!ubo->create() || !ubo->initialize(this))))
+		if (!ubo || !ubo->valid())
 		{
 			return;
 		}
 
-		auto it = m_renderState.ubos.find(index);
-		if (it != m_renderState.ubos.end())
+		if (m_renderState.ubos[index] == ubo)
 		{
-			if (m_renderState.ubo == ubo)
-			{
-				return;
-			}
-			it->second = ubo;
+			return;
 		}
-		else
-		{
-			m_renderState.ubos[index] = ubo;
-		}
+
+		m_renderState.ubos[index] = ubo;
 		m_renderState.ubo = ubo;
 		glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo->getID());
 	}
@@ -205,6 +203,16 @@ namespace volucris
 		}
 	}
 
+	void Context::setPrimitiveInfo(PrimitiveInfo* ptimitiveInfo)
+	{
+		m_primitiveUniformBuffer->setData((uint8*)ptimitiveInfo, sizeof(PrimitiveInfo));
+		if (!(m_primitiveUniformBuffer->create()) || !(m_primitiveUniformBuffer->initialize(this)))
+		{
+			V_LOG_WARN(Engine, "primitive buffer update failed");
+		}
+		bindUniformBuffer(m_primitiveUniformBuffer.get(), 2);
+	}
+
 	bool Context::beginRenderPass(FrameBufferObject* target)
 	{
 		glEnable(GL_DEPTH_TEST);
@@ -276,10 +284,8 @@ namespace volucris
 		GL_CHECK();
 	}
 
-	void Context::draw(const MaterialProxy* material, PrimitiveInfo* ptimitiveInfo, const SectionDrawData& section)
+	void Context::draw(const MaterialProxy* material, const SectionDrawData& section)
 	{
-		m_primitiveUniformBuffer->setData((uint8*)ptimitiveInfo, sizeof(PrimitiveInfo));
-		bindUniformBuffer(m_primitiveUniformBuffer.get(), 2);
 		OGLDrawState state;
 		state.programState = material->getState();
 		state.ebo = section.renderInfo->ebo.get();

@@ -200,13 +200,13 @@ namespace volucris
 		size_t size = 0;
 		serializer.deserialize(bufferData, size);
 
-		check(size == m_resource->getBufferSize());
+		v_check(size == m_resource->getBufferSize());
 
 		m_bufferData = std::move(bufferData);
 
 		uint32 textureParameterSize = 0;
 		serializer.deserialize(textureParameterSize);
-		check(textureParameterSize == m_textureParameters.size())
+		v_check(textureParameterSize == m_textureParameters.size())
 		for (auto idx = 0; idx < textureParameterSize; ++idx)
 		{
 			TSoftObjectPtr<Texture2D> texture;
@@ -226,7 +226,7 @@ namespace volucris
 
 	void Material::onSourceRebuild(MaterialResource* resource)
 	{
-		check(resource == m_resource.get());
+		v_check(resource == m_resource.get());
 		m_parameters.clear();
 		const auto& descriptions = resource->getParameterDescriptions();
 		m_parameters.reserve(descriptions.size());

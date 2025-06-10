@@ -191,7 +191,7 @@ namespace volucris
 				for (auto k = 0; k < mesh->mNumFaces; ++k)
 				{
 					auto face = mesh->mFaces[k];
-					checkf(face.mNumIndices == 3, Editor, "mesh parse error, find not triangle face, face size: {}", face.mNumIndices);
+					v_checkf(face.mNumIndices == 3, Editor, "mesh parse error, find not triangle face, face size: {}", face.mNumIndices);
 					indices.push_back(indexOffset + face.mIndices[0]);
 					indices.push_back(indexOffset + face.mIndices[1]);
 					indices.push_back(indexOffset + face.mIndices[2]);
