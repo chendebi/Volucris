@@ -12,6 +12,7 @@
 #include <Resource/render_target.h>
 #include <Renderer/render_target_proxy.h>
 #include <Renderer/FRP/forward_render_pass.h>
+#include <Renderer/material_proxy.h>
 
 namespace volucris
 {
@@ -72,7 +73,7 @@ namespace volucris
 			{
 				for (const auto& pass : m_passes)
 				{
-					pass->addBatch(batch);
+					pass->addPrimitiveDrawBatch(batch);
 				}
 			}
 		}

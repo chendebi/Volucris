@@ -62,7 +62,8 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 			{
 				mesh->setMaterial(slot, material);
 			}
-			level->addActor<StaticMeshComponent>(mesh);
+			auto comp = level->addActor<StaticMeshComponent>(mesh);
+			comp->setScale({ 100,100,100 });
 		}
 	}
 

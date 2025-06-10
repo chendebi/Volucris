@@ -13,9 +13,18 @@ namespace volucris
 {
 	PrimitiveProxy::PrimitiveProxy()
 		: m_meshProxy(nullptr)
+		, m_primitiveInfo()
 		, m_batches()
 	{
 		
+	}
+
+	void PrimitiveProxy::update()
+	{
+		for (const auto& batch : m_batches)
+		{
+			batch.material->update();
+		}
 	}
 
 	void PrimitiveProxy::initialize(PrimitiveComponent* primitive)
@@ -46,11 +55,11 @@ namespace volucris
 		}
 
 		m_sections = sections;
-		m_batches.reserve(m_sections.size());
 		for (auto& [material, sections] : m_sections)
 		{
 			PrimitiveDrawBatch batch;
 			batch.material = material.get();
+			batch.primitiveInfo = &m_primitiveInfo;
 			for (auto& section : sections)
 			{
 				SectionDrawData drawData;

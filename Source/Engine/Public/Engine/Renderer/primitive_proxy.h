@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <glm/glm.hpp>
 
 namespace volucris
 {
@@ -15,6 +16,10 @@ namespace volucris
 
 	class MeshRenderInfo;
 
+	struct PrimitiveInfo
+	{
+		glm::mat4 localToWorldMatrix;
+	};
 
 	struct SectionDrawData
 	{
@@ -25,21 +30,8 @@ namespace volucris
 	struct PrimitiveDrawBatch
 	{
 		MaterialProxy* material = nullptr;
+		PrimitiveInfo* primitiveInfo = nullptr;
 		std::vector<SectionDrawData> sections = {};
-
-		bool join(const PrimitiveDrawBatch& other)
-		{
-			if (other.material == material)
-			{
-				sections.reserve(sections.size() + other.sections.size());
-				for (const auto& section : other.sections)
-				{
-					sections.push_back(section);
-				}
-				return true;
-			}
-			return false;
-		}
 	};
 
 	class PrimitiveProxy
@@ -49,11 +41,17 @@ namespace volucris
 
 		void initialize(PrimitiveComponent* Primitive);
 
-		std::vector<PrimitiveDrawBatch> getDrawBatch() const { return m_batches; }
+		void setPrimitiveInfo(const PrimitiveInfo& info) { m_primitiveInfo = info; }
+
+		const std::vector<PrimitiveDrawBatch>& getDrawBatch() const { return m_batches; }
+		
+		void update();
 
 	private:
+		
 		std::shared_ptr<MeshProxy> m_meshProxy;
 		std::vector<PrimitiveDrawBatch> m_batches;
+		PrimitiveInfo m_primitiveInfo;
 		std::unordered_map<std::shared_ptr<MaterialProxy>, std::vector<SectionRenderData>> m_sections;
 	};
 }

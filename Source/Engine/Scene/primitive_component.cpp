@@ -63,13 +63,22 @@ namespace volucris
 		{
 			proxy = std::make_shared<PrimitiveProxy>();
 			proxy->initialize(this);
+			PrimitiveInfo info;
+			info.localToWorldMatrix = getWorldTransform();
+			proxy->setPrimitiveInfo(info);
 			m_proxy = proxy;
+
+
+			auto renderer = gApp->getRenderer();
+			auto sceneProxy = getScene()->getSceneProxy();
+			
+			renderer->pushCommand([sceneProxy, proxy]() {
+				sceneProxy->addPrimitiveProxy(proxy);
+				});
+
 			return;
 		}
 
-		auto renderer = gApp->getRenderer();
-		auto sceneProxy = getScene()->getSceneProxy();
-		
 	}
 
 	void PrimitiveComponent::onTransformChanged()
@@ -80,7 +89,14 @@ namespace volucris
 
 	void PrimitiveComponent::updateTransform()
 	{
-		
+		if (auto proxy = m_proxy.lock())
+		{
+			PrimitiveInfo info;
+			info.localToWorldMatrix = getWorldTransform();
+			gApp->getRenderer()->pushCommand([proxy, info]() {
+				proxy->setPrimitiveInfo(info);
+				});
+		}
 	}
 
 }

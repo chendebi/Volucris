@@ -39,6 +39,7 @@ namespace volucris
 
 	Context::Context()
 		: m_impl(new Impl)
+		, m_primitiveUniformBuffer(std::make_unique<OGLBufferObject>(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW))
 	{
 		auto window = Application::Instance()->getWindow();
 		m_impl->window = static_cast<GLFWwindow*>(window->getHandle());
@@ -89,9 +90,9 @@ namespace volucris
 		glBindBuffer(target, buffer->getID());
 	}
 
-	void Context::bindUniformBuffer(OGLBufferObject* buffer, uint32 index)
+	void Context::bindUniformBuffer(OGLBufferObject* ubo, uint32 index)
 	{
-		if (!buffer || buffer->getTarget()!=GL_UNIFORM_BUFFER || buffer->getID() == 0)
+		if (!ubo || (!ubo->valid() && (!ubo->create() || !ubo->initialize(this))))
 		{
 			return;
 		}
@@ -99,27 +100,27 @@ namespace volucris
 		auto it = m_renderState.ubos.find(index);
 		if (it != m_renderState.ubos.end())
 		{
-			if (m_renderState.ubo == buffer)
+			if (m_renderState.ubo == ubo)
 			{
 				return;
 			}
-			it->second = buffer;
+			it->second = ubo;
 		}
 		else
 		{
-			m_renderState.ubos[index] = buffer;
+			m_renderState.ubos[index] = ubo;
 		}
-		m_renderState.ubo = buffer;
-		glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer->getID());
+		m_renderState.ubo = ubo;
+		glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo->getID());
 	}
 
 	void Context::bindUniformBlock(UniformBlock* block, uint32 index)
 	{
-		//GLint alignment;
-		//glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
-		//if (block->block.offset % alignment != 0) {
-		//	V_LOG_ERROR(Engine, "block offset is invalid: {}, {}", block->block.offset, alignment);
-		//}
+		if (!prepareUniformBlock(block))
+		{
+			V_LOG_WARN(Engine, "failed to prepare uniform block for binding");
+			return;
+		}
 		glBindBufferRange(GL_UNIFORM_BUFFER, index, block->ubo->getID(), block->block.offset, block->block.size);
 		GL_CHECK();
 	}
@@ -175,11 +176,19 @@ namespace volucris
 	void Context::setCameraInfoBlock(UniformBlock* block)
 	{
 		m_cameraInfoBlock = block;
+		if (block)
+		{
+			bindUniformBlock(block, 1);
+		}
 	}
 
 	void Context::setDirectionLightBlock(UniformBlock* block)
 	{
 		m_directonLightBlock = block;
+		if (block)
+		{
+			bindUniformBlock(block, 0);
+		}
 	}
 
 	void Context::setViewport(int x, int y, int w, int h)
@@ -267,8 +276,10 @@ namespace volucris
 		GL_CHECK();
 	}
 
-	void Context::draw(const MaterialProxy* material, const SectionDrawData& section)
+	void Context::draw(const MaterialProxy* material, PrimitiveInfo* ptimitiveInfo, const SectionDrawData& section)
 	{
+		m_primitiveUniformBuffer->setData((uint8*)ptimitiveInfo, sizeof(PrimitiveInfo));
+		bindUniformBuffer(m_primitiveUniformBuffer.get(), 2);
 		OGLDrawState state;
 		state.programState = material->getState();
 		state.ebo = section.renderInfo->ebo.get();

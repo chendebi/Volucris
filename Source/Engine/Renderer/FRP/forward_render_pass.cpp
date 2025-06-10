@@ -39,7 +39,7 @@ namespace volucris
 			auto material = batch.material;
 			for (const auto& section : batch.sections)
 			{
-				context->draw(material, section);
+				context->draw(material, batch.primitiveInfo, section);
 				GL_CHECK();
 			}
 		}
