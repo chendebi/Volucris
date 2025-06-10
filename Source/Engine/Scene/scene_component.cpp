@@ -68,3 +68,12 @@ namespace volucris
 		}
 	}
 }
+
+struct X {};
+
+RTTR_REGISTRATION
+{
+	rttr::registration::class_<X>("X")
+		 .constructor<>();
+//.REFLECTION_FROM_SCENE_COMPONENT()
+}

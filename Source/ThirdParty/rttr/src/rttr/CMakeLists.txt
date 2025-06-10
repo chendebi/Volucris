@@ -84,6 +84,7 @@ if (${BUILD_RTTR_DYNAMIC})
 endif()
 
 if (BUILD_STATIC)
+    message("build rttr static")
     add_library(rttr_core_lib STATIC ${UnityBuild} ${SRC_FILES} ${HPP_FILES})
     add_library(RTTR::Core_Lib ALIAS rttr_core_lib)
 

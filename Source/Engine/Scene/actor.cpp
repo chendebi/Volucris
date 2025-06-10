@@ -5,6 +5,7 @@
 namespace volucris
 {
 	Actor::Actor()
+		: SceneObject()
 	{
 		setRootComponent(std::make_shared<SceneComponent>());
 	}

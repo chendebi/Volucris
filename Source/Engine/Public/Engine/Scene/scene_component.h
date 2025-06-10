@@ -3,6 +3,7 @@
 
 #include "Engine/Scene/component.h"
 #include <glm/glm.hpp>
+#include <rttr/registration.h>
 
 namespace volucris
 {
@@ -13,15 +14,15 @@ namespace volucris
 
 		void setPosition(const glm::vec3& pos) { m_position = pos; transformChanged(); }
 
-		glm::vec3 getPosition() const { return m_position; }
+		const glm::vec3& getPosition() const { return m_position; }
 
 		void setRotation(const glm::vec3& rot) { m_rotation = rot; transformChanged(); }
 
-		glm::vec3 getRotation() const { return m_rotation; }
+		const glm::vec3& getRotation() const { return m_rotation; }
 
 		void setScale(const glm::vec3& scale) { m_scale = scale; transformChanged(); }
 
-		glm::vec3 getScale() const { return m_scale; }
+		const glm::vec3& getScale() const { return m_scale; }
 
 		const glm::mat4& getWorldTransform() const { return m_worldTransform; }
 
@@ -47,6 +48,24 @@ namespace volucris
 		glm::mat4 m_worldTransform;
 		SceneComponent* m_parentSceneComponent;
 	};
+
+#define REFLECTION_FROM_SCENE_COMPONENT() \
+	property("Position", &SceneComponent::getPosition, &SceneComponent::setPosition)\
+	(\
+		rttr::metadata("Group", "Transform"),\
+		rttr::metadata("Description", "position.")\
+		)\
+		.property("Rotation", &SceneComponent::getRotation, &SceneComponent::setRotation)\
+		(\
+			rttr::metadata("Group", "Transform"),\
+			rttr::metadata("Description", "position.")\
+			)\
+		.property("Scale", &SceneComponent::getScale, &SceneComponent::setScale)\
+		(\
+			rttr::metadata("Group", "Transform"),\
+			rttr::metadata("Description", "position.")\
+			);
+
 }
 
 #endif // !__volucris_scene_component_h__
