@@ -93,12 +93,15 @@ namespace volucris
 
 	void EditorPlayerActor::tick(double delta)
 	{
-		auto camera = getCameraComponent();
-		float speedz = delta * m_speed.x;
-		float speedx = delta * m_speed.y;
-		auto pos = camera->getPosition() 
-			+ camera->getForwardDirection() * glm::vec3(speedz, speedz, speedz)
-			+ camera->getRightDirection() * glm::vec3(speedx, speedx, speedx);
-		camera->setPosition(pos);
+		if (std::abs(m_speed.x) >= 0.00001 || std::abs(m_speed.y) > 0.0001)
+		{
+			auto camera = getCameraComponent();
+			float speedz = delta * m_speed.x;
+			float speedx = delta * m_speed.y;
+			auto pos = camera->getPosition()
+				+ camera->getForwardDirection() * glm::vec3(speedz, speedz, speedz)
+				+ camera->getRightDirection() * glm::vec3(speedx, speedx, speedx);
+			camera->setPosition(pos);
+		}
 	}
 }
