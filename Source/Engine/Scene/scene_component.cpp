@@ -32,14 +32,13 @@ namespace volucris
 		const glm::vec3 xasix = { 1.0, 0.0, 0.0 };
 		const glm::vec3 yasix = { 0.0, 1.0, 0.0 };
 		const glm::vec3 zasix = { 0.0, 0.0, 1.0 };
-		m_relativeTransform = glm::scale(glm::mat4(1.0), m_scale);
 
+		m_relativeTransform = glm::translate(glm::mat4(1.0), m_position);
 		m_rotationTransform = glm::rotate(glm::mat4(1.0), glm::radians(m_rotation.y), yasix);
 		m_rotationTransform = glm::rotate(m_rotationTransform, glm::radians(m_rotation.x), xasix);
 		m_rotationTransform = glm::rotate(m_rotationTransform, glm::radians(m_rotation.z), zasix);
-
 		m_relativeTransform = m_relativeTransform * m_rotationTransform;
-		m_relativeTransform = glm::translate(m_relativeTransform, m_position);
+		m_relativeTransform = glm::scale(m_relativeTransform, m_scale);
 
 		if (m_parentSceneComponent)
 		{

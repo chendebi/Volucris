@@ -45,9 +45,6 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 	if (true)
 	{
-		/*auto mesh = ResourceRegistry::Instance().loadResource<StaticMesh>("/Engine/Cube");
-		auto actor = level->addActor<StaticMeshComponent>(mesh);*/
-
 		MaterialLoader loader;
 		std::string vsf, fsf;
 		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.vert", vsf);

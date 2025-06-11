@@ -29,7 +29,8 @@ namespace volucris
         {
             if (ImGui::CollapsingHeader(group.name.c_str()))
             {
-                ImGui::Columns(2); // 2列
+                ImGui::PushID(group.name.c_str());
+                ImGui::Columns(2, "##columns"); // 2列
                 ImGui::SetColumnWidth(0, 100);
                 for (auto& property : group.stringProperties)
                 {
@@ -39,7 +40,7 @@ namespace volucris
                     ImGui::PushItemWidth(available_width);
                     ImGui::Text(property.value.c_str());
                     if (ImGui::IsItemDeactivatedAfterEdit()) {
-                        property.property.set_value(m_object, property.value);
+                        property.property.set_value(m_object, property.value); 
                     }
                     ImGui::PopItemWidth();
                     ImGui::NextColumn();
@@ -59,6 +60,7 @@ namespace volucris
                     ImGui::NextColumn();
                 }
                 ImGui::Columns(1); // 2列
+                ImGui::PopID();
             }
         }
 
