@@ -26,7 +26,8 @@ namespace volucris
 
 		void setDisplayName(const std::string& name) { m_displayName = name; }
 
-		std::string getDisplayName() const { return m_displayName; }
+		const std::string& getDisplayName() const { return m_displayName; }
+
 	protected:
 		virtual void attached() {}
 

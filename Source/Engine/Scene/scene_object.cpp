@@ -51,4 +51,15 @@ namespace volucris
 
 		V_LOG_DEBUG(Engine, "object {} remove from scene", m_displayName);
 	}
+
+	RTTR_REGISTRATION
+	{
+		rttr::registration::class_<SceneObject>("SceneObject")
+			 .constructor<>()
+			 .property("Name", &SceneObject::getDisplayName, &SceneObject::setDisplayName)
+			(
+				rttr::metadata("Group", "Common"),
+				rttr::metadata("Description", "object name")
+			);
+	}
 }

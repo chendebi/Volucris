@@ -31,6 +31,19 @@ namespace volucris
             {
                 ImGui::Columns(2); // 2列
                 ImGui::SetColumnWidth(0, 100);
+                for (auto& property : group.stringProperties)
+                {
+                    ImGui::Text(fmt::format("{}: ", property.name).c_str());
+                    ImGui::NextColumn();
+                    float available_width = ImGui::GetContentRegionAvail().x;
+                    ImGui::PushItemWidth(available_width);
+                    ImGui::Text(property.value.c_str());
+                    if (ImGui::IsItemDeactivatedAfterEdit()) {
+                        property.property.set_value(m_object, property.value);
+                    }
+                    ImGui::PopItemWidth();
+                    ImGui::NextColumn();
+                }
                 for (auto& property : group.vec3Properties)
                 {
                     ImGui::Text(fmt::format("{}: ", property.name).c_str());
@@ -85,6 +98,20 @@ namespace volucris
                 property.name = std::string(prop.get_name());
                 property.value = value.get_value<glm::vec3>();
                 propertyGroup->vec3Properties.emplace_back(std::move(property));
+            }
+            else if (value.is_type<float>())
+            {
+                FloatProperty property = FloatProperty(prop);
+                property.name = std::string(prop.get_name());
+                property.value = value.get_value<float>();
+                propertyGroup->floatProperties.emplace_back(std::move(property));
+            }
+            else if (value.is_type<std::string>())
+            {
+                StringProperty property = StringProperty(prop);
+                property.name = std::string(prop.get_name());
+                property.value = value.get_value<std::string>();
+                propertyGroup->stringProperties.emplace_back(std::move(property));
             }
         }
 	}

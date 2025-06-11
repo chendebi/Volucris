@@ -26,11 +26,32 @@ namespace volucris
 	{
 		std::string name;
 		float value;
+
+		const rttr::property property;
+
+		FloatProperty(const rttr::property& prop)
+			: name(), value(), property(prop)
+		{
+		}
+	};
+
+	struct StringProperty
+	{
+		std::string name;
+		std::string value;
+
+		const rttr::property property;
+
+		StringProperty(const rttr::property& prop)
+			: name(), value(), property(prop)
+		{
+		}
 	};
 
 	struct PropertyGroup
 	{
 		std::string name;
+		std::vector<StringProperty> stringProperties;
 		std::vector<Vector3Property> vec3Properties;
 		std::vector<FloatProperty> floatProperties;
 	};
