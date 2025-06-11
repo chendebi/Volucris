@@ -15,6 +15,8 @@ namespace volucris
 	public:
 		Texture2DProxy();
 
+		~Texture2DProxy();
+
 		void initialize(Texture2D* texture);
 
 		void setTextureData(TextureData data);

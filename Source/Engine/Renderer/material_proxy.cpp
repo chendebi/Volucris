@@ -63,6 +63,7 @@ namespace volucris
 				value = std::make_unique<UniformValueVec4>(description);
 				break;
 			case volucris::MaterialParameterType::TEXTURE2D:
+				value = std::make_unique<UniformValueInt>(description);
 				break;
 			default:
 				break;

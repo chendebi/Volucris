@@ -62,6 +62,7 @@ namespace volucris
 			break;
 		}
 		m_bufferSize += description.size;
+		m_descriptions.push_back(description);
 	}
 
 	void MaterialResource::dirty()
@@ -117,9 +118,8 @@ namespace volucris
 	void  MaterialResource::deserialize(Serializer& serializer)
 	{
 		std::string vss, fss;
-		MaterialUniformBlocks engineDatas;
 		std::vector<MaterialParameterDescription> descriptions;
-		if (!serializer.deserialize(vss) || !serializer.deserialize(fss) || !serializer.deserialize(engineDatas) ||
+		if (!serializer.deserialize(vss) || !serializer.deserialize(fss) ||
 			!serializer.deserialize(descriptions))
 		{
 			V_LOG_WARN(Engine, "deserialize material resource failed.");

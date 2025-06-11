@@ -36,6 +36,7 @@ namespace volucris
 			gApp->getWindow()->setCursorEnabled(true);
 			sender->setEventScope(ViewClient::EventScope::ClientOnly);
 			m_mousePressed = false;
+			m_speed = { 0,0 };
 		}
 	}
 
@@ -61,6 +62,10 @@ namespace volucris
 
 	void EditorPlayerActor::keyPressedEvent(KeyEvent* e, ViewClient* sender)
 	{
+		if (!m_mousePressed)
+		{
+			return;
+		}
 		if (e->key == Key::KEY_W)
 		{
 			m_speed.x = 2.0f;
@@ -93,7 +98,7 @@ namespace volucris
 
 	void EditorPlayerActor::tick(double delta)
 	{
-		if (std::abs(m_speed.x) >= 0.00001 || std::abs(m_speed.y) > 0.0001)
+		if (m_mousePressed && std::abs(m_speed.x) >= 0.00001 || std::abs(m_speed.y) > 0.0001)
 		{
 			auto camera = getCameraComponent();
 			float speedz = delta * m_speed.x;

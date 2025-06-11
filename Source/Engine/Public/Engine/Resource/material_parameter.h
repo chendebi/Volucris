@@ -91,15 +91,15 @@ namespace volucris
 			v_check(description.type == MaterialParameterType::TEXTURE2D)
 		}
 
-		TSoftObjectPtr<Texture2D> getTexture() const { return m_texture; }
+		const std::shared_ptr<Texture2D>& getTexture() const { return m_texture; }
 
-		void setTexture(const TSoftObjectPtr<Texture2D>& texture)
+		void setTexture(const std::shared_ptr<Texture2D>& texture)
 		{
 			m_texture = texture;
 		}
 
 	public:
-		TSoftObjectPtr<Texture2D> m_texture;
+		std::shared_ptr<Texture2D> m_texture;
 	};
 
 }

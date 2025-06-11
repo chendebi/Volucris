@@ -18,6 +18,7 @@
 #include <Engine/Scene/static_mesh_component.h>
 #include <ContentBrowser/mesh_loader.h>
 #include <PropertyWidget/property_widget.h>
+#include <ContentBrowser/texture_loader.h>
 
 using namespace volucris;
 
@@ -51,6 +52,10 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.frag", fsf);
 		auto resource = loader.load(vsf, fsf);
 		auto material = std::make_shared<Material>(resource);
+
+		TextureLoader texLoader;
+		auto texture = texLoader.load("D:\\Projects\\Volucris\\Assets\\learn_opengl\\container.jpg");
+		dynamic_cast<MaterialParameterTexture2D*>(material->getParameterByName("colorTex"))->setTexture(texture);
 
 		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.frag", fsf);
 		MeshLoader meshLoader = MeshLoader("");

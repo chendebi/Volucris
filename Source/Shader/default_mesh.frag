@@ -10,7 +10,11 @@ layout (std140) uniform UDirectionLight
 
 uniform vec3 fcolor;
 
+uniform sampler2D colorTex;
+
+in vec3 uv;
+
 void main()
 {
-    color = vec4(1.0,0.0,0.0,1.0);
+    color = texture(colorTex, uv.xy);
 }

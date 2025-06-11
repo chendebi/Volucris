@@ -32,7 +32,7 @@ namespace volucris
 
 	void MeshResourceData::setUV(int idx, std::vector<glm::vec3> uv)
 	{
-		if (idx == 1 || idx == 2)
+		if (idx == 0 || idx == 1)
 		{
 			m_uvs[idx] = std::move(uv);
 		}
