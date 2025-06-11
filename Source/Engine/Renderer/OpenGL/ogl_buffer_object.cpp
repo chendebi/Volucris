@@ -124,9 +124,9 @@ namespace volucris
 			V_LOG_WARN(Engine, "initialize gl buffer failed. because buffer size is 0");
 			return false;
 		}
-
+		GL_CHECK();
 		ctx->bindBuffer(this);
-
+		GL_CHECK();
 		if (m_shouldReallocate)
 		{
 			glBufferData(m_target, m_bufferSize, m_data.data(), m_usage);

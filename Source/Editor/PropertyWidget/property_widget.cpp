@@ -25,20 +25,27 @@ namespace volucris
         {
             ImGui::SeparatorText(m_object->getDisplayName().c_str());
         }
-
         for (auto& group : m_groups)
         {
             if (ImGui::CollapsingHeader(group.name.c_str()))
             {
+                ImGui::Columns(2); // 2列
+                ImGui::SetColumnWidth(0, 100);
                 for (auto& property : group.vec3Properties)
                 {
                     ImGui::Text(fmt::format("{}: ", property.name).c_str());
-                    ImGui::SameLine();
+                    //ImGui::SameLine();
+                    ImGui::NextColumn();
+                    float available_width = ImGui::GetContentRegionAvail().x;
+                    ImGui::PushItemWidth(available_width);
                     ImGui::DragFloat3(fmt::format("##{}", property.name).c_str(), glm::value_ptr(property.value), 0.1f);
                     if (ImGui::IsItemDeactivatedAfterEdit()) {
                         property.property.set_value(m_object, property.value);
                     }
+                    ImGui::PopItemWidth();
+                    ImGui::NextColumn();
                 }
+                ImGui::Columns(1); // 2列
             }
         }
 

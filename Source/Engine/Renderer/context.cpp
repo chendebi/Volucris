@@ -108,7 +108,7 @@ namespace volucris
 		}
 
 		m_renderState.ubos[index] = ubo;
-		m_renderState.ubo = ubo;
+		//m_renderState.ubo = ubo;
 		glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo->getID());
 	}
 
@@ -120,6 +120,7 @@ namespace volucris
 			return;
 		}
 		glBindBufferRange(GL_UNIFORM_BUFFER, index, block->ubo->getID(), block->block.offset, block->block.size);
+		//m_renderState.ubo = block->ubo;
 		GL_CHECK();
 	}
 
@@ -176,7 +177,11 @@ namespace volucris
 		m_cameraInfoBlock = block;
 		if (block)
 		{
-			bindUniformBlock(block, 1);
+			if (!(block->ubo->create()) || !(block->ubo->initialize(this)))
+			{
+				V_LOG_WARN(Engine, "direct light buffer update failed");
+			}
+			bindUniformBuffer(block->ubo, 1);
 		}
 	}
 
@@ -185,7 +190,11 @@ namespace volucris
 		m_directonLightBlock = block;
 		if (block)
 		{
-			bindUniformBlock(block, 0);
+			if (!(block->ubo->create()) || !(block->ubo->initialize(this)))
+			{
+				V_LOG_WARN(Engine, "direct light buffer update failed");
+			}
+			bindUniformBuffer(block->ubo, 0);
 		}
 	}
 
