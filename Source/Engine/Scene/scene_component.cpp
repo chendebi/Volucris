@@ -67,4 +67,11 @@ namespace volucris
 			comp = comp->getParentComponent();
 		}
 	}
+
+	RTTR_REGISTRATION
+	{
+		rttr::registration::class_<SceneComponent>("SceneComponent")
+			 .constructor<>()
+			.REFLECTION_FROM_SCENE_COMPONENT()
+	}
 }

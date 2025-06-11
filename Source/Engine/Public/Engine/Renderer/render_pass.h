@@ -22,21 +22,6 @@ namespace volucris
 
 		virtual void initialize(ViewProxy* viewport) {}
 
-		void addBatch(const PrimitiveDrawBatch& batch)
-		{
-			if (shouldCollectBatch(batch))
-			{
-				for (auto& renderBatch : m_renderBatches)
-				{
-					if (renderBatch.join(batch))
-					{
-						return;
-					}
-				}
-				m_renderBatches.push_back(batch);
-			}
-		}
-
 		void clear()
 		{
 			m_renderBatches.clear();
@@ -45,6 +30,14 @@ namespace volucris
 		void setRenderTarget(const std::shared_ptr<RenderTargetProxy>& renderTarget)
 		{
 			m_renderTarget = renderTarget;
+		}
+
+		void addPrimitiveDrawBatch(const PrimitiveDrawBatch& batch)
+		{
+			if (shouldCollectBatch(batch))
+			{
+				m_renderBatches.push_back(batch);
+			}
 		}
 
 		virtual void render(Context* context) {}

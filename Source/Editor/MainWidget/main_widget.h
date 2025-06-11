@@ -7,6 +7,7 @@
 namespace volucris
 {
 	class LogWidget;
+	class PropertyWidget;
 	class ContentBrowserWidget;
 
 	class MainWidget : public Widget
@@ -21,10 +22,16 @@ namespace volucris
 			m_logWidget = widget;
 		}
 
+		void setPropertyWidget(const std::shared_ptr<PropertyWidget>& widget)
+		{
+			m_propertyWidget = widget;
+		}
+
 	private:
 		float m_value;
 		std::shared_ptr<ContentBrowserWidget> m_browserWidget;
 		std::shared_ptr<LogWidget> m_logWidget;
+		std::shared_ptr<PropertyWidget> m_propertyWidget;
 		ViewportWidget m_viewport;
 	};
 }

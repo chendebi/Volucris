@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	ResourceRegistry::Instance().addResourceSearchPath(Directory::ApplicationDirectory().toString(), "/Project");
 
 	auto app = volucrisMain(argc, argv);
-	checkq(Application::Instance(), Engine, "application not created");
+	v_checkq(Application::Instance(), Engine, "application not created");
 	V_LOG_INFO(Engine, "launch application: {}", app->getAppConfig().appName);
 	if (!app->initialize())
 	{

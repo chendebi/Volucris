@@ -10,7 +10,6 @@
 namespace volucris
 {
 	class Uniform;
-	class BlockUniform;
 	class UniformDescription;
 
 	class OGLShaderObject
@@ -76,25 +75,13 @@ namespace volucris
 			m_autoReleaseShader = enabled;
 		}
 
-		void setParameterUniforms(const std::vector<std::shared_ptr<Uniform>>& uniforms)
-		{
-			m_parameterUniforms = uniforms;
-			dirty();
-		}
-
-		const std::vector<std::shared_ptr<Uniform>>& getParameterUniforms() const { return m_parameterUniforms; }
-
-		const std::vector<std::shared_ptr<BlockUniform>>& getBlockUniforms() const { return m_blockUniforms; }
-
-		void setBlockUniforms(const std::vector<std::shared_ptr<BlockUniform>>& uniforms)
-		{
-			m_blockUniforms = uniforms;
-			dirty();
-		}
-
 		bool create();
 
 		bool initialize();
+
+		int32 findUniformLocation(const std::string& name);
+
+		int32 findUniformBlockLocation(const std::string& name);
 
 		void release();
 
@@ -114,8 +101,6 @@ namespace volucris
 		uint8 m_autoReleaseShader;
 		uint32 m_id;
 		std::vector<std::shared_ptr<OGLShaderObject>> m_shaders;
-		std::vector<std::shared_ptr<Uniform>> m_parameterUniforms;
-		std::vector<std::shared_ptr<BlockUniform>> m_blockUniforms;
 	};
 }
 

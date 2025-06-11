@@ -55,7 +55,9 @@ namespace volucris
 			m_data.resize(newSize);
 		}
 		memcpy(m_data.data() + currSize, data, size);
-		return { currSize, size };
+		OGLBufferObject::BlockID id = BlockID({ currSize, size });
+		dirtyBlock(id);
+		return id;
 	}
 
 	void OGLBufferObject::setBlockData(const BlockID& id, uint8* data)
@@ -122,9 +124,9 @@ namespace volucris
 			V_LOG_WARN(Engine, "initialize gl buffer failed. because buffer size is 0");
 			return false;
 		}
-
+		GL_CHECK();
 		ctx->bindBuffer(this);
-
+		GL_CHECK();
 		if (m_shouldReallocate)
 		{
 			glBufferData(m_target, m_bufferSize, m_data.data(), m_usage);
@@ -168,7 +170,7 @@ namespace volucris
 		glGenBuffers(ids.size(), ids.data());
 		for (auto idx = 0; idx < ids.size(); ++idx)
 		{
-			check(ids[idx] > 0);
+			v_check(ids[idx] > 0);
 			buffers[idx]->m_id = ids[idx];
 		}
 		return true;

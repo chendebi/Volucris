@@ -10,13 +10,13 @@
 #endif // _DEBUG
 
 #ifdef _DEBUG
-#define check(exp) if (!(exp)){ DEBUG_BREAK();}
-#define checkf(exp, category, msg, ...)  if (!(exp)){ V_LOG_ERROR(category, msg, ##__VA_ARGS__); DEBUG_BREAK();}
-#define checkq(exp, category, msg, ...) checkf(exp, category, msg, ##__VA_ARGS__);
+#define v_check(exp) if (!(exp)){ DEBUG_BREAK();}
+#define v_checkf(exp, category, msg, ...)  if (!(exp)){ V_LOG_ERROR(category, msg, ##__VA_ARGS__); DEBUG_BREAK();}
+#define v_checkq(exp, category, msg, ...) v_checkf(exp, category, msg, ##__VA_ARGS__);
 #else
-#define checkf(exp, category, msg, ...) if (!(exp)) { V_LOG_ERROR(category, msg, ##__VA_ARGS__);}
-#define check(exp)
-#define checkq(exp, category, msg, ...) if (!(exp)) { V_LOG_ERROR(category, msg, ##__VA_ARGS__); std::exit(-1); }
+#define v_checkf(exp, category, msg, ...) if (!(exp)) { V_LOG_ERROR(category, msg, ##__VA_ARGS__);}
+#define v_check(exp)
+#define v_checkq(exp, category, msg, ...) if (!(exp)) { V_LOG_ERROR(category, msg, ##__VA_ARGS__); std::exit(-1); }
 #endif
 
 

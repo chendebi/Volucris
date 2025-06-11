@@ -28,6 +28,12 @@ namespace volucris
 
 	void SceneProxy::render(Context* context)
 	{
+
+		for (const auto& primitive : m_primitives)
+		{
+			primitive->update();
+		}
+
 		for (const auto& view : m_views)
 		{
 			view->update(m_primitives);

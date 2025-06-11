@@ -25,6 +25,7 @@ volucris_engine_code(MainWidget MAIN_WIDGET_CODE_FILES)
 volucris_engine_code(ContentBrowser CONTENT_BROWSER_CODE_FILES)
 volucris_engine_code(Viewport VIEWPORT_CODE_FILES)
 volucris_engine_code(LogWidget LOG_WIDGET_CODE_FILES)
+volucris_engine_code(PropertyWidget PROPERTY_WIDGET_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${EDITOR_ENTRY_CODE_FILES}
@@ -32,6 +33,7 @@ target_sources(${TARGET} PRIVATE
     ${CONTENT_BROWSER_CODE_FILES}
     ${VIEWPORT_CODE_FILES}
     ${LOG_WIDGET_CODE_FILES}
+    ${PROPERTY_WIDGET_CODE_FILES}
 )
 
 target_include_directories(${TARGET} PRIVATE 

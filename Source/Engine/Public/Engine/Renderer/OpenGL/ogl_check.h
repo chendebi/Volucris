@@ -10,7 +10,7 @@
 		auto err = glGetError(); \
 		while (err != GL_NO_ERROR) \
 		{ \
-			checkf(false, Engine, "gl error at {} : {}, code: {:X}", __FILE__, __LINE__, err); \
+			v_checkf(false, Engine, "gl error at {} : {}, code: {:X}", __FILE__, __LINE__, err); \
 			err = glGetError(); \
 		} \
 	}

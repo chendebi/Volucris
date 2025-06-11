@@ -21,7 +21,7 @@ namespace volucris
 			proxy = std::make_shared<MeshProxy>();
 			proxy->updateByResource(m_data.get());
 			m_proxy = proxy;
-			V_LOG_DEBUG(Engine, "create mesh resource proxy: {}");
+			V_LOG_DEBUG(Engine, "create mesh resource proxy");
 		}
 		return proxy;
 	}

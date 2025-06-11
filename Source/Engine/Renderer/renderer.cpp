@@ -85,7 +85,7 @@ namespace volucris
 
 	void Renderer::removeScene(Scene* scene)
 	{
-		check(scene);
+		v_check(scene);
 		auto proxy = scene->getSceneProxy();
 		pushCommand([this, proxy]() {
 			VectorHelp::quickRemoveFirstIf<std::shared_ptr<SceneProxy>>(m_scenes, [proxy](const std::shared_ptr<SceneProxy>& scene)->bool {

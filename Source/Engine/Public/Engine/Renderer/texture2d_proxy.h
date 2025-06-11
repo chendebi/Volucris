@@ -19,6 +19,8 @@ namespace volucris
 
 		void setTextureData(TextureData data);
 
+		Texture2DObject* getTexture2DObject() const { return m_object.get(); }
+
 	private:
 		std::unique_ptr<Texture2DObject> m_object;
 	};

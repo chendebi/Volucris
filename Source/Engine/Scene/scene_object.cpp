@@ -7,7 +7,7 @@ namespace volucris
 {
 	SceneObject::~SceneObject()
 	{
-		checkf(!m_scene, Engine, "delete scene object with attached")
+		v_checkf(!m_scene, Engine, "delete scene object with attached")
 	}
 
 	void SceneObject::attach(Scene* scene)
@@ -50,5 +50,16 @@ namespace volucris
 		disattached(scene);
 
 		V_LOG_DEBUG(Engine, "object {} remove from scene", m_displayName);
+	}
+
+	RTTR_REGISTRATION
+	{
+		rttr::registration::class_<SceneObject>("SceneObject")
+			 .constructor<>()
+			 .property("Name", &SceneObject::getDisplayName, &SceneObject::setDisplayName)
+			(
+				rttr::metadata("Group", "Common"),
+				rttr::metadata("Description", "object name")
+			);
 	}
 }

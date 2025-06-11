@@ -9,6 +9,7 @@
 #include <Engine/Core/types_help.h>
 #include "Engine/Resource/meta_data.h"
 
+
 namespace volucris
 {
 	class ResourceObject

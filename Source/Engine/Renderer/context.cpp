@@ -28,7 +28,7 @@ namespace volucris
 		default:
 			break;
 		}
-		check(false);
+		v_check(false);
 		return GL_NONE;
 	}
 
@@ -39,7 +39,13 @@ namespace volucris
 
 	Context::Context()
 		: m_impl(new Impl)
+		, m_primitiveUniformBuffer(std::make_unique<OGLBufferObject>(GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW))
 	{
+		m_renderState.ubos.resize(16);
+		for (auto& ubo : m_renderState.ubos)
+		{
+			ubo = nullptr;
+		}
 		auto window = Application::Instance()->getWindow();
 		m_impl->window = static_cast<GLFWwindow*>(window->getHandle());
 		makeCurrent();
@@ -89,38 +95,32 @@ namespace volucris
 		glBindBuffer(target, buffer->getID());
 	}
 
-	void Context::bindUniformBuffer(OGLBufferObject* buffer, uint32 index)
+	void Context::bindUniformBuffer(OGLBufferObject* ubo, uint32 index)
 	{
-		if (!buffer || buffer->getTarget()!=GL_UNIFORM_BUFFER || buffer->getID() == 0)
+		if (!ubo || !ubo->valid())
 		{
 			return;
 		}
 
-		auto it = m_renderState.ubos.find(index);
-		if (it != m_renderState.ubos.end())
+		if (m_renderState.ubos[index] == ubo)
 		{
-			if (m_renderState.ubo == buffer)
-			{
-				return;
-			}
-			it->second = buffer;
+			return;
 		}
-		else
-		{
-			m_renderState.ubos[index] = buffer;
-		}
-		m_renderState.ubo = buffer;
-		glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer->getID());
+
+		m_renderState.ubos[index] = ubo;
+		//m_renderState.ubo = ubo;
+		glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo->getID());
 	}
 
 	void Context::bindUniformBlock(UniformBlock* block, uint32 index)
 	{
-		//GLint alignment;
-		//glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
-		//if (block->block.offset % alignment != 0) {
-		//	V_LOG_ERROR(Engine, "block offset is invalid: {}, {}", block->block.offset, alignment);
-		//}
+		if (!prepareUniformBlock(block))
+		{
+			V_LOG_WARN(Engine, "failed to prepare uniform block for binding");
+			return;
+		}
 		glBindBufferRange(GL_UNIFORM_BUFFER, index, block->ubo->getID(), block->block.offset, block->block.size);
+		//m_renderState.ubo = block->ubo;
 		GL_CHECK();
 	}
 
@@ -175,11 +175,27 @@ namespace volucris
 	void Context::setCameraInfoBlock(UniformBlock* block)
 	{
 		m_cameraInfoBlock = block;
+		if (block)
+		{
+			if (!(block->ubo->create()) || !(block->ubo->initialize(this)))
+			{
+				V_LOG_WARN(Engine, "direct light buffer update failed");
+			}
+			bindUniformBuffer(block->ubo, 1);
+		}
 	}
 
 	void Context::setDirectionLightBlock(UniformBlock* block)
 	{
 		m_directonLightBlock = block;
+		if (block)
+		{
+			if (!(block->ubo->create()) || !(block->ubo->initialize(this)))
+			{
+				V_LOG_WARN(Engine, "direct light buffer update failed");
+			}
+			bindUniformBuffer(block->ubo, 0);
+		}
 	}
 
 	void Context::setViewport(int x, int y, int w, int h)
@@ -194,6 +210,16 @@ namespace volucris
 			glViewport(rect.x, rect.y, rect.w, rect.h);
 			m_viewport = rect;
 		}
+	}
+
+	void Context::setPrimitiveInfo(PrimitiveInfo* ptimitiveInfo)
+	{
+		m_primitiveUniformBuffer->setData((uint8*)ptimitiveInfo, sizeof(PrimitiveInfo));
+		if (!(m_primitiveUniformBuffer->create()) || !(m_primitiveUniformBuffer->initialize(this)))
+		{
+			V_LOG_WARN(Engine, "primitive buffer update failed");
+		}
+		bindUniformBuffer(m_primitiveUniformBuffer.get(), 2);
 	}
 
 	bool Context::beginRenderPass(FrameBufferObject* target)
@@ -248,18 +274,15 @@ namespace volucris
 			return;
 		}
 
-		if (state.programState.program != m_renderState.drawState.programState.program)
+		if (state.programState.material != m_renderState.drawState.programState.material)
 		{
-			m_renderState.drawState.programState.program = state.programState.program;
-			glUseProgram(state.programState.program->getID());
+			m_renderState.drawState.programState.material = state.programState.material;
+			glUseProgram(m_renderState.drawState.programState.material->getProgramObject()->getID());
 		}
 
-		if (auto renderData = state.programState.renderData)
+		for (const auto& uniform : state.programState.uniforms)
 		{
-			for (const auto& uniform : renderData->values)
-			{
-				uniform->upload();
-			}
+			uniform->upload();
 		}
 
 		
@@ -281,7 +304,7 @@ namespace volucris
 
 	bool Context::prepareDrawState(const OGLDrawState& state)
 	{
-		if (!state.ebo || !state.programState.program || !state.vao)
+		if (!state.ebo || !state.programState.material || !state.vao)
 		{
 			return false;
 		}
@@ -300,37 +323,11 @@ namespace volucris
 			return false;
 		}
 
-		if (!state.programState.program->valid() && !state.programState.program->initialize())
+		if (!state.programState.material->ready())
 		{
 			return false;
 		}
 
-		uint32 slot = 0;
-		for (const auto& uniformBlock : state.programState.program->getBlockUniforms())
-		{
-			glUniformBlockBinding(state.programState.program->getID(), uniformBlock->getLocation(), slot);
-			switch (uniformBlock->getBlockSlot())
-			{
-			case MaterialUniformBlock::CAMERA_INFO:
-				if (!prepareUniformBlock(m_cameraInfoBlock))
-				{
-					return false;
-				}
-				bindUniformBlock(m_cameraInfoBlock, slot);
-				break;
-			case MaterialUniformBlock::DIRECTION_LIGHT:
-				if (!prepareUniformBlock(m_directonLightBlock))
-				{
-					return false;
-				}
-				bindUniformBlock(m_directonLightBlock, slot);
-				break;
-			default:
-				break;
-			}
-			++slot;
-			GL_CHECK();
-		}
 		GL_CHECK();
 		return true;
 	}

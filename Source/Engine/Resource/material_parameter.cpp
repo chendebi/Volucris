@@ -10,28 +10,11 @@
 namespace volucris
 {
 
-	MaterialParameter::MaterialParameter(std::string name, MaterialParameterType type)
+	MaterialParameter::MaterialParameter(const MaterialParameterDescription& description)
 		: m_dirty(true)
-		, m_type(type)
-		, m_name(std::move(name))
+		, m_description(description)
 	{
 		
-	}
-
-	std::shared_ptr<UniformValue> MaterialParameterFloat::createUniformValue()
-	{
-		return std::make_shared<UniformValueFloat>(m_value);
-	}
-
-	std::shared_ptr<UniformValue> MaterialParameterVec3::createUniformValue()
-	{
-		return std::make_shared<UniformValueVec3>(m_value);
-	}
-
-	std::shared_ptr<UniformValue> MaterialParameterTexture2D::createUniformValue()
-	{
-		//return std::make_shared<UniformValueVec3>(m_value);
-		return nullptr;
 	}
 
 }

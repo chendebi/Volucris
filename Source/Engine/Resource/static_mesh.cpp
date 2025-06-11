@@ -33,7 +33,7 @@ namespace volucris
 
 	void StaticMesh::setMeshResource(const std::shared_ptr<MeshResource>& resource)
 	{
-		checkf(m_resource == nullptr, Engine, "static mesh try set mesh resource while it has been set");
+		v_checkf(m_resource == nullptr, Engine, "static mesh try set mesh resource while it has been set");
 		m_materials.clear();
 		m_resource = resource;
 		for (const auto& section : m_resource->getResourceData()->getSections())
@@ -53,6 +53,16 @@ namespace volucris
 		}
 		it->second = mat;
 		return true;
+	}
+
+	std::vector<std::string> StaticMesh::getMaterialSlots() const
+	{
+		std::vector<std::string> slots;
+		for (const auto& [slot, mat] : m_materials)
+		{
+			slots.push_back(slot);
+		}
+		return slots;
 	}
 
 	std::shared_ptr<MeshResource> StaticMesh::getResource() const

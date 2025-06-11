@@ -36,6 +36,7 @@ namespace volucris
 		GL_CHECK();
 		for (const auto& batch : m_renderBatches)
 		{
+			context->setPrimitiveInfo(batch.primitiveInfo);
 			auto material = batch.material;
 			for (const auto& section : batch.sections)
 			{

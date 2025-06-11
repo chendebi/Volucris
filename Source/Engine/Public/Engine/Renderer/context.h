@@ -5,10 +5,12 @@
 #include "Engine/Renderer/mesh_render_data.h"
 #include "Engine/Core/rect.h"
 #include "Engine/Renderer/primitive_proxy.h"
+#include <Engine/Renderer/OpenGL/ogl_buffer_object.h>
 
 namespace volucris
 {
 	class MaterialProxy;
+	class OGLBufferObject;
 
 	class Context
 	{
@@ -43,6 +45,8 @@ namespace volucris
 
 		void setViewport(const Rect& rect);
 
+		void setPrimitiveInfo(PrimitiveInfo* ptimitiveInfo);
+
 		bool beginRenderPass(FrameBufferObject* target = nullptr);
 
 		void clear(const OGLClearState& state);
@@ -64,6 +68,7 @@ namespace volucris
 		Rect m_viewport;
 		UniformBlock* m_cameraInfoBlock;
 		UniformBlock* m_directonLightBlock;
+		std::unique_ptr<OGLBufferObject> m_primitiveUniformBuffer;
 	};
 }
 
