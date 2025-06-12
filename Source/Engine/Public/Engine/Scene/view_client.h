@@ -59,16 +59,6 @@ namespace volucris
 
 		void dispatchEvent(ClientEvent* event);
 
-		void dispatchMousePressEvent(const MouseEvent& event);
-		
-		void dispatchMouseReleaseEvent(const MouseEvent& event);
-
-		void dispatchMouseMoveEvent(int x, int y);
-
-		void dispatchKeyPressedEvent(Key key, Modifiers modifiers);
-
-		void dispatchKeyReleasedEvent(Key key, Modifiers modifiers);
-
 		Rect getRect() const { return m_rect; }
 
 	private:
