@@ -59,7 +59,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 
 		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.frag", fsf);
 		MeshLoader meshLoader = MeshLoader("");
-		meshLoader.load("D:\\Projects\\Volucris\\Assets\\simple_cube.fbx");
+		meshLoader.load("D:\\Projects\\Volucris\\Assets\\BoxTextured-glTF\\BoxTextured.gltf");
 		auto meshes = meshLoader.getLoadedStaticMeshes();
 		for (const auto& mesh : meshes)
 		{
@@ -68,7 +68,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 				mesh->setMaterial(slot, material);
 			}
 			auto comp = level->addActor<StaticMeshComponent>(mesh);
-			comp->setScale({ 100,100,100 });
+			//comp->setScale({ 100,100,100 });
 			propertyWidget->setSceneObject(comp.get());
 		}
 	}
