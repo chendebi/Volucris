@@ -13,7 +13,7 @@ namespace volucris
 		{
 			spdlog::memory_buf_t formatted;
 			formatter_->format(msg, formatted);
-			// todo: 
+			// TODO 发送消息给编辑器或其他系统
 		}
 
 		void flush_() override {}
@@ -49,6 +49,32 @@ namespace volucris
 
 	void Logger::log(Level level, const char* msg)
 	{
-		
+		if (m_impl->logger)
+		{
+			switch (level)
+			{
+			case Level::Trace:
+				m_impl->logger->trace(msg);
+				break;
+			case Level::Debug:
+				m_impl->logger->debug(msg);
+				break;
+			case Level::Info:
+				m_impl->logger->info(msg);
+				break;
+			case Level::Warning:
+				m_impl->logger->warn(msg);
+				break;
+			case Level::Error:
+				m_impl->logger->error(msg);
+				break;
+			case Level::Critical:
+				m_impl->logger->critical(msg);
+				break;
+			default:
+				m_impl->logger->info(msg);
+				break;
+			}
+		}
 	}
 }
