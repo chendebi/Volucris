@@ -28,8 +28,8 @@ namespace volucris
             ImGui::DockBuilderSetNodeSize(left_id, {600,100});
 
             // 将窗口绑定到 DockNode
-            ImGui::DockBuilderDockWindow("Controls", left_id);
-            ImGui::DockBuilderDockWindow("Material Editor", right_id);
+            ImGui::DockBuilderDockWindow("Preview", left_id);
+            ImGui::DockBuilderDockWindow("Editor", right_id);
 
             // 完成布局设置
             ImGui::DockBuilderFinish(dockspace_id);

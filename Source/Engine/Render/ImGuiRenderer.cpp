@@ -6,6 +6,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
 #include <Core/Volucris.h>
+#include <FileSystem/FileSystem.h>
 
 namespace volucris
 {
@@ -46,8 +47,13 @@ namespace volucris
 		}
 
 		ImGuiIO& io = ImGui::GetIO();
-		io.IniFilename = nullptr;
-		ImGui::LoadIniSettingsFromDisk("");
+		//io.IniFilename = nullptr;
+
+		if (gFileSystem.fileExists("/Engine/Config/ImGuiIniSettings.ini"))
+		{
+			//ImGui::LoadIniSettingsFromDisk(gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini").c_str());
+		}
+
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
@@ -56,6 +62,14 @@ namespace volucris
 	ImGuiRenderer::~ImGuiRenderer()
 	{
 		ImGui::SetCurrentContext(m_imguiContext);
+
+		//const auto& path = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
+		/*if (!gFileSystem.createDirectory("/Engine/Config/"))
+		{
+			V_LOG_WARN(Engine, "something wrong");
+		}*/
+		//ImGui::SaveIniSettingsToDisk(path.c_str());
+
 		ImGui_ImplGlfw_Shutdown();
 
 		// 2. 再清理 ImGui 的其他后端（如 OpenGL/Vulkan）

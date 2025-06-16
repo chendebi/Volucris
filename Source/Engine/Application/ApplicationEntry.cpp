@@ -2,6 +2,7 @@
 #include <Application/Application.h>
 #include <GLFW/glfw3.h>
 #include <Application/Window.h>
+#include <FileSystem/FileSystem.h>
 
 using namespace volucris;
 
@@ -20,6 +21,9 @@ bool initialize()
 
 int main(int argc, char* argv[])
 {
+	gFileSystem.mount("/Engine/Content", fmt::format("{}/Content", VOLUCRIS_ENGINE_ROOT));
+	gFileSystem.mount("/Engine/Config", fmt::format("{}/Binaries/Config", VOLUCRIS_ENGINE_ROOT));
+
 	if (!initialize())
 	{
 		V_LOG_CRITICAL(Engine, "Failed to initialize GLFW");
