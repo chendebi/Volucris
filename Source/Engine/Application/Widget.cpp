@@ -1,5 +1,6 @@
 #include "Application/Widget.h"
 #include <Core/VectorHelp.h>
+#include <Core/Volucris.h>
 
 namespace volucris
 {
@@ -20,7 +21,7 @@ namespace volucris
 
 		for (auto& child : m_children)
 		{
-			child->setParent(nullptr);
+			child->m_parent = nullptr;
 		}
 
 		m_children.clear();
@@ -31,7 +32,6 @@ namespace volucris
 		if (child)
 		{
 			child->setParent(this);
-			m_children.push_back(child);
 		}
 	}
 
@@ -46,7 +46,7 @@ namespace volucris
 			m_parent = parent;
 			if (m_parent)
 			{
-				m_parent->addChild(getShared<Widget>());
+				m_parent->m_children.push_back(getShared<Widget>());
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <Render/ImGuiRenderer.h>
+#include <Core/Volucris.h>
 
 namespace volucris
 {
@@ -34,6 +35,7 @@ namespace volucris
 
 	void Window::create()
 	{
+		V_LOG_DEBUG(Engine, "create window: {}", m_title);
 		m_handle = glfwCreateWindow(800, 600, m_title.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(m_handle, this);
 		glfwSetWindowCloseCallback(m_handle, [](GLFWwindow* handle) {
@@ -46,6 +48,7 @@ namespace volucris
 
 	void Window::destroy()
 	{
+		V_LOG_DEBUG(Engine, "destroy window: {}", m_title);
 		if (m_handle)
 		{
 			glfwDestroyWindow(m_handle);

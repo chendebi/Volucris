@@ -46,6 +46,8 @@ namespace volucris
 		}
 
 		ImGuiIO& io = ImGui::GetIO();
+		io.IniFilename = nullptr;
+		ImGui::LoadIniSettingsFromDisk("");
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
@@ -65,15 +67,15 @@ namespace volucris
 	{
 		ImGui::SetCurrentContext(m_imguiContext);
 		glfwMakeContextCurrent(m_windowHandle);
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		int display_w, display_h;
 		glfwGetFramebufferSize(m_windowHandle, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(color.x, color.y, color.z, color.w);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(m_windowHandle);
 	}
 

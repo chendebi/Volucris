@@ -21,7 +21,7 @@ option(BUILD_WITH_EDITOR "build engine with editor mode" ON)
 
 if (BUILD_WITH_EDITOR)
     add_compile_definitions(WITH_EDITOR=1)
-    #add_subdirectory(Source/Editor)
+    add_subdirectory(Source/Editor)
 endif()
 
 add_subdirectory(Test)
