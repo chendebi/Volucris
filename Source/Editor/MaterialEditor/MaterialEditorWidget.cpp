@@ -1,20 +1,20 @@
 #include "MaterialEditorWidget.h"
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <Engine/Application/Window.h>
+#include <Engine/FileSystem/FileSystem.h>
 
 namespace volucris
 {
 	void MaterialEditorWidget::onBuild()
 	{
-		auto dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-        ImGuiIO& io = ImGui::GetIO();
-
-        // 检查是否有保存的布局
-        if (ImGui::GetFrameCount() == 1)
-        {
+        auto dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+        //ImGuiIO& io = ImGui::GetIO();
+		if (ImGui::GetFrameCount() == 1 && !gFileSystem.fileExists("/Engine/Config/ImGuiIniSettings.ini"))
+		{
             ImGui::DockBuilderRemoveNode(dockspace_id); // 清除现有布局（如果有）
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace); // 添加新的 DockSpace
- 
+
             // 将 DockSpace 拆分为左右两部分（比例 1:1）
             ImGuiID left_id, right_id;
             ImGui::DockBuilderSplitNode(
@@ -33,7 +33,7 @@ namespace volucris
 
             // 完成布局设置
             ImGui::DockBuilderFinish(dockspace_id);
-        }
+		}
 
         static ImGuiWindowClass no_title_class;
         no_title_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoWindowMenuButton |

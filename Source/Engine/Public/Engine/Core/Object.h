@@ -19,6 +19,12 @@ namespace volucris
 		{
 			return std::static_pointer_cast<T>(shared_from_this());
 		}
+
+		template<typename T>
+		bool isA()
+		{
+			return dynamic_cast<T*>(this);
+		}
 	};
 }
 

@@ -22,6 +22,7 @@ namespace volucris
 		for (auto& child : m_children)
 		{
 			child->m_parent = nullptr;
+			child->ParentChanged(this);
 		}
 
 		m_children.clear();
@@ -43,13 +44,16 @@ namespace volucris
 			{
 				VectorHelp::quickRemove<Widget>(m_parent->m_children, this);
 			}
+			auto oldParent = m_parent;
 			m_parent = parent;
 			if (m_parent)
 			{
 				m_parent->m_children.push_back(getShared<Widget>());
 			}
+			ParentChanged(oldParent);
 		}
 	}
+
 	void Widget::build()
 	{
 		onBuild();

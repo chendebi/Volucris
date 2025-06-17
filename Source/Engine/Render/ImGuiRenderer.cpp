@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <Core/Volucris.h>
 #include <FileSystem/FileSystem.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 namespace volucris
 {
@@ -47,28 +49,41 @@ namespace volucris
 		}
 
 		ImGuiIO& io = ImGui::GetIO();
-		//io.IniFilename = nullptr;
-
+		io.IniFilename = nullptr;
+		m_imguiContext->SettingsLoaded = false;
 		if (gFileSystem.fileExists("/Engine/Config/ImGuiIniSettings.ini"))
 		{
-			//ImGui::LoadIniSettingsFromDisk(gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini").c_str());
+			const auto& configFilePath = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
+			ImGui::LoadIniSettingsFromDisk(configFilePath.c_str());
+			m_imguiContext->SettingsLoaded = true;
 		}
 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+
+		float dpi_scale = 1.0f;
+#if defined(_WIN32)
+		// Windows获取DPI缩放
+		dpi_scale = (float)GetDpiForSystem() / 96.0f;
+#elif defined(__APPLE__)
+		// macOS获取Retina缩放因子
+#endif
+
+		io.FontGlobalScale = dpi_scale;
+		ImGui::GetStyle().ScaleAllSizes(dpi_scale);
 	}
 
 	ImGuiRenderer::~ImGuiRenderer()
 	{
 		ImGui::SetCurrentContext(m_imguiContext);
 
-		//const auto& path = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
-		/*if (!gFileSystem.createDirectory("/Engine/Config/"))
+		if (!gFileSystem.directoryExists("/Engine/Config/"))
 		{
-			V_LOG_WARN(Engine, "something wrong");
-		}*/
-		//ImGui::SaveIniSettingsToDisk(path.c_str());
+			gFileSystem.createDirectory("/Engine/Config/");
+		}
+		const auto& configFilePath = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
+		ImGui::SaveIniSettingsToDisk(configFilePath.c_str());
 
 		ImGui_ImplGlfw_Shutdown();
 
