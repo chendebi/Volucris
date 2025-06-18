@@ -33,17 +33,25 @@ namespace volucris
 		}
 	}
 
-	void Window::create()
+	void Window::create(bool offscreen)
 	{
 		V_LOG_DEBUG(Engine, "create window: {}", m_title);
 		m_handle = glfwCreateWindow(800, 600, m_title.c_str(), nullptr, nullptr);
-		glfwSetWindowUserPointer(m_handle, this);
-		glfwSetWindowCloseCallback(m_handle, [](GLFWwindow* handle) {
-			auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-			gApp->removeWindow(window->getShared<Window>());
-			});
+		if (!offscreen)
+		{
+			glfwSetWindowUserPointer(m_handle, this);
+			glfwSetWindowCloseCallback(m_handle, [](GLFWwindow* handle) {
+				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+				gApp->removeWindow(window->getShared<Window>());
+				});
 
-		m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_handle);
+			glfwSetWindowSizeCallback(m_handle, [](GLFWwindow* handle, int width, int height) {
+				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+				window->setSize({ width, height });
+				});
+
+			m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_handle);
+		}
 	}
 
 	void Window::destroy()

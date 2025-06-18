@@ -15,10 +15,9 @@ namespace volucris
 	bool s_gladInitialized = false;
 
 	ImGuiRenderer::ImGuiRenderer(GLFWwindow* handle)
-		: Object(), m_windowHandle(handle), m_imguiContext(nullptr)
+		: m_windowHandle(handle), m_imguiContext(nullptr)
 	{
 		glfwMakeContextCurrent(handle);
-
 		if (!s_gladInitialized)
 		{
 			gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
@@ -54,6 +53,7 @@ namespace volucris
 		if (gFileSystem.fileExists("/Engine/Config/ImGuiIniSettings.ini"))
 		{
 			const auto& configFilePath = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
+			//io.IniFilename = configFilePath.c_str();
 			ImGui::LoadIniSettingsFromDisk(configFilePath.c_str());
 			m_imguiContext->SettingsLoaded = true;
 		}

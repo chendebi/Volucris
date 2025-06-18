@@ -39,6 +39,16 @@ namespace volucris
 			height -= size.height;
 			return *this;
 		}
+
+		bool operator==(const Size& size) const
+		{
+			return width == size.width && height == size.height;
+		}
+
+		bool operator!=(const Size& size) const
+		{
+			return !operator==(size);
+		}
 	};
 }
 

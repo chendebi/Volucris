@@ -1,7 +1,7 @@
 #ifndef __volucris_imgui_renderer_h__
 #define __volucris_imgui_renderer_h__
 
-#include <Engine/Render/Renderer.h>
+#include <Engine/Core/Object.h>
 #include <glm/glm.hpp>
 
 struct GLFWwindow;
@@ -9,12 +9,12 @@ class ImGuiContext;
 
 namespace volucris
 {
-	class ImGuiRenderer : public Object
+	class ImGuiRenderer
 	{
 	public:
 		ImGuiRenderer(GLFWwindow* handle);
 
-		~ImGuiRenderer() override;
+		~ImGuiRenderer();
 
 		void render();
 

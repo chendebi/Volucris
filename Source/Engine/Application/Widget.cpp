@@ -1,6 +1,7 @@
 #include "Application/Widget.h"
 #include <Core/VectorHelp.h>
 #include <Core/Volucris.h>
+#include <imgui/imgui.h>
 
 namespace volucris
 {
@@ -22,7 +23,7 @@ namespace volucris
 		for (auto& child : m_children)
 		{
 			child->m_parent = nullptr;
-			child->ParentChanged(this);
+			child->parentChanged(this, nullptr);
 		}
 
 		m_children.clear();
@@ -50,16 +51,27 @@ namespace volucris
 			{
 				m_parent->m_children.push_back(getShared<Widget>());
 			}
-			ParentChanged(oldParent);
+			parentChanged(oldParent, m_parent);
 		}
 	}
 
 	void Widget::build()
 	{
 		onBuild();
+
 		for (const auto& child : m_children)
 		{
 			child->build();
+		}
+	}
+
+	void Widget::setSize(Size size)
+	{
+		m_rect.setSize(size.width, size.height);
+		sizeChanged(size);
+		for (const auto& child : m_children)
+		{
+			child->parentSizeChanged(size);
 		}
 	}
 }

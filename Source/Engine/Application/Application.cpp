@@ -4,7 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <Core/VectorHelp.h>
 #include <Render/ImGuiRenderer.h>
-
+#include <Render/Renderer.h>
+#include <Application/FrameSynthesizer.h>
+#include <Core/Volucris.h>
 
 namespace volucris
 {
@@ -45,12 +47,12 @@ namespace volucris
 
 		if (window == m_mainWindow)
 		{
-			for (auto window : m_windows)
+			for (const auto& window : m_windows)
 			{
 				window->destroyImGuiRenderer();
 			}
 
-			for (auto window : m_windows)
+			for (const auto& window : m_windows)
 			{
 				window->destroy();
 			}
@@ -82,11 +84,13 @@ namespace volucris
 			return 0;
 		}
 
+		Renderer::getInstance().run();
+		double lastFrameTime = glfwGetTime();
 		while (m_mainWindow->isValid())
 		{
 			glfwPollEvents();
 
-			for (auto window : m_windows)
+			for (const auto& window : m_windows)
 			{
 				window->build();
 			}
@@ -99,11 +103,22 @@ namespace volucris
 				}
 			}*/
 
-			for (auto window : m_windows)
+			Renderer::getInstance().push(nullptr);
+
+			FrameSynthesier::getInstance().countGameFrame();
+
+			for (const auto& window : m_windows)
 			{
 				window->getImGuiRenderer()->render();
 			}
+
+			double current = glfwGetTime();
+			double delta = current - lastFrameTime;
+			V_LOG_DEBUG(Engine, "frame rate: {}", 1.0 / delta);
+			lastFrameTime = current;
 		}
+
+		Renderer::getInstance().quit();
 
 		return 0;
 	}

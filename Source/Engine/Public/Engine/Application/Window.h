@@ -29,13 +29,16 @@ namespace volucris
 			return m_imguiRenderer.get();
 		}
 
+		GLFWwindow* getHandle() const { return m_handle; }
+
 	protected:
 		void onBuild() override;
 
 	private:
 		friend class Application;
+		friend class Renderer;
 
-		void create();
+		void create(bool offscreen = false);
 
 		void destroy();
 

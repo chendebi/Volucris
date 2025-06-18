@@ -20,12 +20,16 @@ function(volucris_engine_code FOLDER_NAME OUTPUT_LIST)
     set(${OUTPUT_LIST} ${ALL_FILES} PARENT_SCOPE)
 endfunction()
 
+volucris_engine_code(EditorCore EDITOR_CORE_CODE_FILES)
 volucris_engine_code(EditorEntry EDITOR_ENTRY_CODE_FILES)
+volucris_engine_code(Viewport VIEWPORT_CODE_FILES)
 volucris_engine_code(MaterialEditor MATERIAL_EDITOR_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
+    ${EDITOR_CORE_CODE_FILES}
     ${EDITOR_ENTRY_CODE_FILES}
     ${MATERIAL_EDITOR_CODE_FILES}
+    ${VIEWPORT_CODE_FILES}
 )
 
 target_include_directories(${TARGET} PRIVATE 

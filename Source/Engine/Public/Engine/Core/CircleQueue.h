@@ -42,6 +42,7 @@ namespace volucris
 			m_tail = (m_tail+1) % m_capacity;
 			m_count++;
 			m_notEmpty.notify_one();
+			return true;
 		}
 
 		bool push(T&& val, bool block = true)
@@ -63,6 +64,7 @@ namespace volucris
 			m_tail = (m_tail + 1) % m_capacity;
 			m_count++;
 			m_notEmpty.notify_one();
+			return true;
 		}
 
 		bool pop(T& val, bool block=true)

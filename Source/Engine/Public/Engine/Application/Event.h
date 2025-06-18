@@ -7,122 +7,78 @@
 
 namespace volucris
 {
-	template <typename ...Args>
-	class Event
+	template <typename ReturnType, typename ...Args>
+	class EventCallable
 	{
 	public:
-		// 绑定Lamda表达式
-		size_t addLambda(std::function<void(Args...)> lamda)
+		virtual ReturnType invoke(Args... args) = 0;
+	};
+
+	template <typename Callable, typename ReturnType, typename ...Args>
+	class EventCallableWrapper
+	{
+	public:
+		EventCallableWrapper(const Callable& callable)
+			: m_callable(callable) {}
+
+		EventCallableWrapper(Callable&& callable)
+			: m_callable(std::move(callable)) 
 		{
-			m_callables.push_back({ m_id, std::move(lamda) });
-			auto id = m_id;
-			++m_id;
-			return id;
 		}
-
-		void clear()
+		ReturnType invoke(Args... args)
 		{
-			m_callables.clear();
-			m_objectCallables.clear();
-			m_id = 0;
-		}
-
-		bool remove(size_t id)
-		{
-			auto it = std::find(m_callables.begin(), m_callables.end(), id);
-			if (it == m_callables.end())
-			{
-				return true;
-			}
-			it->func = nullptr;
-			std::swap(*it, *(m_callables.rbegin()));
-			m_callables.pop_back();
-		}
-
-		// 绑定成员函数
-		template <typename T, typename Method>
-		void addObject(T* object, Method method)
-		{
-			m_objectCallables.push_back({ object, [object, method](Args... args) {
-				// 使用 std::invoke 调用成员函数
-				std::invoke(method, object, std::forward<Args>(args)...);
-				} });
-		}
-
-		template <typename T>
-		void removeAll(T* object)
-		{
-			auto i = 0;
-			bool finish = false;
-			while (!finish)
-			{
-				if (i == m_objectCallables.size())
-				{
-					break;
-				}
-
-				if (m_objectCallables[i].object != object)
-				{
-					++i;
-					continue;
-				}
-
-				auto it = m_objectCallables.begin() + i;
-				std::swap(*it, *(m_objectCallables.rbegin()));
-				m_objectCallables.pop_back();
-			}
-		}
-
-		void broadcast(Args ...args)
-		{
-			for (auto& callable : m_callables)
-			{
-				callable.call(std::forward<Args>(args)...);
-			}
-
-			for (auto& callable : m_objectCallables)
-			{
-				callable.call(std::forward<Args>(args)...);
-			}
-		}
-
-		void operator()(Args ...args)
-		{
-			broadcast(std::forward<Args>(args)...);
+			return m_callable.invoke(std::forward<Args>(std::move(args))...);
 		}
 
 	private:
-		struct Callable
-		{
-			size_t id;
-			std::function<void(Args...)> func;
-
-			bool operator==(size_t id) const
-			{
-				return this->id == id;
-			}
-
-			void call(Args... args)
-			{
-				func(std::forward<Args>(args)...);
-			}
-		};
-
-		struct ObjectCallable
-		{
-			void* object;
-			std::function<void(Args...)> func;
-
-			void call(Args... args)
-			{
-				func(std::forward<Args>(args)...);
-			}
-		};
-
-		size_t m_id = 0;
-		std::vector<Callable> m_callables;
-		std::vector<ObjectCallable> m_objectCallables;
+		Callable m_callable;
 	};
+
+	template <typename ReturnType, typename ...Args>
+	class EventDelegate
+	{
+		using EventCallablePtr = EventCallable<ReturnType, Args...>*;
+
+		EventCallablePtr m_callable = nullptr;
+
+	public:
+		EventDelegate() = default;
+
+		template<typename Callable>
+		EventDelegate(Callable&& callable)
+		{
+			m_callable = new EventCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(std::forward<Callable>(callable));
+		}
+
+		EventDelegate(const EventDelegate& other)
+			: m_callable(other.m_callable)
+		{
+		}
+
+		EventDelegate(EventDelegate&& other)
+			: m_callable(other.m_callable)
+		{
+			other.m_callable = nullptr;
+		}
+
+		~EventDelegate()
+		{
+			delete m_callable;
+		}
+
+		ReturnType invoke(Args... args)
+		{
+			if (m_callable)
+			{
+				return m_callable->invoke(std::forward<Args>(args)...);
+			}
+			return ReturnType();
+		}
+
+		bool isValid() const { return m_callable != nullptr; }
+	};
+
+	
 
 	enum class Key
 	{

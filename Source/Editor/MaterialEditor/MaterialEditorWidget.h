@@ -5,12 +5,21 @@
 
 namespace volucris
 {
+	class ViewportWidget;
+
 	class MaterialEditorWidget : public Widget
 	{
 	public:
+		MaterialEditorWidget();
+
 
 	protected:
 		void onBuild() override;
+
+		void parentSizeChanged(Size size) override;
+
+	private:
+		std::unique_ptr<ViewportWidget> m_viewport;
 	};
 }
 

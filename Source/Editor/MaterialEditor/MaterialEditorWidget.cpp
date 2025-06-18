@@ -3,10 +3,18 @@
 #include <imgui_internal.h>
 #include <Engine/Application/Window.h>
 #include <Engine/FileSystem/FileSystem.h>
+#include <EditorCore/editor.h>
+#include <Viewport/ViewportWidget.h>
 
 namespace volucris
 {
-	void MaterialEditorWidget::onBuild()
+    MaterialEditorWidget::MaterialEditorWidget()
+        : m_viewport(std::make_unique<ViewportWidget>())
+    {
+        //addChild(std::make_shared<ViewportWidget>());
+    }
+
+    void MaterialEditorWidget::onBuild()
 	{
         auto dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
         //ImGuiIO& io = ImGui::GetIO();
@@ -15,12 +23,12 @@ namespace volucris
             ImGui::DockBuilderRemoveNode(dockspace_id); // 清除现有布局（如果有）
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace); // 添加新的 DockSpace
 
-            // 将 DockSpace 拆分为左右两部分（比例 1:1）
+            // 将 DockSpace 拆分为左右两部分
             ImGuiID left_id, right_id;
             ImGui::DockBuilderSplitNode(
                 dockspace_id,
                 ImGuiDir_Left,    // 方向：左侧
-                50.f,             // 左侧占 50%
+                .5f,             // 左侧占 50%
                 &left_id,         // 左侧 DockNode ID
                 &right_id         // 右侧 DockNode ID
             );
@@ -43,14 +51,16 @@ namespace volucris
         // 对每个窗口
         ImGui::SetNextWindowClass(&no_title_class);
 
-		// 窗口 2-4：普通 ImGui 控件窗口
-		ImGui::Begin("Preview", nullptr, ImGuiWindowFlags_NoTitleBar);
-		ImGui::Text("This is a control panel.");
-		ImGui::End();
+        m_viewport->build();
 
         ImGui::SetNextWindowClass(&no_title_class);
 		ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_NoTitleBar);
 		ImGui::Text("This is a material editor widget.");
 		ImGui::End();
 	}
+
+    void MaterialEditorWidget::parentSizeChanged(Size size)
+    {
+        V_LOG_INFO(Editor, "size chaged {}", size);
+    }
 } // namespace volucris

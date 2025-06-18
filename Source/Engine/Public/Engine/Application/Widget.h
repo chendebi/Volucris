@@ -5,18 +5,14 @@
 #include <Engine/Core/Size.h>
 #include <Engine/Application/Event.h>
 #include <vector>
+#include <Engine/Core/Rect.h>
 
 namespace volucris
 {
 	class Widget;
 
-	DECLARE_EVENT(OnParentChanged, Widget*)
-
 	class Widget : public Object
 	{
-	public:
-		OnParentChanged ParentChanged;
-
 	public:
 		Widget();
 
@@ -37,12 +33,23 @@ namespace volucris
 			return this;
 		}
 
+		const Size getSize() const { return m_rect.getSize(); }
+
 	protected:
+		void setSize(Size size);
+
 		virtual void onBuild() {}
+
+		virtual void parentChanged(Widget* old, Widget* current) {}
+
+		virtual void sizeChanged(Size newSize) {}
+
+		virtual void parentSizeChanged(Size size) {}
 
 	private:
 		Widget* m_parent;
 		std::vector <std::shared_ptr<Widget>> m_children;
+		Rect m_rect;
 	};
 }
 

@@ -28,12 +28,14 @@ volucris_engine_code(Core CORE_CODE_FILES)
 volucris_engine_code(Application APPLICATION_CODE_FILES)
 volucris_engine_code(Render RENDER_CODE_FILES)
 volucris_engine_code(FileSystem FILE_SYSTEM_CODE_FILES)
+volucris_engine_code(Game GAME_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${CORE_CODE_FILES}
     ${APPLICATION_CODE_FILES}
     ${RENDER_CODE_FILES}
     ${FILE_SYSTEM_CODE_FILES}
+    ${GAME_CODE_FILES}
 )
 
 set_target_properties(${TARGET} PROPERTIES FOLDER "Volucris")
