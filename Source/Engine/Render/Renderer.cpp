@@ -5,6 +5,7 @@
 #include <Application/Window.h>
 #include <Core/TypesHelp.h>
 #include <Application/FrameSynthesizer.h>
+#include <Render/Command/RenderCommand.h>
 
 namespace volucris
 {
@@ -18,7 +19,8 @@ namespace volucris
 
 	void Renderer::main()
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		ClearCommand command = ClearCommand(0.2, 0.6, 0.8);
+		command.execute();
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
 

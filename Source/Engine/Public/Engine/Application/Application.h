@@ -24,6 +24,8 @@ namespace volucris
 
 		void setMainWindow(const std::shared_ptr<Window>& window);
 
+		int getWindowCount() const { return m_windows.size(); }
+
 		int exec();
 
 	private:

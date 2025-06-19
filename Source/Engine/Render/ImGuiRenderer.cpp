@@ -9,6 +9,9 @@
 #include <FileSystem/FileSystem.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include <Profile/Profile.h>
+#include <tracy/Tracy.hpp>
+#include <Application/Application.h>
 
 namespace volucris
 {
@@ -18,6 +21,7 @@ namespace volucris
 		: m_windowHandle(handle), m_imguiContext(nullptr)
 	{
 		glfwMakeContextCurrent(handle);
+		glfwSwapInterval(1); // Enable vsync
 		if (!s_gladInitialized)
 		{
 			gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
@@ -94,9 +98,12 @@ namespace volucris
 
 	void ImGuiRenderer::render()
 	{
-		ImGui::SetCurrentContext(m_imguiContext);
-		glfwMakeContextCurrent(m_windowHandle);
-
+		V_SCOPED_PROFILE;
+		if (gApp->getWindowCount() > 1)
+		{
+			ImGui::SetCurrentContext(m_imguiContext);
+			glfwMakeContextCurrent(m_windowHandle);
+		}
 		int display_w, display_h;
 		glfwGetFramebufferSize(m_windowHandle, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);

@@ -7,6 +7,9 @@
 #include <Render/Renderer.h>
 #include <Application/FrameSynthesizer.h>
 #include <Core/Volucris.h>
+#include <Engine/Profile/Profile.h>
+#include <Profile/ProfileManager.h>
+#include <tracy/Tracy.hpp>
 
 namespace volucris
 {
@@ -88,6 +91,8 @@ namespace volucris
 		double lastFrameTime = glfwGetTime();
 		while (m_mainWindow->isValid())
 		{
+			V_SCOPED_PROFILE;
+			
 			glfwPollEvents();
 
 			for (const auto& window : m_windows)
@@ -111,15 +116,10 @@ namespace volucris
 			{
 				window->getImGuiRenderer()->render();
 			}
-
-			double current = glfwGetTime();
-			double delta = current - lastFrameTime;
-			V_LOG_DEBUG(Engine, "frame rate: {}", 1.0 / delta);
-			lastFrameTime = current;
+			
 		}
 
 		Renderer::getInstance().quit();
-
 		return 0;
 	}
 }

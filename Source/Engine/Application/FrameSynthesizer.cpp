@@ -1,6 +1,7 @@
 #include "Application/FrameSynthesizer.h"
 #include <thread>
 #include <Core/Volucris.h>
+#include <Profile/Profile.h>
 
 namespace volucris
 {
@@ -16,6 +17,7 @@ namespace volucris
 
 	void FrameSynthesier::countGameFrame()
 	{
+		V_SCOPED_PROFILE
 		waitRenderFrame(m_gameFrameCount);
 		++m_gameFrameCount;
 	}

@@ -27,19 +27,23 @@ endfunction()
 volucris_engine_code(Core CORE_CODE_FILES)
 volucris_engine_code(Application APPLICATION_CODE_FILES)
 volucris_engine_code(Render RENDER_CODE_FILES)
+volucris_engine_code(Render/Command RENDER_COMMAND_CODE_FILES)
 volucris_engine_code(FileSystem FILE_SYSTEM_CODE_FILES)
 volucris_engine_code(Game GAME_CODE_FILES)
+volucris_engine_code(Profile PR0FILE_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${CORE_CODE_FILES}
     ${APPLICATION_CODE_FILES}
     ${RENDER_CODE_FILES}
+    ${RENDER_COMMAND_CODE_FILES}
     ${FILE_SYSTEM_CODE_FILES}
     ${GAME_CODE_FILES}
+    ${PR0FILE_CODE_FILES}
 )
 
 set_target_properties(${TARGET} PROPERTIES FOLDER "Volucris")
-target_link_libraries(${TARGET} PUBLIC fmt glm imgui glad RTTR::Core_Lib)
+target_link_libraries(${TARGET} PUBLIC fmt glm imgui glad RTTR::Core_Lib Tracy::TracyClient)
 target_link_libraries(${TARGET} PRIVATE spdlog_header_only glfw comdlg32.lib)
 target_include_directories(${TARGET} PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine

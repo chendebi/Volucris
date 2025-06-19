@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <Application/Window.h>
 #include <FileSystem/FileSystem.h>
+#include <tracy/Tracy.hpp>
 
 using namespace volucris;
 
@@ -21,6 +22,10 @@ bool initialize()
 
 int main(int argc, char* argv[])
 {
+#ifdef TRACY_ENABLE
+	//TracyGpuContext; // GPU上下文初始化
+#endif
+
 	gFileSystem.mount("/Engine/Content", fmt::format("{}/Content", VOLUCRIS_ENGINE_ROOT));
 	gFileSystem.mount("/Engine/Config", fmt::format("{}/Binaries/Config", VOLUCRIS_ENGINE_ROOT));
 
