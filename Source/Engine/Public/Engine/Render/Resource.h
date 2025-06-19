@@ -9,7 +9,7 @@ namespace volucris
 	class Resource : public Object
 	{
 	public:
-		Resource() : Object(), m_dirty(false), m_id(0){}
+		Resource() : Object(), m_dirty(false){}
 
 		~Resource();
 
