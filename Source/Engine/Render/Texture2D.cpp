@@ -2,13 +2,14 @@
 
 namespace volucris
 {
-	FTexture2D::FTexture2D()
-		: FTexture()
+	Texture2DResource::Texture2DResource()
+		: TextureResouece()
+		, m_resourceID(0)
 		, m_data()
 	{
 	}
 
-	FTexture2D::~FTexture2D()
+	Texture2DResource::~Texture2DResource()
 	{
 	}
 }

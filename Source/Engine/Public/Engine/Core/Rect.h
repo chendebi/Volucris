@@ -26,6 +26,16 @@ namespace volucris
 		Size getSize() const { return { width, height }; }
 
 		bool isValid() const { return width > 0 && height > 0; }
+
+		bool operator==(const Rect& other) const
+		{
+			return x == other.x && y == other.y && width == other.width && height == other.height;
+		}
+
+		bool operator!=(const Rect& other) const
+		{
+			return !operator==(other);
+		}
 	};
 }
 

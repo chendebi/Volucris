@@ -37,6 +37,7 @@ namespace volucris
 	private:
 		friend class Application;
 		friend class Renderer;
+		friend class RHICommandList;
 
 		void create(bool offscreen = false);
 

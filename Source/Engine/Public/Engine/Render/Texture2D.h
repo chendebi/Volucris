@@ -8,7 +8,7 @@
 
 namespace volucris
 {
-	class FTexture : public Resource
+	class TextureResouece : public Resource
 	{
 	public:
 		enum EFilter
@@ -25,7 +25,7 @@ namespace volucris
 		};
 
 	public:
-		FTexture() : Resource(), m_filter(EFilter::Near), m_wrapMode(EWrapMode::Repeat)
+		TextureResouece() : Resource(), m_filter(EFilter::Near), m_wrapMode(EWrapMode::Repeat)
 		{
 			markDirty();
 		}
@@ -39,12 +39,12 @@ namespace volucris
 		EWrapMode m_wrapMode;
 	};
 
-	class FTexture2D : public FTexture
+	class Texture2DResource : public TextureResouece
 	{
 	public:
-		FTexture2D();
+		Texture2DResource();
 
-		~FTexture2D() override;
+		~Texture2DResource() override;
 
 		void setTextureData(std::vector<uint8> data)
 		{
@@ -53,6 +53,7 @@ namespace volucris
 		}
 
 	private:
+		uint32 m_resourceID;
 		std::vector<uint8> m_data;
 	};
 }

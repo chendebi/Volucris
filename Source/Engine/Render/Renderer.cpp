@@ -6,6 +6,7 @@
 #include <Core/TypesHelp.h>
 #include <Application/FrameSynthesizer.h>
 #include <Render/Command/RenderCommand.h>
+#include <RHI/RHICommandList.h>
 
 namespace volucris
 {
@@ -19,13 +20,17 @@ namespace volucris
 
 	void Renderer::main()
 	{
-		ClearCommand command = ClearCommand(0.2, 0.6, 0.8);
-		command.execute();
+		RENDER_SCOPE(BeginFrame)
+		ENQUEUE_COMMMAND_LIST(ClearBuffer, [](RHICommandList* cmdList) {
+			cmdList->setViewport(0, 0, 1920, 1080);
+			cmdList->
+			});
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
 
 	void Renderer::run()
 	{
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		m_window = std::make_unique<Window>();
 		m_window->create(true);
@@ -34,40 +39,11 @@ namespace volucris
 
 	bool Renderer::initialize()
 	{
-		auto handle = m_window->getHandle();
-		glfwMakeContextCurrent(handle);
-		glfwSwapInterval(0);
-		gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
-
-		{
-			const auto vender = glGetString(GL_VENDOR);
-			const auto renderer = glGetString(GL_RENDERER);
-			const auto language = glGetString(GL_SHADING_LANGUAGE_VERSION);
-			const auto version = glGetString(GL_VERSION);
-
-			V_LOG_INFO(Engine, "context initialized");
-			V_LOG_INFO(Engine, "	vender: {}", (char*)vender);
-			V_LOG_INFO(Engine, "	renderer: {}", (char*)renderer);
-			V_LOG_INFO(Engine, "	version: {}", (char*)version);
-			V_LOG_INFO(Engine, "	language version: {}", (char*)language);
-		}
-
-		glGenFramebuffers(1, &frameBuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1080, 960, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-		glViewport(0, 0, 1080, 960);
-		glClearColor(0.2, 0.4, 0.8, 1.0);
-		return true;
+		return RHICmdList.initialize(std::move(m_window));
 	}
 
 	void Renderer::destroy()
 	{
-		m_window->destroy();
-		m_window = nullptr;
+		RHICmdList.destroy();
 	}
 }
