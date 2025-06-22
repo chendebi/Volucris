@@ -12,7 +12,7 @@ namespace volucris
 
 	bool RHISamplerState::init(RHICommandList* command)
 	{
-		glBindSampler()
+		//command
 	}
 
 	uint32 RHISamplerState::create(RHICommandList* command)
@@ -20,14 +20,6 @@ namespace volucris
 		uint32 id;
 		glGenSamplers(1, &id);
 		return id;
-	}
-
-	void RHISamplerState::bind(RHIState* state)
-	{
-		if (state->texture2d)
-		{
-			glBindSampler(0, getId());
-		}
 	}
 
 	void RHISamplerState::destroy(RHIState* state)

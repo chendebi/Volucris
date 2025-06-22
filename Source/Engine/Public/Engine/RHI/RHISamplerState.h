@@ -15,8 +15,6 @@ namespace volucris
 	protected:
 		uint32 create(RHICommandList* command) override;
 
-		void bind(RHIState* state) override;
-
 		void destroy(RHIState* state) override;
 	};
 }
