@@ -13,7 +13,8 @@ using namespace volucris;
 
 int main(int argc, char** argv)
 {
-	gFileSystem.mount("/Engine/", VOLUCRIS_ENGINE_ROOT);
+	gFileSystem.mount("/Engine/Config", fmt::format("{}/Binaries/Config", VOLUCRIS_ENGINE_ROOT));
+	//gFileSystem.mount("/Engine/", VOLUCRIS_ENGINE_ROOT);
 	{
 		auto filepath = gFileSystem.virtualToPhysical("/Engine/test.txt");
 		V_LOG_INFO(FileSystemTest, "virtual path: /Engine/test.txt");
@@ -25,7 +26,7 @@ int main(int argc, char** argv)
 		V_LOG_INFO(FileSystemTest, "virtual path: {}", filepath);
 	}
 
-	auto nodes = gFileSystem.getFileNodes("/Engine");
+	auto nodes = gFileSystem.getFileNodes("/Engine/Config/");
 	for (auto node : nodes)
 	{
 		if (node.type == EFileType::Directory)

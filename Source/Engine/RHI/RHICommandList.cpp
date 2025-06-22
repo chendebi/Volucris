@@ -83,7 +83,7 @@ namespace volucris
 	{
 		if (!resource->isCreated())
 		{
-			auto id = resource->create();
+			auto id = resource->create(this);
 			resource->m_id = id;
 		}
 		resource->bind(&m_state);

@@ -64,10 +64,13 @@ namespace volucris
 
 		// 创建文件
 		bool createFile(const std::string& virtualPath, const void* initialData = nullptr, size_t size = 0);
+
 		// 删除文件
 		bool deleteFile(const std::string& virtualPath);
+
 		// 创建文件夹
 		bool createDirectory(const std::string& virtualPath);
+
 		// 删除文件夹
 		bool deleteDirectory(const std::string& virtualPath);
 

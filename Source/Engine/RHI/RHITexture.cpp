@@ -28,7 +28,7 @@ namespace volucris
 	{
 	}
 
-	uint32 RHITexture::create()
+	uint32 RHITexture::create(RHICommandList* command)
 	{
 		uint32 id;
 		glGenTextures(1, &id);

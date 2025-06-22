@@ -13,6 +13,7 @@ namespace volucris
 	bool RHISamplerState::init(RHICommandList* command)
 	{
 		//command
+		return false;
 	}
 
 	uint32 RHISamplerState::create(RHICommandList* command)
