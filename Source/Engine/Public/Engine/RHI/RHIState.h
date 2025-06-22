@@ -3,11 +3,12 @@
 
 #include <glm/glm.hpp>
 #include <Engine/Core/Rect.h>
+#include <Engine/Core/TypesHelp.h>
 
 namespace volucris
 {
 	class RHITexture;
-	class RHIFrameBuffer;
+	class RHIRenderTarget;
 
 	struct RHIClearState
 	{
@@ -29,7 +30,7 @@ namespace volucris
 		RHIClearState clearState = RHIClearState();
 		RHITexture* texture = nullptr;
 		RHITexture* texture2d = nullptr;
-		RHIFrameBuffer* frameBuffer = nullptr;
+		RHIRenderTarget* renderTarget = nullptr;
 	};
 }
 

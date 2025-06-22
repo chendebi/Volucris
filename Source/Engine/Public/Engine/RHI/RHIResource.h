@@ -8,6 +8,7 @@
 namespace volucris
 {
 	struct RHIState;
+	struct RHICommandList;
 
 	class RHIResource : public Object
 	{
@@ -20,8 +21,10 @@ namespace volucris
 
 		bool isCreated() const { return m_id > 0; }
 
+		virtual bool init(RHICommandList* command) = 0;
+
 	protected:
-		virtual uint32 create() = 0;
+		virtual uint32 create(RHICommandList* command) = 0;
 		
 		virtual void bind(RHIState* state) {}
 

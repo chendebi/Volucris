@@ -1,6 +1,7 @@
 #include <RHI/RHIRenderTarget.h>
 #include <glad/glad.h>
 #include <RHI/RHIState.h>
+#include <RHI/RHICommandList.h>
 
 namespace volucris
 {
@@ -10,20 +11,76 @@ namespace volucris
 
 	}
 
-	uint32 RHIRenderTarget::create()
+	bool RHIRenderTarget::init(RHICommandList* command)
+	{
+		command->bindResource(this);
+		for (const auto& [idx, attachment] : m_colorAttachments)
+		{
+			if (!attachment->init(command))
+			{
+				return false;
+			}
+
+			attachment->getId();
+			if (attachment->isA<RHITexture>())
+			{
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, attachment->getId(), 0);
+			}
+			else
+			{
+				// 支持RBO
+				v_check(false);
+				return false;
+			}
+		}
+
+		if (m_depthAttachment)
+		{
+			if (!m_depthAttachment->init(command))
+			{
+				return false;
+			}
+
+			if (m_depthAttachment->isA<RHITexture>())
+			{
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthAttachment->getId(), 0);
+			}
+			else
+			{
+				// 支持RBO
+				v_check(false);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	uint32 RHIRenderTarget::create(RHICommandList* command)
 	{
 		uint32 id;
 		glGenFramebuffers(1, &id);
+
 		return id;
 	}
 
 	void RHIRenderTarget::bind(RHIState* state)
 	{
-		if (state->frameBuffer == this)
+		if (state->renderTarget == this)
 		{
 			return;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, getId());
-		state->frameBuffer = this;
+		state->renderTarget = this;
+	}
+
+	void RHIRenderTarget::destroy(RHIState* state)
+	{
+		uint32 id = getId();
+		glDeleteFramebuffers(1, &id);
+		if (state->renderTarget == this)
+		{
+			state->renderTarget = nullptr;
+		}
 	}
 }

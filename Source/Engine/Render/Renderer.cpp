@@ -23,7 +23,7 @@ namespace volucris
 		RENDER_SCOPE(BeginFrame)
 		ENQUEUE_COMMMAND_LIST(ClearBuffer, [](RHICommandList* cmdList) {
 			cmdList->setViewport(0, 0, 1920, 1080);
-			cmdList->
+			//cmdList->
 			});
 		FrameSynthesier::getInstance().countRenderFrame();
 	}

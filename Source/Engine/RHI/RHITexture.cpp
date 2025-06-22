@@ -54,9 +54,10 @@ namespace volucris
 		
 	}
 
-	bool RHITexture2D::init(const std::vector<uint8>& data)
+	bool RHITexture2D::init(RHICommandList* command)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, convertToGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+		command->setTexture(this);
+		glTexImage2D(GL_TEXTURE_2D, 0, convertToGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		return true;
 	}
 

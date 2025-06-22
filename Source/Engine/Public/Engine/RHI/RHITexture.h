@@ -40,7 +40,7 @@ namespace volucris
 		RHITexture();
 
 	protected:
-		uint32 create() override;
+		uint32 create(RHICommandList* command) override;
 	};
 
 	class RHITexture2D : public RHITexture
@@ -52,7 +52,7 @@ namespace volucris
 
 		~RHITexture2D() override;
 
-		bool init(const std::vector<uint8>& data);
+		bool init(RHICommandList* command) override;
 
 	protected:
 		void bind(RHIState* state) override;
