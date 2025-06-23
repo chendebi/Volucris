@@ -47,6 +47,7 @@ namespace volucris
 	namespace UniformUploader
 	{
 		void upload(int location, float value);
+		void upload(int location, int value);
 		void upload(int location, glm::vec3 value);
 		void upload(int location, glm::vec4 value);
 		void upload(int location, glm::mat4 value);
@@ -79,6 +80,34 @@ namespace volucris
 	protected:
 		std::shared_ptr<Uniform> m_uniform;
 		MaterialParameterDescription m_description;
+	};
+
+	class UniformValueInt : public UniformValue
+	{
+	public:
+		UniformValueInt(const MaterialParameterDescription& description)
+			: UniformValue(description)
+			, m_value()
+		{
+			v_check(description.type == MaterialParameterType::TEXTURE2D);
+		}
+
+		void updateValue(const std::vector<uint8>& data) override
+		{
+			v_check((m_description.offset + m_description.size) <= data.size())
+				memcpy(&m_value, data.data() + m_description.offset, m_description.size);
+		}
+
+		void upload() override
+		{
+			if (m_uniform && m_uniform->getLocation() >= 0)
+			{
+				UniformUploader::upload(m_uniform->getLocation(), m_value);
+			}
+		}
+
+	private:
+		int m_value;
 	};
 
 	class UniformValueFloat : public UniformValue

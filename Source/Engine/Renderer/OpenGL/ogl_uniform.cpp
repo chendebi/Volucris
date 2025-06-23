@@ -12,6 +12,11 @@ namespace volucris
 		glUniform1f(location, value);
 	}
 
+	void UniformUploader::upload(int location, int value)
+	{
+		glUniform1i(location, value);
+	}
+
 	void UniformUploader::upload(int location, glm::vec3 value)
 	{
 		glUniform3fv(location, 1, glm::value_ptr(value));

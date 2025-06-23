@@ -108,7 +108,6 @@ namespace volucris
 		}
 
 		m_renderState.ubos[index] = ubo;
-		//m_renderState.ubo = ubo;
 		glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo->getID());
 	}
 
@@ -120,7 +119,6 @@ namespace volucris
 			return;
 		}
 		glBindBufferRange(GL_UNIFORM_BUFFER, index, block->ubo->getID(), block->block.offset, block->block.size);
-		//m_renderState.ubo = block->ubo;
 		GL_CHECK();
 	}
 
@@ -326,6 +324,17 @@ namespace volucris
 		if (!state.programState.material->ready())
 		{
 			return false;
+		}
+
+		for (auto slot = 0; slot < state.programState.textures.size(); ++slot)
+		{
+			auto texture = state.programState.textures[slot];
+			if (!texture->create() || !texture->initialize(this))
+			{
+				return false;
+			}
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, texture->getID());
 		}
 
 		GL_CHECK();

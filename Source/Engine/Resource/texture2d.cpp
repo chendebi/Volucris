@@ -22,20 +22,19 @@ namespace volucris
 
 	Texture2D::Texture2D()
 		: ResourceObject(Asset::TEXTURE)
-		, m_dirty(false)
+		, m_dirty(true)
 		, m_data()
 		, m_proxy()
 	{
 	}
 
-	Texture2D::Texture2D(uint8* data, Size size, Texture::Format format)
+	Texture2D::Texture2D(TextureData data)
 		: ResourceObject(Asset::TEXTURE)
-		, m_dirty(false)
-		, m_data()
+		, m_dirty(true)
+		, m_data(std::move(data))
 		, m_proxy()
 	{
-		setSize(size.width, size.height);
-		setFormat(format);
+
 	}
 
 	Texture2D::~Texture2D()
@@ -43,11 +42,7 @@ namespace volucris
 
 	}
 
-	void Texture2D::setData(uint8* data, size_t size)
-	{
-		m_data.data.resize(size);
-		memcpy(m_data.data.data(), data, size);
-	}
+
 
 	void Texture2D::update()
 	{
