@@ -20,8 +20,6 @@ namespace volucris
 
 		void attachDepthStencil(const RHITextureDesc& desc);*/
 
-		void setSize(int width, int height);
-
 		bool init(RHICommandList* command) override;
 
 	protected:
