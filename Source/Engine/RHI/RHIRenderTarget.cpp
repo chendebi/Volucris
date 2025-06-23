@@ -5,11 +5,21 @@
 
 namespace volucris
 {
-	RHIRenderTarget::RHIRenderTarget()
+	RHIRenderTarget::RHIRenderTarget(const Size& size)
 		: RHIResource()
+		, m_size(size)
+		, m_colorAttachments()
+		, m_depthAttachment()
 	{
 
 	}
+
+	void RHIRenderTarget::attachColor(RHITextureDesc desc, int32 index)
+	{
+		desc.size = m_size;
+		m_colorAttachments[index] = RHICreateTexture(desc);
+	}
+
 
 	bool RHIRenderTarget::init(RHICommandList* command)
 	{

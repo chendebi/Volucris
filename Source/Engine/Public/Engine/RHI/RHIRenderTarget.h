@@ -6,18 +6,21 @@
 
 namespace volucris
 {
+
 	class RHIRenderTarget : public RHIResource
 	{
 	public:
-		RHIRenderTarget();
+		RHIRenderTarget(const Size& size);
 
-		void attachColor(const RHITextureDesc& desc, int32 index);
+		void attachColor(RHITextureDesc desc, int32 index);
 		
-		void attachDepth(const RHITextureDesc& desc);
+		/*void attachDepth(const RHITextureDesc& desc);
 
 		void attachStencil(const RHITextureDesc& desc);
 
-		void attachDepthStencil(const RHITextureDesc& desc);
+		void attachDepthStencil(const RHITextureDesc& desc);*/
+
+		void setSize(int width, int height);
 
 		bool init(RHICommandList* command) override;
 
@@ -29,6 +32,7 @@ namespace volucris
 		void destroy(RHIState* state) override;
 
 	private:
+		Size m_size;
 		std::unordered_map<int32, std::shared_ptr<RHIResource>> m_colorAttachments;
 		std::shared_ptr<RHIResource> m_depthAttachment;
 	};
