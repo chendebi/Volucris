@@ -52,7 +52,7 @@ namespace volucris
 			std::vector<std::shared_ptr<Texture2DProxy>> textures;
 			for (const auto& parameter : m_textureParameters)
 			{
-				if (auto texture2d = parameter->getTexture().tryLoad())
+				if (auto texture2d = parameter->getTexture())
 				{
 					textures.push_back(texture2d->getProxy());
 				}
@@ -81,7 +81,7 @@ namespace volucris
 				std::vector<std::shared_ptr<Texture2DProxy>> textures;
 				for (const auto& parameter : m_textureParameters)
 				{
-					if (auto texture2d = parameter->getTexture().tryLoad())
+					if (auto texture2d = parameter->getTexture())
 					{
 						textures.push_back(texture2d->getProxy());
 					}
@@ -118,7 +118,7 @@ namespace volucris
 				std::vector<std::shared_ptr<Texture2DProxy>> textures;
 				for (const auto& parameter : m_textureParameters)
 				{
-					if (auto texture2d = parameter->getTexture().tryLoad())
+					if (auto texture2d = parameter->getTexture())
 					{
 						textures.push_back(texture2d->getProxy());
 					}
@@ -138,6 +138,14 @@ namespace volucris
 	MaterialParameter* Material::getParameterByName(const std::string& name)
 	{
 		for (auto& parameter : m_parameters)
+		{
+			if (parameter->getDescription().name == name)
+			{
+				return parameter.get();
+			}
+		}
+
+		for (const auto& parameter : m_textureParameters)
 		{
 			if (parameter->getDescription().name == name)
 			{
@@ -165,7 +173,7 @@ namespace volucris
 		serializer.serialize(textureParameterSize);
 		for (const auto& texture : m_textureParameters)
 		{
-			serializer.serialize(texture->getTexture());
+			serializer.serialize(texture->getTexture()->getAsset().assetPath);
 		}
 
 		return true;
@@ -211,7 +219,7 @@ namespace volucris
 		{
 			TSoftObjectPtr<Texture2D> texture;
 			serializer.deserialize(texture);
-			m_textureParameters[idx]->setTexture(texture);
+			m_textureParameters[idx]->setTexture(texture.tryLoad());
 		}
 	}
 

@@ -18,6 +18,7 @@
 #include <Engine/Scene/static_mesh_component.h>
 #include <ContentBrowser/mesh_loader.h>
 #include <PropertyWidget/property_widget.h>
+#include <ContentBrowser/texture_loader.h>
 
 using namespace volucris;
 
@@ -52,9 +53,13 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 		auto resource = loader.load(vsf, fsf);
 		auto material = std::make_shared<Material>(resource);
 
+		TextureLoader texLoader;
+		auto texture = texLoader.load("D:\\Projects\\Volucris\\Assets\\learn_opengl\\container.jpg");
+		dynamic_cast<MaterialParameterTexture2D*>(material->getParameterByName("colorTex"))->setTexture(texture);
+
 		ResourceRegistry::Instance().getSystemPathByResourcePath("/Shader/default_mesh.frag", fsf);
 		MeshLoader meshLoader = MeshLoader("");
-		meshLoader.load("D:\\Projects\\Volucris\\Assets\\simple_cube.fbx");
+		meshLoader.load("D:\\Projects\\Volucris\\Assets\\BoxTextured-glTF\\BoxTextured.gltf");
 		auto meshes = meshLoader.getLoadedStaticMeshes();
 		for (const auto& mesh : meshes)
 		{
@@ -63,7 +68,7 @@ std::shared_ptr<volucris::Application> volucrisMain(int argc, char* argv[])
 				mesh->setMaterial(slot, material);
 			}
 			auto comp = level->addActor<StaticMeshComponent>(mesh);
-			comp->setScale({ 100,100,100 });
+			//comp->setScale({ 100,100,100 });
 			propertyWidget->setSceneObject(comp.get());
 		}
 	}

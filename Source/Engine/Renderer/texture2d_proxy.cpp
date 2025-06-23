@@ -1,6 +1,7 @@
 #include "Renderer/texture2d_proxy.h"
 #include <Renderer/OpenGL/ogl_texture2d_object.h>
 #include <Resource/texture2d.h>
+#include <Core/volucris.h>
 
 namespace volucris
 {
@@ -23,6 +24,11 @@ namespace volucris
 	{
 	}
 
+	Texture2DProxy::~Texture2DProxy()
+	{
+	
+	}
+
 	void Texture2DProxy::initialize(Texture2D* texture)
 	{
 		setTextureData(std::move(texture->getTextureData()));
@@ -32,6 +38,8 @@ namespace volucris
 	{
 		m_object->setFormat(data.hdr ? GL_RGBA16F : GL_RGBA);
 		m_object->setDataFormat(getGLFormat(data.format));
+		m_object->setSize(data.size.width, data.size.height);
+		m_object->setData(std::move(data.data));
 		m_object->setType(data.hdr ? GL_FLOAT : GL_UNSIGNED_BYTE);
 	}
 }

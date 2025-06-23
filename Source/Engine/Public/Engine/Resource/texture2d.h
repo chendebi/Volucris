@@ -15,15 +15,9 @@ namespace volucris
 	public:
 		Texture2D();
 
-		Texture2D(uint8* data, Size size, Texture::Format format);
+		Texture2D(TextureData data);
 
 		~Texture2D();
-
-		void setSize(int width, int height) { m_data.size = Size(width, height); m_dirty = true; }
-
-		void setFormat(Texture::Format format) { m_data.format = format; m_dirty = true;}
-		
-		void setData(uint8* data, size_t size);
 
 		void update();
 

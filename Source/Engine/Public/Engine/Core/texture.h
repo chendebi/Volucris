@@ -21,9 +21,9 @@ namespace volucris
 
 	struct TextureData
 	{
-		uint8 hdr;
-		Texture::Format format;
-		Size size;
+		uint8 hdr = false;
+		Size size = { 0,0 };
+		Texture::Format format = Texture::UNKNOWN;
 		std::vector<uint8> data;
 	};
 }

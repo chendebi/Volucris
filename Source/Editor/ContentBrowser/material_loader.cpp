@@ -16,6 +16,7 @@ namespace volucris
 		MaterialParameterType type = MaterialParameterType::NONE;
 		if (name == "float") { type = MaterialParameterType::FLOAT; }
 		else if (name == "vec3") { type = MaterialParameterType::VEC3; }
+		else if (name == "sampler2D") { type = MaterialParameterType::TEXTURE2D; }
 
 		if (type == MaterialParameterType::NONE)
 		{
@@ -24,7 +25,7 @@ namespace volucris
 		return type;
 	}
 
-	static bool getShaderSource(const std::string& filePath, std::string& source, MaterialParameterMap& map, MaterialUniformBlocks& uniformBlocks)
+	static bool getShaderSource(const std::string& filePath, std::string& source, MaterialParameterMap& map)
 	{
 		V_LOG_DEBUG(Editor, "load shader source: {}", filePath)
 			std::ifstream file(filePath);
@@ -37,7 +38,6 @@ namespace volucris
 		std::string res;
 		std::string line;
 		size_t lineCount = 1;
-		MaterialUniformBlocks parameters = 0;
 		while (std::getline(file, line))
 		{
 			std::regex uboPattern(R"(uniform\s+(\w+)(?:\s*\{|\s*;)?)");
@@ -50,14 +50,7 @@ namespace volucris
 				MaterialParameterType type = MaterialParameterType::NONE;    // "mat4"
 				std::string name = matches[2];    // "v_modelMat"
 
-				if (name == MATERIAL_UNIFORM_PRIMITIVE_INFO)
-				{
-					parameters |= MaterialUniformBlock::PRIMITIVE_INFO;
-				}
-				else
-				{
-					type = getTypeByString(matches[1]);
-				}
+				type = getTypeByString(matches[1]);
 
 				if (type != MaterialParameterType::NONE)
 				{
@@ -65,33 +58,11 @@ namespace volucris
 					map[type].push_back(name);
 				}
 			}
-			else if (std::regex_search(line, matches, uboPattern))
-			{
-				std::string name = matches[1];
-
-				if (name == MATERIAL_UNIFORM_CAMERA_INFO)
-				{
-					parameters |= MaterialUniformBlock::CAMERA_INFO;
-				}
-				else if (name == MATERIAL_UNIFORM_PRIMITIVE_INFO)
-				{
-					parameters |= MaterialUniformBlock::PRIMITIVE_INFO;
-				}
-				else if (name == MATERIAL_UNIFORM_DIRECTION_LIGHT)
-				{
-					parameters |= MaterialUniformBlock::DIRECTION_LIGHT;
-				}
-				else
-				{
-					V_LOG_DEBUG(Editor, "find unsupported uniform block: {}", name);
-				}
-			}
 
 			++lineCount;
 			res += line + "\n";
 		}
 		source = std::move(res);
-		uniformBlocks = parameters;
 		return true;
 	}
 
@@ -99,8 +70,7 @@ namespace volucris
 	{
 		MaterialParameterMap map;
 		std::string vss, fss;
-		MaterialUniformBlocks blocks = 0;
-		if (!getShaderSource(vsf, vss, map, blocks) || !getShaderSource(fsf, fss, map, blocks))
+		if (!getShaderSource(vsf, vss, map) || !getShaderSource(fsf, fss, map))
 		{
 			V_LOG_WARN(Editor, "load material failed.");
 			return nullptr;
@@ -119,7 +89,6 @@ namespace volucris
 				resource->addParameter(name, type);
 			}
 		}
-
 
 		return resource;
 	}
