@@ -124,13 +124,17 @@ namespace volucris
 			asset.path = m_pathWidget->getSelectedPathItem()->getResourceDirectory();
 			asset.name = m_buffer.data();
 			asset.assetPath = fmt::format("{}/{}", asset.path, asset.name);
+			auto package = material->getPackage();
+			package.pkAsset = asset;
+			package.pkDirty = false;
+
 			V_LOG_INFO(Editor, "add material: {}", asset.getAssetPath());
 			V_LOG_INFO(Editor, " vertex shader {}", vs);
 			V_LOG_INFO(Editor, " fragment shader: {}", fs);
 
 			material->setAsset(asset);
 			ResourceRegistry::Instance().registry(material);
-			ResourceRegistry::Instance().save(material);
+			//ResourceRegistry::Instance().save(material);
 			return true;
 		}
 		return false;

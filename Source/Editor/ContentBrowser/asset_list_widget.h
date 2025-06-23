@@ -2,6 +2,7 @@
 #define __volucris_asset_list_widget_h__
 
 #include <Engine/Application/widget.h>
+#include "Engine/Resource/resource_object.h"
 #include <string>
 #include <glm/glm.hpp>
 #include "content_browser_events.h"
@@ -19,14 +20,22 @@ namespace volucris
 
 		void build() override;
 
-		void setCurrentFiles();
+		void setCurrentFiles(const std::string& path);
 
 		void renderAssetGrid();
 
+		void setAssetObject(std::shared_ptr<ResourceObject> res);
+
 		void setCurrentPath(const std::string& path) {
 			m_currentPath = path;
-			setCurrentFiles();
+			setCurrentFiles(path);
 		}
+
+		void drawFileItem(const std::string& filePath);
+
+		void drawObjectItem(std::shared_ptr<ResourceObject> obj);
+
+		void handleObjectClick(std::shared_ptr<ResourceObject> obj);
 
 		PathSelectedEvent& getDirectorySelectedEvent() { return m_pathSelectedEvent; }
 
@@ -34,11 +43,15 @@ namespace volucris
 	private:
 
 		std::vector<std::string> m_currentFiles;  // 当前显示的文件列表
+		
+		std::vector<std::shared_ptr<ResourceObject>> m_assetObjects;  //注册但未保存的资产对象
 
 		float m_thumbnailSize;// 缩略图大小
 		glm::vec4 m_assetColor; // 资产框颜色
 
 		std::string m_currentPath;
+
+		bool m_showAlreadySavedPopup;   //是否保存弹窗标志
 
 		PathSelectedEvent m_pathSelectedEvent; 
 	};
