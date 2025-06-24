@@ -84,13 +84,22 @@ namespace volucris
 		state->renderTarget = this;
 	}
 
-	void RHIRenderTarget::destroy(RHIState* state)
+	void RHIRenderTarget::destroy(RHICommandList* command)
 	{
+		for (auto & [idx, attachment] : m_colorAttachments)
+		{
+			if (attachment)
+			{
+				command->deleteResource(attachment.get());
+			}
+		}
+
+		if (m_depthAttachment)
+		{
+			command->deleteResource(m_depthAttachment.get());
+		}
+
 		uint32 id = getId();
 		glDeleteFramebuffers(1, &id);
-		if (state->renderTarget == this)
-		{
-			state->renderTarget = nullptr;
-		}
 	}
 }

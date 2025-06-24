@@ -57,7 +57,7 @@ namespace volucris
 	protected:
 		void bind(RHIState* state) override;
 
-		void destroy(RHIState* state) override;
+		void destroy(RHICommandList* command) override;
 
 	private:
 		Size m_size;

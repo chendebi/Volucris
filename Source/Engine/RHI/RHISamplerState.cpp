@@ -23,7 +23,7 @@ namespace volucris
 		return id;
 	}
 
-	void RHISamplerState::destroy(RHIState* state)
+	void RHISamplerState::destroy(RHICommandList* command)
 	{
 		auto id = getId();
 		glDeleteSamplers(1, &id);

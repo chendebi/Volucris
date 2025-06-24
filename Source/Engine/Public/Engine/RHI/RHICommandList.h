@@ -33,9 +33,13 @@ namespace volucris
 
 		void destroy();
 
+		void clear(const RHIClearState& state);
+
 		void executeCommand(const std::string& name);
 
 		void setTexture(RHITexture* texture);
+
+		void setRenderTarget(RHIRenderTarget* renderTarget);
 
 		void bindResource(RHIResource* resource);
 
@@ -46,6 +50,9 @@ namespace volucris
 	private:
 		std::unique_ptr<Window> m_window;
 		RHIState m_state;
+
+		struct Impl;
+		Impl* m_impl;
 
 	private:
 		RHICommandList();

@@ -7,12 +7,10 @@
 #include <Application/FrameSynthesizer.h>
 #include <Render/Command/RenderCommand.h>
 #include <RHI/RHICommandList.h>
+#include <RHI/RHIRenderTarget.h>
 
 namespace volucris
 {
-	static uint32 frameBuffer = 0;
-	static uint32 texture = 0;
-
 	Renderer::Renderer()
 		: Runable(1024)
 	{
@@ -21,9 +19,12 @@ namespace volucris
 	void Renderer::main()
 	{
 		RENDER_SCOPE(BeginFrame)
+		ENQUEUE_COMMMAND_LIST(BindRenderTarget, [this](RHICommandList* cmdList) {
+			cmdList->setRenderTarget(m_renderTarget.get());
+			});
 		ENQUEUE_COMMMAND_LIST(ClearBuffer, [](RHICommandList* cmdList) {
 			cmdList->setViewport(0, 0, 1920, 1080);
-			//cmdList->
+			//  cmdList->clear();
 			});
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
@@ -39,11 +40,24 @@ namespace volucris
 
 	bool Renderer::initialize()
 	{
-		return RHICmdList.initialize(std::move(m_window));
+		bool inited = RHICmdList.initialize(std::move(m_window));
+		if (inited)
+		{
+			m_renderTarget = std::make_shared<RHIRenderTarget>(Size(800, 600));
+			m_renderTarget->attachColor(RHITextureDesc(), 0);
+
+			ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
+				m_renderTarget->init(cmdList);
+				});
+		}
+		return inited;
 	}
 
 	void Renderer::destroy()
 	{
+		ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
+			cmdList->deleteResource(m_renderTarget.get());
+			});
 		RHICmdList.destroy();
 	}
 }

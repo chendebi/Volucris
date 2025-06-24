@@ -1,7 +1,6 @@
 #include "RHI/RHITexture.h"
 #include <glad/glad.h>
 #include <RHI/RHICommandList.h>
-#include <glad/glad.h>
 
 namespace volucris
 {
@@ -71,12 +70,8 @@ namespace volucris
 		state->texture2d = this;
 	}
 
-	void RHITexture2D::destroy(RHIState* state)
+	void RHITexture2D::destroy(RHICommandList* command)
 	{
-		if (state->texture2d == this)
-		{
-			state->texture2d = nullptr;
-		}
 		auto id = getId();
 		glDeleteTextures(1, &id);
 	}

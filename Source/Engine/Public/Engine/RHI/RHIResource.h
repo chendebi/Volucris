@@ -28,7 +28,7 @@ namespace volucris
 		
 		virtual void bind(RHIState* state) {}
 
-		virtual void destroy(RHIState* state) = 0;
+		virtual void destroy(RHICommandList* command) = 0;
 
 	private:
 		friend class RHICommandList;

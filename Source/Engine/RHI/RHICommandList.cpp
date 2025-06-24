@@ -5,9 +5,17 @@
 #include <Core/Volucris.h>
 #include <RHI/RHITexture.h>
 #include <RHI/RHIResource.h>
+#include <RHI/RHIRenderTarget.h>
 
 namespace volucris
 {
+	struct RHICommandList::Impl
+	{
+		GLbitfield clearFlags;
+	};
+
+	//GLbitfield getGLClearFlags()
+
 	RenderScope::RenderScope(const std::string& name)
 	{
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name.c_str());
@@ -20,13 +28,14 @@ namespace volucris
 
 	RHICommandList::RHICommandList()
 		: m_window(nullptr)
+		, m_impl(new Impl)
 	{
 
 	}
 
 	RHICommandList::~RHICommandList()
 	{
-
+		delete m_impl;
 	}
 
 	bool RHICommandList::initialize(std::unique_ptr<Window> window)
@@ -69,6 +78,14 @@ namespace volucris
 		m_window = nullptr;
 	}
 
+	void RHICommandList::clear(const RHIClearState& state)
+	{
+		if (state.buffers != m_state.clearState.buffers)
+		{
+			//glClear(GLbitfield)
+		}
+	}
+
 	void RHICommandList::executeCommand(const std::string& name)
 	{
 		//glDebug
@@ -77,6 +94,11 @@ namespace volucris
 	void RHICommandList::setTexture(RHITexture* texture)
 	{
 		bindResource(texture);
+	}
+
+	void RHICommandList::setRenderTarget(RHIRenderTarget* renderTarget)
+	{
+		bindResource(renderTarget);
 	}
 
 	void RHICommandList::bindResource(RHIResource* resource)
@@ -91,7 +113,7 @@ namespace volucris
 
 	void RHICommandList::deleteResource(RHIResource* resource)
 	{
-		resource->destroy(&m_state);
+		resource->destroy(this);
 		resource->m_id = 0;
 	}
 

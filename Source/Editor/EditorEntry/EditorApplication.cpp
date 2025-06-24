@@ -2,6 +2,7 @@
 #include <Engine/Application/Window.h>
 #include <Engine/Render/ImGuiRenderer.h>
 #include <MaterialEditor/MaterialEditorWidget.h>
+#include <imgui/imgui.h>
 
 namespace volucris
 {
@@ -12,17 +13,30 @@ namespace volucris
 
 using namespace volucris;
 
+class MWidget : public Widget
+{
+public:
+
+	void onBuild() override
+	{
+		ImGui::Begin("Content Browser");
+		ImGui::Text("Hello Imgui");
+		ImGui::End();
+	}
+};
+
 std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 {
 	auto app = std::make_shared<EditorApplication>();
 	auto window1 = std::make_shared<Window>();
-	auto window2 = std::make_shared<Window>();
+	//auto window2 = std::make_shared<Window>();
 	window1->setTitle("Volucris Editor");
-	window2->setTitle("Material Editor");
-	window2->addChild(std::make_shared<MaterialEditorWidget>());
+	window1->addChild(std::make_shared<MWidget>());
+	//window2->setTitle("Material Editor");
+	//window2->addChild(std::make_shared<MaterialEditorWidget>());
 	app->addWindow(window1);
-	app->addWindow(window2);
+	//app->addWindow(window2);
 	window1->getImGuiRenderer()->color = glm::vec4(1.0, 0.0, 0.0, 1.0);
-	window2->getImGuiRenderer()->color = glm::vec4(0.0, 0.0, 1.0, 1.0);
+	//window2->getImGuiRenderer()->color = glm::vec4(0.0, 0.0, 1.0, 1.0);
 	return app;
 }

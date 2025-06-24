@@ -6,6 +6,7 @@
 namespace volucris
 {
 	class Window;
+	class RHIRenderTarget;
 
 	class Renderer : public Runable
 	{
@@ -25,7 +26,7 @@ namespace volucris
 		void run() override;
 
 		bool initialize() override;
-
+		   
 		void destroy() override;
 
 	protected:
@@ -36,6 +37,7 @@ namespace volucris
 
 	private:
 		std::unique_ptr<Window> m_window;
+		std::shared_ptr<RHIRenderTarget> m_renderTarget;
 	};
 }
 
