@@ -22,7 +22,9 @@ namespace volucris
 		RENDER_SCOPE(Frame)
 		ENQUEUE_COMMMAND_LIST(BindRenderTarget, [this](RHICommandList* cmdList) {
 			cmdList->setRenderTarget(m_renderTarget.get());
-			cmdList->clear(RHIClearState());
+			RHIClearState state;
+			state.color = glm::vec4(1.0,0.0,1.0,1.0);
+			cmdList->clear(state);
 			m_reader->readColor(cmdList, {0, 0, 800, 600}, m_renderTarget.get());
 			});
 		FrameSynthesier::getInstance().countRenderFrame();

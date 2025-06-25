@@ -99,11 +99,6 @@ namespace volucris
 	void ImGuiRenderer::render()
 	{
 		V_SCOPED_PROFILE;
-		if (gApp->getWindowCount() > 1)
-		{
-			ImGui::SetCurrentContext(m_imguiContext);
-			glfwMakeContextCurrent(m_windowHandle);
-		}
 		int display_w, display_h;
 		glfwGetFramebufferSize(m_windowHandle, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
@@ -118,5 +113,6 @@ namespace volucris
 	void ImGuiRenderer::makeCurrent()
 	{
 		ImGui::SetCurrentContext(m_imguiContext);
+		glfwMakeContextCurrent(m_windowHandle);
 	}
 }

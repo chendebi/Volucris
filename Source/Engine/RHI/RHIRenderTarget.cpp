@@ -64,9 +64,10 @@ namespace volucris
 			}
 		}
 
-		if (glCheckFramebufferStatus(getId()) != GL_FRAMEBUFFER_COMPLETE)
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
 		{
-			V_LOG_WARN(Engine, "frame buffer init failed.")
+			V_LOG_WARN(Engine, "frame buffer init failed.{}", status)
 		}
 
 		return true;

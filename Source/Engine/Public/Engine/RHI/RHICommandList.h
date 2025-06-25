@@ -66,6 +66,12 @@ namespace volucris
 
 #define RHICmdList volucris::RHICommandList::getInstance()
 
+template<typename F>
+void process_lambda(F&& lambda) {
+	auto& cmdList = RHICmdList;
+	F(&cmdList);
+}
+
 #define ENQUEUE_COMMMAND_LIST(name, function) {\
 	RHICmdList.executeCommand(#name);\
 	auto& cmdList = RHICmdList;\

@@ -29,14 +29,14 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 {
 	auto app = std::make_shared<EditorApplication>();
 	auto window1 = std::make_shared<Window>();
-	//auto window2 = std::make_shared<Window>();
+	auto window2 = std::make_shared<Window>();
 	window1->setTitle("Volucris Editor");
 	window1->addChild(std::make_shared<MWidget>());
-	//window2->setTitle("Material Editor");
-	//window2->addChild(std::make_shared<MaterialEditorWidget>());
+	window2->setTitle("Material Editor");
+	window2->addChild(std::make_shared<MaterialEditorWidget>());
 	app->addWindow(window1);
-	//app->addWindow(window2);
+	app->addWindow(window2);
 	window1->getImGuiRenderer()->color = glm::vec4(1.0, 0.0, 0.0, 1.0);
-	//window2->getImGuiRenderer()->color = glm::vec4(0.0, 0.0, 1.0, 1.0);
+	window2->getImGuiRenderer()->color = glm::vec4(0.0, 0.0, 1.0, 1.0);
 	return app;
 }

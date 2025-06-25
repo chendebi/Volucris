@@ -109,8 +109,9 @@ namespace volucris
 
 		command->bindResource(renderTarget);
 		command->bindResource(this);
-		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
-		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
+		//glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
+		GL_CHECK()
+		//glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
 		GL_CHECK()
 	}
 

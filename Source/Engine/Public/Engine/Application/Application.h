@@ -24,12 +24,15 @@ namespace volucris
 
 		void setMainWindow(const std::shared_ptr<Window>& window);
 
+		void setFocusedWindow(Window* window);
+
 		int getWindowCount() const { return m_windows.size(); }
 
 		int exec();
 
 	private:
 		static Application* s_instance;
+		Window* m_focusedWindow;
 		std::shared_ptr<Window> m_mainWindow;
 		std::vector<std::shared_ptr<Window>> m_windows;
 	};

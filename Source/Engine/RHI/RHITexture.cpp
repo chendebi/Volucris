@@ -1,27 +1,10 @@
 #include "RHI/RHITexture.h"
 #include <glad/glad.h>
 #include <RHI/RHICommandList.h>
+#include <RHI/RHIOpenGL.h>
 
 namespace volucris
 {
-	static GLint convertToGLFormat(Texture::EPixelFormat format)
-	{
-		switch (format)
-		{
-		case volucris::Texture::EPixelFormat::Invalid:
-			break;
-		case volucris::Texture::EPixelFormat::R8G8B8:
-			return GL_RGB;
-			break;
-		case volucris::Texture::EPixelFormat::R8G8B8A8:
-			return GL_RGBA;
-			break;
-		default:
-			break;
-		}
-		return GL_NONE;
-	}
-
 	RHITexture::RHITexture()
 		: RHIResource()
 	{
@@ -60,7 +43,7 @@ namespace volucris
 			return false;
 		}
 		command->setTexture(this);
-		glTexImage2D(GL_TEXTURE_2D, 0, convertToGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, getGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		return true;
 	}
 

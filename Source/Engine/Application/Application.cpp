@@ -16,6 +16,9 @@ namespace volucris
 	Application* Application::s_instance = nullptr;
 
 	Application::Application()
+		: m_focusedWindow(nullptr)
+		, m_mainWindow(nullptr)
+		, m_windows()
 	{
 		if (s_instance != nullptr)
 		{
@@ -38,6 +41,7 @@ namespace volucris
 			m_mainWindow = window;
 		}
 
+		setFocusedWindow(window.get());
 		// todo 添加渲染线程
 	}
 
@@ -60,12 +64,14 @@ namespace volucris
 				window->destroy();
 			}
 			m_windows.clear();
+			setFocusedWindow(nullptr);
 		}
 		else
 		{
 			window->destroyImGuiRenderer();
 			// 上下文切换到主窗口
-			m_mainWindow->getImGuiRenderer()->makeCurrent();
+			setFocusedWindow(m_mainWindow.get());
+
 			window->destroy();
 			VectorHelp::quickRemove(m_windows, window);
 		}
@@ -80,6 +86,20 @@ namespace volucris
 		m_mainWindow = window;
 	}
 
+	void Application::setFocusedWindow(Window* window)
+	{
+		m_focusedWindow = window;
+		if (m_focusedWindow && m_focusedWindow->getImGuiRenderer())
+		{
+			m_focusedWindow->getImGuiRenderer()->makeCurrent();
+
+			// 渲染一帧
+			m_focusedWindow->build();
+
+			m_focusedWindow->getImGuiRenderer()->render();
+		}
+	}
+
 	int Application::exec()
 	{
 		if (!m_mainWindow)
@@ -92,13 +112,8 @@ namespace volucris
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;
-			
-			glfwPollEvents();
 
-			for (const auto& window : m_windows)
-			{
-				window->build();
-			}
+			m_focusedWindow->build();
 
 			/*for (auto renderer : m_renderers)
 			{
@@ -112,11 +127,9 @@ namespace volucris
 
 			FrameSynthesier::getInstance().countGameFrame();
 
-			for (const auto& window : m_windows)
-			{
-				window->getImGuiRenderer()->render();
-			}
-			
+			m_focusedWindow->getImGuiRenderer()->render();
+
+			glfwPollEvents();
 		}
 
 		Renderer::getInstance().quit();
