@@ -89,7 +89,7 @@ namespace volucris
 
 
 	RHIReadPixelBuffer::RHIReadPixelBuffer(size_t size, EBufferUsage usage)
-		: RHIBuffer(std::make_unique<Impl>(Impl::GLBuffer({size, GL_PIXEL_UNPACK_BUFFER, getGLUsage(usage)})))
+		: RHIBuffer(std::make_unique<Impl>(Impl::GLBuffer({size, GL_PIXEL_PACK_BUFFER, getGLUsage(usage)})))
 	{
 	}
 
@@ -109,10 +109,7 @@ namespace volucris
 
 		command->bindResource(renderTarget);
 		command->bindResource(this);
-		//glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
-		GL_CHECK()
-		//glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
-		GL_CHECK()
+		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
 	}
 
 
