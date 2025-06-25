@@ -8,6 +8,7 @@
 #include <Render/Command/RenderCommand.h>
 #include <RHI/RHICommandList.h>
 #include <RHI/RHIRenderTarget.h>
+#include <RHI/RHIBuffer.h>
 
 namespace volucris
 {
@@ -18,13 +19,11 @@ namespace volucris
 
 	void Renderer::main()
 	{
-		RENDER_SCOPE(BeginFrame)
+		RENDER_SCOPE(Frame)
 		ENQUEUE_COMMMAND_LIST(BindRenderTarget, [this](RHICommandList* cmdList) {
 			cmdList->setRenderTarget(m_renderTarget.get());
-			});
-		ENQUEUE_COMMMAND_LIST(ClearBuffer, [](RHICommandList* cmdList) {
-			cmdList->setViewport(0, 0, 1920, 1080);
-			//  cmdList->clear();
+			cmdList->clear(RHIClearState());
+			m_reader->readColor(cmdList, {0, 0, 800, 600}, m_renderTarget.get());
 			});
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
@@ -43,11 +42,16 @@ namespace volucris
 		bool inited = RHICmdList.initialize(std::move(m_window));
 		if (inited)
 		{
+			RHITextureDesc desc;
+			desc.pixelFormat = Texture::EPixelFormat::R8G8B8;
 			m_renderTarget = std::make_shared<RHIRenderTarget>(Size(800, 600));
-			m_renderTarget->attachColor(RHITextureDesc(), 0);
+			m_renderTarget->attachColor(desc, 0);
+
+			m_reader = std::make_shared<RHIReadPixelBuffer>(800 * 600 * 4, RHIBuffer::StreamRead);
 
 			ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
 				m_renderTarget->init(cmdList);
+				m_reader->init(cmdList);
 				});
 		}
 		return inited;
@@ -57,6 +61,7 @@ namespace volucris
 	{
 		ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
 			cmdList->deleteResource(m_renderTarget.get());
+			cmdList->deleteResource(m_reader.get());
 			});
 		RHICmdList.destroy();
 	}

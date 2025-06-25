@@ -7,6 +7,7 @@ namespace volucris
 {
 	class Window;
 	class RHIRenderTarget;
+	class RHIReadPixelBuffer;
 
 	class Renderer : public Runable
 	{
@@ -38,6 +39,7 @@ namespace volucris
 	private:
 		std::unique_ptr<Window> m_window;
 		std::shared_ptr<RHIRenderTarget> m_renderTarget;
+		std::shared_ptr<RHIReadPixelBuffer> m_reader;
 	};
 }
 

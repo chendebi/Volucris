@@ -22,6 +22,16 @@ namespace volucris
 
 		bool init(RHICommandList* command) override;
 
+		RHIResource* getAttachedColor(int32 index) const
+		{
+			auto it = m_colorAttachments.find(index);
+			if (it != m_colorAttachments.end())
+			{
+				return it->second.get();
+			}
+			return nullptr;
+		}
+
 	protected:
 		uint32 create(RHICommandList* command) override;
 

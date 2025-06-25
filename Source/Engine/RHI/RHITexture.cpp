@@ -55,6 +55,10 @@ namespace volucris
 
 	bool RHITexture2D::init(RHICommandList* command)
 	{
+		if (m_pixelFormat == Texture::EPixelFormat::Invalid || !m_size.isValid())
+		{
+			return false;
+		}
 		command->setTexture(this);
 		glTexImage2D(GL_TEXTURE_2D, 0, convertToGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		return true;

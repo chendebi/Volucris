@@ -14,7 +14,20 @@ namespace volucris
 		GLbitfield clearFlags;
 	};
 
-	//GLbitfield getGLClearFlags()
+	GLbitfield getGLClearFlags(uint32 buffers)
+	{
+		GLbitfield flags = 0;
+		if (buffers & RHIClearState::ColorBuffer)
+		{
+			flags |= GL_COLOR_BUFFER_BIT;
+		}
+		if (buffers & RHIClearState::DepthBuffer)
+		{
+			flags |= GL_DEPTH_BUFFER_BIT;
+		}
+
+		return flags;
+	}
 
 	RenderScope::RenderScope(const std::string& name)
 	{
@@ -30,7 +43,7 @@ namespace volucris
 		: m_window(nullptr)
 		, m_impl(new Impl)
 	{
-
+		m_impl->clearFlags = getGLClearFlags(m_state.clearState.buffers);
 	}
 
 	RHICommandList::~RHICommandList()
@@ -80,10 +93,18 @@ namespace volucris
 
 	void RHICommandList::clear(const RHIClearState& state)
 	{
+		if (state.color != m_state.clearState.color)
+		{
+			m_state.clearState.color = state.color;
+			glClearColor(state.color.r, state.color.g, state.color.b, state.color.a);
+		}
+
 		if (state.buffers != m_state.clearState.buffers)
 		{
-			//glClear(GLbitfield)
+			m_impl->clearFlags = getGLClearFlags(m_state.clearState.buffers);
+			m_state.clearState.buffers = state.buffers;
 		}
+		glClear(m_impl->clearFlags);
 	}
 
 	void RHICommandList::executeCommand(const std::string& name)

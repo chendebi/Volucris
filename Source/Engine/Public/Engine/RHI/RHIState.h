@@ -21,7 +21,7 @@ namespace volucris
 		};
 
 		uint32 buffers = Buffer::ColorAndDepth;
-		glm::vec4 color = glm::vec4(0,0,0,1);
+		glm::vec4 color = glm::vec4(1,1,0,1);
 	};
 
 	struct RHIState

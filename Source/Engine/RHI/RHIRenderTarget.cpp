@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <RHI/RHIState.h>
 #include <RHI/RHICommandList.h>
+#include <Core/Volucris.h>
 
 namespace volucris
 {
@@ -61,6 +62,11 @@ namespace volucris
 				v_check(false);
 				return false;
 			}
+		}
+
+		if (glCheckFramebufferStatus(getId()) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			V_LOG_WARN(Engine, "frame buffer init failed.")
 		}
 
 		return true;

@@ -54,6 +54,8 @@ namespace volucris
 
 		bool init(RHICommandList* command) override;
 
+		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
+
 	protected:
 		void bind(RHIState* state) override;
 

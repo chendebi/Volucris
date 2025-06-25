@@ -1,0 +1,50 @@
+#ifndef __volucris_rhi_buffer_h__
+#define __volucris_rhi_buffer_h__
+
+#include <Engine/RHI/RHIResource.h>
+#include <Engine/Core/TextureDefines.h>
+#include <Engine/Core/Rect.h>
+
+namespace volucris
+{
+	class RHIRenderTarget;
+	class RHICommandList;
+
+	class RHIBuffer : public RHIResource
+	{
+	public:
+		enum EBufferUsage
+		{
+			StaticDraw,
+			DynamicDraw,
+			StreamRead,
+			StreamWrite
+		};
+
+		bool init(RHICommandList* command) override;
+
+	protected:
+		struct Impl;
+		RHIBuffer(std::unique_ptr<Impl> buffer);
+
+		uint32 create(RHICommandList* command) override;
+
+		void bind(RHIState* state) override;
+
+		void destroy(RHICommandList* command) override;
+
+	private:
+		std::unique_ptr<Impl> m_impl;
+	};
+
+	class RHIReadPixelBuffer : public RHIBuffer
+	{
+	public:
+		RHIReadPixelBuffer(size_t size, EBufferUsage usage = StaticDraw);
+
+		void readColor(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index = 0);
+	};
+
+}
+
+#endif // !__volucris_rhi_buffer_h__
