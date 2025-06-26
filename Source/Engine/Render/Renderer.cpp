@@ -25,7 +25,7 @@ namespace volucris
 			RHIClearState state;
 			state.color = glm::vec4(1.0,0.0,1.0,1.0);
 			cmdList->clear(state);
-			m_reader->readColor(cmdList, {0, 0, 800, 600}, m_renderTarget.get());
+			m_reader->startRead(cmdList, {0, 0, 800, 600}, m_renderTarget.get());
 			});
 		FrameSynthesier::getInstance().countRenderFrame();
 	}

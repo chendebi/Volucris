@@ -33,7 +33,7 @@ namespace volucris
 
 		void destroy(RHICommandList* command) override;
 
-	private:
+	protected:
 		std::unique_ptr<Impl> m_impl;
 	};
 
@@ -42,7 +42,11 @@ namespace volucris
 	public:
 		RHIReadPixelBuffer(size_t size, EBufferUsage usage = StaticDraw);
 
-		void readColor(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index = 0);
+		void startRead(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index = 0);
+
+		std::vector<uint8> readColor(RHICommandList* command);
+
+		bool readColorTo(std::vector<uint8>& data, RHICommandList* command);
 	};
 
 }

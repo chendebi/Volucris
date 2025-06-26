@@ -56,6 +56,8 @@ namespace volucris
 
 		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
 
+		Size getSize() const { return m_size; }
+
 	protected:
 		void bind(RHIState* state) override;
 

@@ -93,7 +93,7 @@ namespace volucris
 	{
 	}
 
-	void RHIReadPixelBuffer::readColor(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index)
+	void RHIReadPixelBuffer::startRead(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index)
 	{
 		auto target = renderTarget->getAttachedColor(index);
 		if (!target)
@@ -112,5 +112,36 @@ namespace volucris
 		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
 	}
 
+	std::vector<uint8> RHIReadPixelBuffer::readColor(RHICommandList* command)
+	{
+		command->bindResource(this);
+		void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+		if (ptr == nullptr)
+		{
+			V_LOG_ERROR(Engine, "Failed to map pixel buffer for reading color data.")
+			return {};
+		}
+		std::vector<uint8> colorData(m_impl->buffer.size);
+		memcpy(colorData.data(), ptr, m_impl->buffer.size);
+		return colorData;
+	}
 
+	bool RHIReadPixelBuffer::readColorTo(std::vector<uint8>& data, RHICommandList* command)
+	{
+		command->bindResource(this);
+		void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+		if (ptr == nullptr)
+		{
+			V_LOG_ERROR(Engine, "Failed to map pixel buffer for reading color data.")
+			return false;
+		}
+
+		if (data.size() < m_impl->buffer.size)
+		{
+			data.resize(m_impl->buffer.size);
+		}
+
+		memcpy(data.data(), ptr, m_impl->buffer.size);
+		return true;
+	}
 }
