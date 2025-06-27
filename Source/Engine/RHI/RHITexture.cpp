@@ -43,7 +43,7 @@ namespace volucris
 			return false;
 		}
 		command->setTexture(this);
-		glTexImage2D(GL_TEXTURE_2D, 0, getGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_size.width, m_size.height);
 		return true;
 	}
 

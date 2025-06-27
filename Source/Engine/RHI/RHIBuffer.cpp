@@ -5,6 +5,8 @@
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHITexture.h>
 #include <RHI/RHIOpenGL.h>
+#include <stb_image/stb_image_write.h>
+#include <FileSystem/FileSystem.h>
 
 namespace volucris
 {
@@ -24,6 +26,20 @@ namespace volucris
 			break;
 		}
 		return GL_STATIC_DRAW;
+	}
+
+	static GLenum getGLReadFormat(Texture::EPixelFormat format)
+	{
+		switch (format)
+		{
+		case volucris::Texture::EPixelFormat::R8G8B8:
+			return GL_RGB;
+		case volucris::Texture::EPixelFormat::R8G8B8A8:
+			return GL_RGBA;
+		default:
+			break;
+		}
+		return GL_NONE;
 	}
 
 	static GLenum getGLPixelBufferTarget(RHIBuffer::EBufferUsage usage)
@@ -109,7 +125,8 @@ namespace volucris
 
 		command->bindResource(renderTarget);
 		command->bindResource(this);
-		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
+		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
+		GL_CHECK();
 	}
 
 	std::vector<uint8> RHIReadPixelBuffer::readColor(RHICommandList* command)
@@ -123,6 +140,7 @@ namespace volucris
 		}
 		std::vector<uint8> colorData(m_impl->buffer.size);
 		memcpy(colorData.data(), ptr, m_impl->buffer.size);
+		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 		return colorData;
 	}
 
@@ -136,12 +154,18 @@ namespace volucris
 			return false;
 		}
 
-		if (data.size() < m_impl->buffer.size)
+		if (data.size() != m_impl->buffer.size)
 		{
-			data.resize(m_impl->buffer.size);
+			return false;
 		}
-
 		memcpy(data.data(), ptr, m_impl->buffer.size);
+		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
 		return true;
+	}
+
+	RHIWritePixelBuffer::RHIWritePixelBuffer(size_t size, EBufferUsage usage)
+		: RHIBuffer(std::make_unique<Impl>(Impl::GLBuffer({ size, GL_PIXEL_UNPACK_BUFFER, getGLUsage(usage) })))
+	{
 	}
 }

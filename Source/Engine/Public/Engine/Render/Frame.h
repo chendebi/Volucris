@@ -15,14 +15,19 @@ namespace volucris
 	public:
 		Frame();
 
+		~Frame();
+
 		void resize(int width, int height);
 
 		void render(RHICommandList* cmdList);
 
+		void swapFrameData(RHICommandList* cmdList);
+
 	private:
-		std::unique_ptr<RHIRenderTarget> m_target;
+		std::vector<std::unique_ptr<RHIRenderTarget>> m_targets;
 		std::vector<std::unique_ptr<RHIReadPixelBuffer>> m_targetReaders;
-		std::vector<Texture::TextureData> m_targetDatas;
+		Texture::TextureData m_targetData;
+		int m_current;
 	};
 }
 

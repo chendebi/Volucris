@@ -6,17 +6,21 @@
 namespace volucris
 {
 	class Window;
-	class RHIRenderTarget;
-	class RHIReadPixelBuffer;
+	class Frame;
+	class RHICommandList;
 
 	class Renderer : public Runable
 	{
 	public:
+		~Renderer();
+
 		static Renderer& getInstance()
 		{
 			static Renderer inst;
 			return inst;
 		}
+
+		RHICommandList* getRenderCommand() { return m_cmdList.get(); }
 
 	protected:
 		Renderer();
@@ -38,9 +42,11 @@ namespace volucris
 
 	private:
 		std::unique_ptr<Window> m_window;
-		std::shared_ptr<RHIRenderTarget> m_renderTarget;
-		std::shared_ptr<RHIReadPixelBuffer> m_reader;
+		std::unique_ptr<Frame> m_frame;
+		std::unique_ptr<RHICommandList> m_cmdList;
 	};
 }
+
+#define RHICmdList volucris::Renderer::getInstance().getRenderCommand()
 
 #endif // !__volucris_renderer_h__

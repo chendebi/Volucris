@@ -13,39 +13,24 @@
 #include <tracy/Tracy.hpp>
 #include <Application/Application.h>
 
+#include <Engine/RHI/RHICommandList.h>
+#include <Engine/Application/Window.h>
+
 namespace volucris
 {
 	bool s_gladInitialized = false;
 
-	ImGuiRenderer::ImGuiRenderer(GLFWwindow* handle)
-		: m_windowHandle(handle), m_imguiContext(nullptr)
+	ImGuiRenderer::ImGuiRenderer(Window* window)
+		: m_imguiContext(nullptr)
+		, m_cmdList(std::make_unique<RHICommandList>())
+		, m_clear()
 	{
-		glfwMakeContextCurrent(handle);
-		glfwSwapInterval(1); // Enable vsync
-		if (!s_gladInitialized)
-		{
-			gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
-
-			{
-				const auto vender = glGetString(GL_VENDOR);
-				const auto renderer = glGetString(GL_RENDERER);
-				const auto language = glGetString(GL_SHADING_LANGUAGE_VERSION);
-				const auto version = glGetString(GL_VERSION);
-
-				V_LOG_INFO(Engine, "context initialized");
-				V_LOG_INFO(Engine, "	vender: {}", (char*)vender);
-				V_LOG_INFO(Engine, "	renderer: {}", (char*)renderer);
-				V_LOG_INFO(Engine, "	version: {}", (char*)version);
-				V_LOG_INFO(Engine, "	language version: {}", (char*)language);
-			}
-
-			s_gladInitialized = true;
-		}
+		m_cmdList->initialize(window, true);
 
 		IMGUI_CHECKVERSION();
 		m_imguiContext = ImGui::CreateContext();
 		ImGui::SetCurrentContext(m_imguiContext);
-		ImGui_ImplGlfw_InitForOpenGL(handle, true);
+		ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), true);
 		if (!ImGui_ImplOpenGL3_Init("#version 330"))
 		{
 			V_LOG_CRITICAL(Engine, "imgui initialize failed");
@@ -99,20 +84,18 @@ namespace volucris
 	void ImGuiRenderer::render()
 	{
 		V_SCOPED_PROFILE;
-		int display_w, display_h;
-		glfwGetFramebufferSize(m_windowHandle, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
-		glClearColor(color.x, color.y, color.z, color.w);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		m_cmdList->setViewport(0, 0, 800, 600);
+		m_cmdList->clear(m_clear);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		glfwSwapBuffers(m_windowHandle);
+		m_cmdList->swapBuffers();
 	}
 
 	void ImGuiRenderer::makeCurrent()
 	{
 		ImGui::SetCurrentContext(m_imguiContext);
-		glfwMakeContextCurrent(m_windowHandle);
+		m_cmdList->makeCurrent();
 	}
 }

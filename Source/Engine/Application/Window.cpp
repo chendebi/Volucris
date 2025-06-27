@@ -39,7 +39,7 @@ namespace volucris
 		m_handle = glfwCreateWindow(800, 600, m_title.c_str(), nullptr, nullptr);
 		if (!offscreen)
 		{
-			m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_handle);
+			m_imguiRenderer = std::make_unique<ImGuiRenderer>(this);
 
 			glfwSetWindowUserPointer(m_handle, this);
 			glfwSetWindowCloseCallback(m_handle, [](GLFWwindow* handle) {
@@ -76,7 +76,6 @@ namespace volucris
 
 	void Window::onBuild()
 	{
-		m_imguiRenderer->makeCurrent();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();

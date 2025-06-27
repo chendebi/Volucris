@@ -21,6 +21,8 @@ namespace volucris
 
 		void setSize(int w, int h) { width = w; height = h; }
 
+		void setSize(const Size& size) { width = size.width; height = size.height; }
+
 		Point getPoint() const { return { x, y }; }
 
 		Size getSize() const { return { width, height }; }

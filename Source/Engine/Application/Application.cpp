@@ -19,6 +19,7 @@ namespace volucris
 		: m_focusedWindow(nullptr)
 		, m_mainWindow(nullptr)
 		, m_windows()
+		, m_queue(1024)
 	{
 		if (s_instance != nullptr)
 		{

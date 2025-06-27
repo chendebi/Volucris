@@ -32,6 +32,8 @@ namespace volucris
 			return nullptr;
 		}
 
+		Size getSize() const { return m_size; }
+
 	protected:
 		uint32 create(RHICommandList* command) override;
 

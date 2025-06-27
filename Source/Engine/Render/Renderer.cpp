@@ -9,9 +9,14 @@
 #include <RHI/RHICommandList.h>
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHIBuffer.h>
+#include <Render/Frame.h>
 
 namespace volucris
 {
+	Renderer::~Renderer()
+	{
+	}
+
 	Renderer::Renderer()
 		: Runable(1024)
 	{
@@ -19,14 +24,7 @@ namespace volucris
 
 	void Renderer::main()
 	{
-		RENDER_SCOPE(Frame)
-		ENQUEUE_COMMMAND_LIST(BindRenderTarget, [this](RHICommandList* cmdList) {
-			cmdList->setRenderTarget(m_renderTarget.get());
-			RHIClearState state;
-			state.color = glm::vec4(1.0,0.0,1.0,1.0);
-			cmdList->clear(state);
-			m_reader->startRead(cmdList, {0, 0, 800, 600}, m_renderTarget.get());
-			});
+		m_frame->render(m_cmdList.get());
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
 
@@ -41,30 +39,20 @@ namespace volucris
 
 	bool Renderer::initialize()
 	{
-		bool inited = RHICmdList.initialize(std::move(m_window));
+		m_cmdList = std::make_unique<RHICommandList>();
+		bool inited = m_cmdList->initialize(m_window.get());
 		if (inited)
 		{
-			RHITextureDesc desc;
-			desc.pixelFormat = Texture::EPixelFormat::R8G8B8;
-			m_renderTarget = std::make_shared<RHIRenderTarget>(Size(800, 600));
-			m_renderTarget->attachColor(desc, 0);
-
-			m_reader = std::make_shared<RHIReadPixelBuffer>(800 * 600 * 4, RHIBuffer::StreamRead);
-
-			ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
-				m_renderTarget->init(cmdList);
-				m_reader->init(cmdList);
-				});
+			m_frame = std::make_unique<Frame>();
+			m_frame->resize(800, 600);
 		}
 		return inited;
 	}
 
 	void Renderer::destroy()
 	{
-		ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
-			cmdList->deleteResource(m_renderTarget.get());
-			cmdList->deleteResource(m_reader.get());
-			});
-		RHICmdList.destroy();
+		m_frame = nullptr;
+		m_window->destroy();
+		m_cmdList->destroy();
 	}
 }

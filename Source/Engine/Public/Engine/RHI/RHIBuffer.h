@@ -49,6 +49,17 @@ namespace volucris
 		bool readColorTo(std::vector<uint8>& data, RHICommandList* command);
 	};
 
+	class RHIWritePixelBuffer : public RHIBuffer
+	{
+	public:
+		RHIWritePixelBuffer(size_t size, EBufferUsage usage = StaticDraw);
+
+		void startWrite(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index = 0);
+
+		std::vector<uint8> readColor(RHICommandList* command);
+
+		bool readColorTo(std::vector<uint8>& data, RHICommandList* command);
+	};
 }
 
 #endif // !__volucris_rhi_buffer_h__
