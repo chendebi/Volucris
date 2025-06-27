@@ -114,6 +114,12 @@ namespace volucris
 		{
 			V_SCOPED_PROFILE;
 
+			std::function<void()> command;
+			while (m_queue.pop(command, false))
+			{
+				command();
+			}
+
 			m_focusedWindow->build();
 
 			/*for (auto renderer : m_renderers)
