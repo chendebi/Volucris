@@ -1,4 +1,4 @@
-#include <Render/Frame.h>
+#include <Render/View.h>
 #include <RHI/RHICommandList.h>
 #include <RHI/RHIBuffer.h>
 #include <RHI/RHIRenderTarget.h>
@@ -9,7 +9,7 @@ constexpr int FrameCount = 2;
 
 namespace volucris
 {
-	Frame::Frame()
+	View::View()
 		: m_targets()
 		, m_targetReaders()
 		, m_targetData()
@@ -17,7 +17,7 @@ namespace volucris
 	{
 	}
 
-	Frame::~Frame()
+	View::~View()
 	{
 		for (auto& target : m_targets)
 		{
@@ -30,7 +30,7 @@ namespace volucris
 		}
 	}
 
-	void Frame::resize(int width, int height)
+	void View::resize(int width, int height)
 	{
 		for (auto& target : m_targets)
 		{
@@ -65,19 +65,19 @@ namespace volucris
 		m_current = 0;
 	}
 
-	void Frame::render(RHICommandList* cmdList)
+	void View::render(RHICommandList* cmdList)
 	{
-		RENDER_SCOPE(Frame);
+		RENDER_SCOPE(View);
 
 		cmdList->bindResource(m_targets[m_current].get());
 		RHIClearState state;
 		state.color = { 0.0, 0.0, 1.0, 1.0 };
 		cmdList->clear(state);
 
-		swapFrameData(cmdList);
+		swapViewData(cmdList);
 	}
 
-	void Frame::swapFrameData(RHICommandList* cmdList)
+	void View::swapViewData(RHICommandList* cmdList)
 	{
 		Rect rect = { 0,0,0,0 };
 		rect.setSize(m_targets[m_current]->getSize());

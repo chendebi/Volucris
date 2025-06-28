@@ -5,7 +5,6 @@
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHITexture.h>
 #include <RHI/RHIOpenGL.h>
-#include <stb_image/stb_image_write.h>
 #include <FileSystem/FileSystem.h>
 
 namespace volucris

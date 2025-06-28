@@ -32,19 +32,14 @@ namespace volucris
 			}
 			return this;
 		}
-
-		const Size getSize() const { return m_rect.getSize(); }
-
 	protected:
-		void setSize(Size size);
+		void topWidgetChanged(Widget* widget);
 
 		virtual void onBuild() {}
 
 		virtual void parentChanged(Widget* old, Widget* current) {}
 
-		virtual void sizeChanged(Size newSize) {}
-
-		virtual void parentSizeChanged(Size size) {}
+		virtual void onTopWidgetChanged(Widget* widget) {}
 
 	private:
 		Widget* m_parent;

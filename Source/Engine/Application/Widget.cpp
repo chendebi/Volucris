@@ -52,6 +52,7 @@ namespace volucris
 				m_parent->m_children.push_back(getShared<Widget>());
 			}
 			parentChanged(oldParent, m_parent);
+			topWidgetChanged(getTopWidget());
 		}
 	}
 
@@ -65,13 +66,13 @@ namespace volucris
 		}
 	}
 
-	void Widget::setSize(Size size)
+
+	void Widget::topWidgetChanged(Widget* widget)
 	{
-		m_rect.setSize(size.width, size.height);
-		sizeChanged(size);
+		onTopWidgetChanged(widget);
 		for (const auto& child : m_children)
 		{
-			child->parentSizeChanged(size);
+			child->topWidgetChanged(widget);
 		}
 	}
 }

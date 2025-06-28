@@ -6,7 +6,7 @@
 namespace volucris
 {
 	class Window;
-	class Frame;
+	class View;
 	class RHICommandList;
 
 	class Renderer : public Runable
@@ -21,6 +21,10 @@ namespace volucris
 		}
 
 		RHICommandList* getRenderCommand() { return m_cmdList.get(); }
+
+		void addView(std::unique_ptr<View> view);
+
+		void removeView(View* view);
 
 	protected:
 		Renderer();
@@ -42,11 +46,14 @@ namespace volucris
 
 	private:
 		std::unique_ptr<Window> m_window;
-		std::unique_ptr<Frame> m_frame;
+		std::vector<std::unique_ptr<View>> m_views;
 		std::unique_ptr<RHICommandList> m_cmdList;
 	};
 }
 
 #define RHICmdList volucris::Renderer::getInstance().getRenderCommand()
+
+#define ENQUEUE_RENDER_COMMAND(cmd) \
+	volucris::Renderer::getInstance().push(cmd, true);
 
 #endif // !__volucris_renderer_h__

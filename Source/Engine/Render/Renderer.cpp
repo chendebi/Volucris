@@ -9,7 +9,8 @@
 #include <RHI/RHICommandList.h>
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHIBuffer.h>
-#include <Render/Frame.h>
+#include <Render/View.h>
+#include <Core/VectorHelp.h>
 
 namespace volucris
 {
@@ -24,7 +25,11 @@ namespace volucris
 
 	void Renderer::main()
 	{
-		m_frame->render(m_cmdList.get());
+		for (auto& view : m_views)
+		{
+			// todo: frame update
+			view->render(m_cmdList.get());
+		}
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
 
@@ -41,18 +46,25 @@ namespace volucris
 	{
 		m_cmdList = std::make_unique<RHICommandList>();
 		bool inited = m_cmdList->initialize(m_window.get());
-		if (inited)
-		{
-			m_frame = std::make_unique<Frame>();
-			m_frame->resize(800, 600);
-		}
 		return inited;
 	}
 
 	void Renderer::destroy()
 	{
-		m_frame = nullptr;
+		m_views.clear();
 		m_window->destroy();
 		m_cmdList->destroy();
+	}
+
+	void Renderer::addView(std::unique_ptr<View> view)
+	{
+		m_views.emplace_back(std::move(view));
+	}
+
+	void Renderer::removeView(View* view)
+	{
+		VectorHelp::quickRemoveAllIf<std::unique_ptr<View>>(m_views, [view](const std::unique_ptr<View>& v) {
+			return v.get() == view;
+			});
 	}
 }

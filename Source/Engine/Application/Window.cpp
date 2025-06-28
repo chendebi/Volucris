@@ -49,7 +49,7 @@ namespace volucris
 
 			glfwSetWindowSizeCallback(m_handle, [](GLFWwindow* handle, int width, int height) {
 				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-				window->setSize({ width, height });
+				//window->setSize({ width, height });
 				});
 
 			glfwSetWindowFocusCallback(m_handle, [](GLFWwindow* handle, int focused) {

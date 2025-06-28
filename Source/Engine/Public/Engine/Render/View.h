@@ -1,27 +1,27 @@
-#ifndef __volucris_frame_h__
-#define __volucris_frame_h__
+#ifndef __volucris_view_h__
+#define __volucris_view_h__
 
 #include <memory>
 #include <Engine/RHI/RHICommandList.h>
-#include <Core/TextureDefines.h>
+#include <Engine/Core/TextureDefines.h>
 
 namespace volucris
 {
 	class RHIRenderTarget;
 	class RHIReadPixelBuffer;
 
-	class Frame
+	class View
 	{
 	public:
-		Frame();
+		View();
 
-		~Frame();
+		~View();
 
 		void resize(int width, int height);
 
 		void render(RHICommandList* cmdList);
 
-		void swapFrameData(RHICommandList* cmdList);
+		void swapViewData(RHICommandList* cmdList);
 
 	private:
 		std::vector<std::unique_ptr<RHIRenderTarget>> m_targets;
@@ -31,4 +31,4 @@ namespace volucris
 	};
 }
 
-#endif // !__volucris_frame_h__
+#endif // !__volucris_view_h__

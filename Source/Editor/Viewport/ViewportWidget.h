@@ -5,12 +5,23 @@
 
 namespace volucris
 {
+	class View;
+
 	class ViewportWidget : public Widget
 	{
 	public:
+		ViewportWidget();
 
 	protected:
 		void onBuild() override;
+
+		void onTopWidgetChanged(Widget* widget) override;
+
+		void viewSizeChanged(Size size);
+
+	private:
+		View* m_view;
+		Size m_size;
 	};
 }
 

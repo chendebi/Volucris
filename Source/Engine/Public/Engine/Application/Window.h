@@ -3,6 +3,7 @@
 
 #include <Engine/Application/Widget.h>
 #include <string>
+#include <Engine/Application/Event.h>
 
 struct GLFWwindow;
 

@@ -16,10 +16,8 @@ namespace volucris
 	protected:
 		void onBuild() override;
 
-		void parentSizeChanged(Size size) override;
-
 	private:
-		std::unique_ptr<ViewportWidget> m_viewport;
+		std::shared_ptr<ViewportWidget> m_viewport;
 	};
 }
 

@@ -78,6 +78,59 @@ namespace volucris
 		bool isValid() const { return m_callable != nullptr; }
 	};
 
+
+	template <typename ReturnType, typename ...Args>
+	class EventMutiDelegate
+	{
+		using EventCallablePtr = EventCallable<ReturnType, Args...>*;
+
+		std::vector<EventCallablePtr> m_callables;
+
+	public:
+		EventMutiDelegate() = default;
+
+		EventDelegate()
+		{
+
+		}
+
+		EventDelegate(const EventDelegate& other)
+			: m_callable(other.m_callables)
+		{
+		}
+
+		EventDelegate(EventDelegate&& other)
+			: m_callable(std::move(other.m_callables))
+		{
+			other.m_callable = nullptr;
+		}
+
+		~EventDelegate()
+		{
+			delete m_callable;
+		}
+
+		template<typename Callable>
+		void addCallable(EventCallablePtr callable)
+		{
+			if (callable)
+			{
+				m_callables.push_back(callable);
+			}
+		}
+
+		ReturnType invoke(Args... args)
+		{
+			if (m_callable)
+			{
+				return m_callable->invoke(std::forward<Args>(args)...);
+			}
+			return ReturnType();
+		}
+
+		bool isValid() const { return m_callable != nullptr; }
+	};
+
 	
 
 	enum class Key
