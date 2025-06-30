@@ -32,6 +32,13 @@ namespace volucris
 
 	void View::resize(int width, int height)
 	{
+		if (width <= 8 || height <= 8)
+		{
+			return;
+		}
+
+		V_LOG_INFO(Engine, "resize view to {}x{}", width, height);
+
 		for (auto& target : m_targets)
 		{
 			RHICmdList->deleteResource(target.get());
@@ -41,6 +48,7 @@ namespace volucris
 		{
 			RHICmdList->deleteResource(reader.get());
 		}
+		m_targets.clear();
 		m_targetReaders.clear();
 
 		RHITextureDesc desc;

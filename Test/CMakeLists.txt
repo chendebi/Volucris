@@ -29,8 +29,9 @@ function(auto_add_subdirectories)
                     # 添加公共包含路径
                     target_include_directories(${child} PRIVATE
                         ${CMAKE_CURRENT_SOURCE_DIR}/${child}
+                        ${VOLUCRIS_ENGINE_PRIVATE_INCLUDE}
                     )
-                    target_link_libraries(${child} PRIVATE Engine)
+                    target_link_libraries(${child} PRIVATE Engine glfw)
                     set_target_properties(${child} PROPERTIES FOLDER "Test")
                     
                     message(STATUS "Added executable: ${child}")

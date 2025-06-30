@@ -24,11 +24,11 @@ namespace volucris
 		virtual bool init(RHICommandList* command) = 0;
 
 	protected:
-		virtual uint32 create(RHICommandList* command) = 0;
+		virtual uint32 create(RHIState* state) = 0;
 		
 		virtual void bind(RHIState* state) {}
 
-		virtual void destroy(RHICommandList* command) = 0;
+		virtual void destroy(RHIState* state) = 0;
 
 	private:
 		friend class RHICommandList;

@@ -3,7 +3,6 @@
 
 #include <Engine/Core/Object.h>
 #include <Engine/Core/Size.h>
-#include <Engine/Application/Event.h>
 #include <vector>
 #include <Engine/Core/Rect.h>
 
@@ -33,13 +32,13 @@ namespace volucris
 			return this;
 		}
 	protected:
-		void topWidgetChanged(Widget* widget);
+		void topWidgetChanged(Widget* old, Widget* current);
 
 		virtual void onBuild() {}
 
 		virtual void parentChanged(Widget* old, Widget* current) {}
 
-		virtual void onTopWidgetChanged(Widget* widget) {}
+		virtual void onTopWidgetChanged(Widget* old, Widget* current) {}
 
 	private:
 		Widget* m_parent;

@@ -3,6 +3,7 @@
 #include <RHI/RHIState.h>
 #include <RHI/RHICommandList.h>
 #include <Core/Volucris.h>
+#include "RHIOpenGL.h"
 
 namespace volucris
 {
@@ -32,7 +33,6 @@ namespace volucris
 				return false;
 			}
 
-			attachment->getId();
 			if (attachment->isA<RHITexture>())
 			{
 				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, attachment->getId(), 0);
@@ -54,7 +54,7 @@ namespace volucris
 
 			if (m_depthAttachment->isA<RHITexture>())
 			{
-				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthAttachment->getId(), 0);
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthAttachment->getId(), 1);
 			}
 			else
 			{
@@ -70,10 +70,11 @@ namespace volucris
 			V_LOG_WARN(Engine, "frame buffer init failed.{}", status)
 		}
 
+		GL_CHECK()
 		return true;
 	}
 
-	uint32 RHIRenderTarget::create(RHICommandList* command)
+	uint32 RHIRenderTarget::create(RHIState* state)
 	{
 		uint32 id;
 		glGenFramebuffers(1, &id);
@@ -91,8 +92,9 @@ namespace volucris
 		state->renderTarget = this;
 	}
 
-	void RHIRenderTarget::destroy(RHICommandList* command)
+	void RHIRenderTarget::destroy(RHIState* state)
 	{
+		auto command = state->commandList;
 		for (auto & [idx, attachment] : m_colorAttachments)
 		{
 			if (attachment)
@@ -104,6 +106,11 @@ namespace volucris
 		if (m_depthAttachment)
 		{
 			command->deleteResource(m_depthAttachment.get());
+		}
+
+		if (state->renderTarget == this)
+		{
+			state->renderTarget = nullptr;
 		}
 
 		uint32 id = getId();

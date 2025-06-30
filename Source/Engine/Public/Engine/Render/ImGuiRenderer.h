@@ -24,6 +24,8 @@ namespace volucris
 
 		void makeCurrent();
 
+		RHICommandList* getCommandList() const;
+
 	private:
 		ImGuiContext* m_imguiContext;
 		std::unique_ptr<RHICommandList> m_cmdList;

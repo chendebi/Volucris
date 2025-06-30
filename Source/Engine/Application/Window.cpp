@@ -57,6 +57,8 @@ namespace volucris
 				gApp->setFocusedWindow(window);
 				});
 		}
+
+		AttachStateChanged.invoke(this, true);
 	}
 
 	void Window::destroy()
@@ -66,6 +68,7 @@ namespace volucris
 		{
 			glfwDestroyWindow(m_handle);
 			m_handle = nullptr;
+			AttachStateChanged.invoke(this, false);
 		}
 	}
 

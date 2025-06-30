@@ -98,4 +98,9 @@ namespace volucris
 		ImGui::SetCurrentContext(m_imguiContext);
 		m_cmdList->makeCurrent();
 	}
+
+	RHICommandList* ImGuiRenderer::getCommandList() const
+	{
+		return m_cmdList.get();
+	}
 }

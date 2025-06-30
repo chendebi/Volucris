@@ -7,6 +7,7 @@
 
 namespace volucris
 {
+	class RHITexture2D;
 	class RHIRenderTarget;
 	class RHICommandList;
 
@@ -27,11 +28,11 @@ namespace volucris
 		struct Impl;
 		RHIBuffer(std::unique_ptr<Impl> buffer);
 
-		uint32 create(RHICommandList* command) override;
+		uint32 create(RHIState* state) override;
 
 		void bind(RHIState* state) override;
 
-		void destroy(RHICommandList* command) override;
+		void destroy(RHIState* state) override;
 
 	protected:
 		std::unique_ptr<Impl> m_impl;
@@ -54,11 +55,11 @@ namespace volucris
 	public:
 		RHIWritePixelBuffer(size_t size, EBufferUsage usage = StaticDraw);
 
-		void startWrite(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index = 0);
+		void startWrite(RHICommandList* command, std::vector<uint8> data);
 
 		std::vector<uint8> readColor(RHICommandList* command);
 
-		bool readColorTo(std::vector<uint8>& data, RHICommandList* command);
+		bool writeTo(RHITexture2D* texture, RHICommandList* command);
 	};
 }
 

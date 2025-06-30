@@ -23,6 +23,11 @@ namespace volucris
 
 		void swapViewData(RHICommandList* cmdList);
 
+		Texture::TextureData getViewData() const
+		{
+			return m_targetData;
+		}
+
 	private:
 		std::vector<std::unique_ptr<RHIRenderTarget>> m_targets;
 		std::vector<std::unique_ptr<RHIReadPixelBuffer>> m_targetReaders;

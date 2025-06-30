@@ -43,6 +43,7 @@ namespace volucris
 		: m_window(nullptr)
 		, m_impl(new Impl)
 	{
+		m_state.commandList = this;
 		m_impl->clearFlags = getGLClearFlags(m_state.clearState.buffers);
 	}
 
@@ -123,7 +124,7 @@ namespace volucris
 	{
 		if (!resource->isCreated())
 		{
-			auto id = resource->create(this);
+			auto id = resource->create(&m_state);
 			resource->m_id = id;
 		}
 		resource->bind(&m_state);
@@ -133,7 +134,7 @@ namespace volucris
 	{
 		if (resource)
 		{
-			resource->destroy(this);
+			resource->destroy(&m_state);
 			resource->m_id = 0;
 		}
 	}

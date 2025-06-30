@@ -80,11 +80,13 @@ namespace volucris
 	{
 		const auto buffer = m_impl->buffer;
 		command->bindResource(this);
+		GL_CHECK();
 		glBufferData(buffer.target, buffer.size, nullptr, buffer.usage);
+		GL_CHECK();
 		return true;
 	}
 
-	uint32 RHIBuffer::create(RHICommandList* command)
+	uint32 RHIBuffer::create(RHIState* state)
 	{
 		uint32 id;
 		glGenBuffers(1, &id);
@@ -96,7 +98,7 @@ namespace volucris
 		glBindBuffer(m_impl->buffer.target, getId());
 	}
 
-	void RHIBuffer::destroy(RHICommandList* command)
+	void RHIBuffer::destroy(RHIState* state)
 	{
 		auto id = getId();
 		glDeleteBuffers(1, &id);
@@ -124,8 +126,12 @@ namespace volucris
 
 		command->bindResource(renderTarget);
 		command->bindResource(this);
+		GL_CHECK();
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		GL_CHECK();
 		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
 		GL_CHECK();
+		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 	}
 
 	std::vector<uint8> RHIReadPixelBuffer::readColor(RHICommandList* command)
@@ -141,6 +147,16 @@ namespace volucris
 		memcpy(colorData.data(), ptr, m_impl->buffer.size);
 		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 		return colorData;
+	}
+
+	bool RHIWritePixelBuffer::writeTo(RHITexture2D* texture, RHICommandList* command)
+	{
+		command->bindResource(this);
+		command->bindResource(texture);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->getSize().width, texture->getSize().height,
+			getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
+		GL_CHECK();
+		return true;
 	}
 
 	bool RHIReadPixelBuffer::readColorTo(std::vector<uint8>& data, RHICommandList* command)
@@ -166,5 +182,17 @@ namespace volucris
 	RHIWritePixelBuffer::RHIWritePixelBuffer(size_t size, EBufferUsage usage)
 		: RHIBuffer(std::make_unique<Impl>(Impl::GLBuffer({ size, GL_PIXEL_UNPACK_BUFFER, getGLUsage(usage) })))
 	{
+
+	}
+
+	void RHIWritePixelBuffer::startWrite(RHICommandList* command, std::vector<uint8> data)
+	{
+		command->bindResource(this);
+		void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		if (ptr)
+		{
+			memcpy(ptr, data.data(), data.size());
+		}
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 	}
 }

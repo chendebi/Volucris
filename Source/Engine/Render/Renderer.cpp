@@ -37,8 +37,11 @@ namespace volucris
 	{
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		auto context = glfwGetCurrentContext();
+		glfwMakeContextCurrent(nullptr);
 		m_window = std::make_unique<Window>();
 		m_window->create(true);
+		glfwMakeContextCurrent(context);
 		start(std::bind(&Renderer::main, this));
 	}
 
