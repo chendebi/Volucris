@@ -1,0 +1,3 @@
+[submodule "Source/ThirdParty/serialization"]
+	path = Source/ThirdParty/serialization
+	url = git@github.com:chendebi/serialization.git

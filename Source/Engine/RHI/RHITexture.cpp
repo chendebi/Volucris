@@ -47,6 +47,12 @@ namespace volucris
 		return true;
 	}
 
+	/*void RHITexture2D::update(RHICommandList* command, const std::vector<uint8>& data)
+	{
+		command->bindResource(this);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, )
+	}*/
+
 	void RHITexture2D::bind(RHIState* state)
 	{
 		if (state->texture2d == this)
