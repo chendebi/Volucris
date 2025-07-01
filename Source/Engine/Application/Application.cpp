@@ -114,13 +114,9 @@ namespace volucris
 		}
 
 		Renderer::getInstance().run();
-		double lastFrameTime = glfwGetTime();
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;
-
-			V_LOG_TRACE(Engine, "game frame begin");
-
 			std::function<void()> command;
 			while (m_queue.pop(command, false))
 			{
@@ -136,8 +132,6 @@ namespace volucris
 			m_focusedWindow->getImGuiRenderer()->render();
 
 			glfwPollEvents();
-
-			V_LOG_TRACE(Engine, "game frame end");
 		}
 
 		Renderer::getInstance().quit();

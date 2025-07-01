@@ -18,8 +18,6 @@ namespace volucris
 	void Timer::stop()
 	{
 		m_stop = std::chrono::high_resolution_clock::now();
-		//m_duration = std::chrono::duration<double>(m_stop - m_start).count();
-		//return m_duration;
 		m_running = false;
 	}
 	double Timer::getDuration() const
