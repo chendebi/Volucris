@@ -24,11 +24,13 @@ volucris_engine_code(EditorCore EDITOR_CORE_CODE_FILES)
 volucris_engine_code(EditorEntry EDITOR_ENTRY_CODE_FILES)
 volucris_engine_code(Viewport VIEWPORT_CODE_FILES)
 volucris_engine_code(MaterialEditor MATERIAL_EDITOR_CODE_FILES)
+volucris_engine_code(AssetEditor ASSET_EDITOR_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${EDITOR_CORE_CODE_FILES}
     ${EDITOR_ENTRY_CODE_FILES}
     ${MATERIAL_EDITOR_CODE_FILES}
+    ${ASSET_EDITOR_CODE_FILES}
     ${VIEWPORT_CODE_FILES}
 )
 

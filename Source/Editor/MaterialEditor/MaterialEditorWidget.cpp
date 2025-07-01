@@ -10,6 +10,7 @@ namespace volucris
 {
     MaterialEditorWidget::MaterialEditorWidget()
         : m_viewport(std::make_unique<ViewportWidget>())
+        //, m_browserWidget(std::make_shared<ContentBrowserWidget>())
     {
         //addChild(std::make_shared<ViewportWidget>());
     }
@@ -56,6 +57,7 @@ namespace volucris
         ImGui::SetNextWindowClass(&no_title_class);
 		ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_NoTitleBar);
 		ImGui::Text("This is a material editor widget.");
+        ImGui::Text("Hello, ImGui!");
 		ImGui::End();
 	}
 

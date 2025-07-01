@@ -10,6 +10,7 @@
 #include <Engine/Profile/Profile.h>
 #include <Profile/ProfileManager.h>
 #include <tracy/Tracy.hpp>
+#include <iostream>
 
 namespace volucris
 {
@@ -106,8 +107,9 @@ namespace volucris
 		{
 			return 0;
 		}
-
+		std::cout << std::this_thread::get_id();
 		Renderer::getInstance().run();
+		glfwMakeContextCurrent(m_mainWindow->m_handle);
 		double lastFrameTime = glfwGetTime();
 		while (m_mainWindow->isValid())
 		{

@@ -108,6 +108,12 @@ namespace volucris
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(m_windowHandle);
+		const char* errorDesc;
+		int errorCode = glfwGetError(&errorDesc);
+		if (errorCode != GLFW_NO_ERROR)
+		{
+			V_LOG_ERROR(Engine, "{}", errorDesc);
+		}
 	}
 
 	void ImGuiRenderer::makeCurrent()

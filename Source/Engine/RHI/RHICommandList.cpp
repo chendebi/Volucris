@@ -55,6 +55,7 @@ namespace volucris
 	{
 		m_window = std::move(window);
 		auto handle = m_window->getHandle();
+		glfwMakeContextCurrent(nullptr);
 		glfwMakeContextCurrent(handle);
 		glfwSwapInterval(0);
 		gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
