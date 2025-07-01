@@ -32,6 +32,7 @@ volucris_engine_code(FileSystem FILE_SYSTEM_CODE_FILES)
 volucris_engine_code(Game GAME_CODE_FILES)
 volucris_engine_code(Profile PROFILE_CODE_FILES)
 volucris_engine_code(RHI RHI_CODE_FILES)
+volucris_engine_code(Asset ASSET_CODE_FILES)
 
 target_sources(${TARGET} PRIVATE 
     ${CORE_CODE_FILES}
@@ -42,6 +43,7 @@ target_sources(${TARGET} PRIVATE
     ${GAME_CODE_FILES}
     ${PROFILE_CODE_FILES}
     ${RHI_CODE_FILES}
+    ${ASSET_CODE_FILES}
 )
 
 set_target_properties(${TARGET} PROPERTIES FOLDER "Volucris")
