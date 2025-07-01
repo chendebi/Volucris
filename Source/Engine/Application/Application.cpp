@@ -69,9 +69,10 @@ namespace volucris
 		}
 		else
 		{
-			window->destroyImGuiRenderer();
 			// 上下文切换到主窗口
 			setFocusedWindow(m_mainWindow.get());
+
+			window->destroyImGuiRenderer();
 
 			window->destroy();
 			VectorHelp::quickRemove(m_windows, window);
@@ -89,15 +90,19 @@ namespace volucris
 
 	void Application::setFocusedWindow(Window* window)
 	{
+		if (m_focusedWindow == window)
+		{
+			return;
+		}
 		m_focusedWindow = window;
 		if (m_focusedWindow && m_focusedWindow->getImGuiRenderer())
 		{
-			m_focusedWindow->getImGuiRenderer()->makeCurrent();
+			//m_focusedWindow->getImGuiRenderer()->makeCurrent();
 
-			// 渲染一帧
-			m_focusedWindow->build();
+			//// 渲染一帧
+			//m_focusedWindow->build();
 
-			m_focusedWindow->getImGuiRenderer()->render();
+			//m_focusedWindow->getImGuiRenderer()->render();
 		}
 	}
 
@@ -114,6 +119,8 @@ namespace volucris
 		{
 			V_SCOPED_PROFILE;
 
+			V_LOG_TRACE(Engine, "game frame begin");
+
 			std::function<void()> command;
 			while (m_queue.pop(command, false))
 			{
@@ -122,14 +129,6 @@ namespace volucris
 
 			m_focusedWindow->build();
 
-			/*for (auto renderer : m_renderers)
-			{
-				for (auto scene : m_scenes)
-				{
-					scene->update(renderer);
-				}
-			}*/
-
 			Renderer::getInstance().push(nullptr);
 
 			FrameSynthesier::getInstance().countGameFrame();
@@ -137,6 +136,8 @@ namespace volucris
 			m_focusedWindow->getImGuiRenderer()->render();
 
 			glfwPollEvents();
+
+			V_LOG_TRACE(Engine, "game frame end");
 		}
 
 		Renderer::getInstance().quit();

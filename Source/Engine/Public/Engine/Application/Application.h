@@ -20,6 +20,11 @@ namespace volucris
 			return s_instance;
 		}
 
+		void pushCommand(const std::function<void()>& command)
+		{
+			m_queue.push(command);
+		}
+
 		void addWindow(const std::shared_ptr<Window>& window);
 
 		void removeWindow(const std::shared_ptr<Window>& window);

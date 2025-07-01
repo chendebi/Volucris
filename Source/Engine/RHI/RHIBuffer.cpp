@@ -149,19 +149,11 @@ namespace volucris
 		return colorData;
 	}
 
-	bool RHIWritePixelBuffer::writeTo(RHITexture2D* texture, RHICommandList* command)
-	{
-		command->bindResource(this);
-		command->bindResource(texture);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->getSize().width, texture->getSize().height,
-			getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
-		GL_CHECK();
-		return true;
-	}
 
 	bool RHIReadPixelBuffer::readColorTo(std::vector<uint8>& data, RHICommandList* command)
 	{
 		command->bindResource(this);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 		if (ptr == nullptr)
 		{
@@ -175,7 +167,7 @@ namespace volucris
 		}
 		memcpy(data.data(), ptr, m_impl->buffer.size);
 		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-
+		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 		return true;
 	}
 
@@ -185,14 +177,28 @@ namespace volucris
 
 	}
 
+	bool RHIWritePixelBuffer::writeTo(RHITexture2D* texture, RHICommandList* command)
+	{
+		command->bindResource(this);
+		command->bindResource(texture);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->getSize().width, texture->getSize().height,
+			getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
+		GL_CHECK();
+		return true;
+	}
+
 	void RHIWritePixelBuffer::startWrite(RHICommandList* command, std::vector<uint8> data)
 	{
 		command->bindResource(this);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 		if (ptr)
 		{
 			memcpy(ptr, data.data(), data.size());
 		}
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		GL_CHECK();
 	}
 }

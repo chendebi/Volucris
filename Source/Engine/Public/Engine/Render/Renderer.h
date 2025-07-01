@@ -26,6 +26,8 @@ namespace volucris
 
 		void removeView(View* view);
 
+		void renderFrame() { main(); }
+
 	protected:
 		Renderer();
 		void main();

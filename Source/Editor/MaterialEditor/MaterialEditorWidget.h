@@ -16,6 +16,8 @@ namespace volucris
 	protected:
 		void onBuild() override;
 
+		void onTopWidgetChanged(Widget* old, Widget* current) override;
+
 	private:
 		std::shared_ptr<ViewportWidget> m_viewport;
 	};

@@ -34,7 +34,7 @@ namespace volucris
 	{
 		if (width <= 8 || height <= 8)
 		{
-			return;
+			width = height = 8;
 		}
 
 		V_LOG_INFO(Engine, "resize view to {}x{}", width, height);

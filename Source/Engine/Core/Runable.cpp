@@ -21,14 +21,23 @@ namespace volucris
 		m_queue.push(std::move(cmd), block);
 	}
 
+	void Runable::flushCommands()
+	{
+		Fence fence;
+		push([this, &fence]() {
+			fence.signal();
+			});
+		fence.wait();
+	}
+
 	void Runable::quit()
 	{
 		Fence fence;
-		m_queue.push([this, &fence]() {
-			m_running = false;
+		push([this, &fence]() {
+			setRunning(false);
 			m_quitFence = &fence;
 			});
-		fence.waite();
+		fence.wait();
 	}
 
 	bool Runable::start(const std::function<void()>& main)
@@ -36,8 +45,8 @@ namespace volucris
 		m_thread = std::thread([this, main]() {
 			// 初始化
 			V_LOG_INFO(Engine, "start thread")
-			m_running = initialize();
-			if (!m_running)
+			setRunning(initialize());
+			if (!isRunning())
 			{
 				return;
 			}
@@ -56,7 +65,7 @@ namespace volucris
 					}
 					msg();
 
-					if (!m_running)
+					if (!isRunning())
 					{
 						break;
 					}

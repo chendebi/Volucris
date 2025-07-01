@@ -68,12 +68,12 @@ namespace volucris
 		{
 			glfwDestroyWindow(m_handle);
 			m_handle = nullptr;
-			AttachStateChanged.invoke(this, false);
 		}
 	}
 
 	void Window::destroyImGuiRenderer()
 	{
+		AttachStateChanged.invoke(this, false);
 		m_imguiRenderer = nullptr;
 	}
 

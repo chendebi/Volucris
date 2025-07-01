@@ -44,7 +44,6 @@ namespace volucris
 		}
 		command->setTexture(this);
 		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_size.width, m_size.height);
-		GL_CHECK()
 		return true;
 	}
 
