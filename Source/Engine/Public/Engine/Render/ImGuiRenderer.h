@@ -3,16 +3,20 @@
 
 #include <Engine/Core/Object.h>
 #include <glm/glm.hpp>
+#include <Engine/RHI/RHIState.h>
 
 struct GLFWwindow;
 class ImGuiContext;
 
 namespace volucris
 {
+	class Window;
+	class RHICommandList;
+
 	class ImGuiRenderer
 	{
 	public:
-		ImGuiRenderer(GLFWwindow* handle);
+		ImGuiRenderer(Window* window);
 
 		~ImGuiRenderer();
 
@@ -20,11 +24,12 @@ namespace volucris
 
 		void makeCurrent();
 
-		glm::vec4 color;
+		RHICommandList* getCommandList() const;
 
 	private:
-		GLFWwindow* m_windowHandle;
 		ImGuiContext* m_imguiContext;
+		std::unique_ptr<RHICommandList> m_cmdList;
+		RHIClearState m_clear;
 	};
 }
 

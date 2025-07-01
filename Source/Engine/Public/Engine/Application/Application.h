@@ -3,6 +3,8 @@
 
 #include <Engine/Core/Object.h>
 #include <vector>
+#include <functional>
+#include <Engine/Core/CircleQueue.h>
 
 namespace volucris
 {
@@ -35,6 +37,7 @@ namespace volucris
 		Window* m_focusedWindow;
 		std::shared_ptr<Window> m_mainWindow;
 		std::vector<std::shared_ptr<Window>> m_windows;
+		CircleQueue<std::function<void()>> m_queue;
 	};
 }
 

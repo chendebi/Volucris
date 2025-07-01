@@ -4,7 +4,7 @@
 #include <Engine/RHI/RHIResource.h>
 #include <Engine/Core/Size.h>
 #include <Engine/Core/TextureDefines.h>
-#include <Core/TypesHelp.h>
+#include <Engine/Core/TypesHelp.h>
 
 namespace volucris
 {
@@ -40,7 +40,7 @@ namespace volucris
 		RHITexture();
 
 	protected:
-		uint32 create(RHICommandList* command) override;
+		uint32 create(RHIState* state) override;
 	};
 
 	class RHITexture2D : public RHITexture
@@ -56,10 +56,12 @@ namespace volucris
 
 		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
 
+		Size getSize() const { return m_size; }
+
 	protected:
 		void bind(RHIState* state) override;
 
-		void destroy(RHICommandList* command) override;
+		void destroy(RHIState* state) override;
 
 	private:
 		Size m_size;

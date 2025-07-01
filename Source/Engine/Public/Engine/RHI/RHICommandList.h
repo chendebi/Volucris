@@ -21,17 +21,17 @@ namespace volucris
 	class RHICommandList
 	{
 	public:
+		RHICommandList();
+
 		~RHICommandList();
 
-		static RHICommandList& getInstance()
-		{
-			static RHICommandList inst;
-			return inst;
-		}
-
-		bool initialize(std::unique_ptr<Window> widnow);
+		bool initialize(Window* widnow, bool sync = false);
 
 		void destroy();
+
+		void makeCurrent();
+
+		void swapBuffers();
 
 		void clear(const RHIClearState& state);
 
@@ -48,34 +48,12 @@ namespace volucris
 		void setViewport(int x, int y, int w, int h);
 
 	private:
-		std::unique_ptr<Window> m_window;
+		Window* m_window;
 		RHIState m_state;
 
 		struct Impl;
 		Impl* m_impl;
-
-	private:
-		RHICommandList();
-
-		RHICommandList(const RHICommandList&) = delete;
-		RHICommandList(RHICommandList&&) = delete;
-		RHICommandList& operator=(const RHICommandList&) = delete;
-		RHICommandList& operator=(RHICommandList&&) = delete;
 	};
-}
-
-#define RHICmdList volucris::RHICommandList::getInstance()
-
-template<typename F>
-void process_lambda(F&& lambda) {
-	auto& cmdList = RHICmdList;
-	F(&cmdList);
-}
-
-#define ENQUEUE_COMMMAND_LIST(name, function) {\
-	RHICmdList.executeCommand(#name);\
-	auto& cmdList = RHICmdList;\
-	function(&cmdList);\
 }
 
 #define RENDER_SCOPE(name) volucris::RenderScope V_UNIQUE_NAME(__renderScope_) = volucris::RenderScope(#name);

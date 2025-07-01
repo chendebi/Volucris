@@ -3,15 +3,21 @@
 
 #include <Engine/Application/Widget.h>
 #include <string>
+#include <Engine/Core/Delegate.h>
 
 struct GLFWwindow;
 
 namespace volucris
 {
+	DECLARE_EVENT_MUTI_DELEGATE(OnWindowAttachStateChanged, void, class Window*, bool)
+
 	class ImGuiRenderer;
 
 	class Window : public Widget
 	{
+	public:
+		OnWindowAttachStateChanged AttachStateChanged;
+
 	public:
 		Window();
 

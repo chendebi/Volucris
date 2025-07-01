@@ -41,6 +41,7 @@ namespace volucris
 	{
 		if (m_parent != parent)
 		{
+			auto oldTopWidget = getTopWidget();
 			if (m_parent)
 			{
 				VectorHelp::quickRemove<Widget>(m_parent->m_children, this);
@@ -52,6 +53,7 @@ namespace volucris
 				m_parent->m_children.push_back(getShared<Widget>());
 			}
 			parentChanged(oldParent, m_parent);
+			topWidgetChanged(oldTopWidget, getTopWidget());
 		}
 	}
 
@@ -65,13 +67,13 @@ namespace volucris
 		}
 	}
 
-	void Widget::setSize(Size size)
+
+	void Widget::topWidgetChanged(Widget* old, Widget* current)
 	{
-		m_rect.setSize(size.width, size.height);
-		sizeChanged(size);
+		onTopWidgetChanged(old, current);
 		for (const auto& child : m_children)
 		{
-			child->parentSizeChanged(size);
+			child->topWidgetChanged(old, current);
 		}
 	}
 }

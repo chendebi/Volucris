@@ -13,9 +13,9 @@ namespace volucris
 		bool init(RHICommandList* command) override;
 
 	protected:
-		uint32 create(RHICommandList* command) override;
+		uint32 create(RHIState* state) override;
 
-		void destroy(RHICommandList* command) override;
+		void destroy(RHIState* state) override;
 	};
 }
 

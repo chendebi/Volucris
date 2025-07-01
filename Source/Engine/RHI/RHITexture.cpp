@@ -10,7 +10,7 @@ namespace volucris
 	{
 	}
 
-	uint32 RHITexture::create(RHICommandList* command)
+	uint32 RHITexture::create(RHIState* state)
 	{
 		uint32 id;
 		glGenTextures(1, &id);
@@ -43,7 +43,8 @@ namespace volucris
 			return false;
 		}
 		command->setTexture(this);
-		glTexImage2D(GL_TEXTURE_2D, 0, getGLFormat(m_pixelFormat), m_size.width, m_size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_size.width, m_size.height);
+		GL_CHECK()
 		return true;
 	}
 
@@ -57,8 +58,12 @@ namespace volucris
 		state->texture2d = this;
 	}
 
-	void RHITexture2D::destroy(RHICommandList* command)
+	void RHITexture2D::destroy(RHIState* state)
 	{
+		if (state->texture2d == this)
+		{
+			state->texture2d = nullptr;
+		}
 		auto id = getId();
 		glDeleteTextures(1, &id);
 	}

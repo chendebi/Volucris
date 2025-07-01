@@ -43,6 +43,7 @@ namespace volucris
 		: m_window(nullptr)
 		, m_impl(new Impl)
 	{
+		m_state.commandList = this;
 		m_impl->clearFlags = getGLClearFlags(m_state.clearState.buffers);
 	}
 
@@ -51,13 +52,11 @@ namespace volucris
 		delete m_impl;
 	}
 
-	bool RHICommandList::initialize(std::unique_ptr<Window> window)
+	bool RHICommandList::initialize(Window* window, bool sync)
 	{
-		m_window = std::move(window);
-		auto handle = m_window->getHandle();
-		glfwMakeContextCurrent(nullptr);
-		glfwMakeContextCurrent(handle);
-		glfwSwapInterval(0);
+		m_window = window;
+		makeCurrent();
+		glfwSwapInterval(sync ? 1 : 0);
 		gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
 
 		{
@@ -72,24 +71,22 @@ namespace volucris
 			V_LOG_INFO(Engine, "	version: {}", (char*)version);
 			V_LOG_INFO(Engine, "	language version: {}", (char*)language);
 		}
-
-		/*glGenFramebuffers(1, &frameBuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1080, 960, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-		glViewport(0, 0, 1080, 960);
-		glClearColor(0.2, 0.4, 0.8, 1.0);*/
 		return true;
 	}
 
 	void RHICommandList::destroy()
 	{
-		m_window->destroy();
 		m_window = nullptr;
+	}
+
+	void RHICommandList::makeCurrent()
+	{
+		glfwMakeContextCurrent(m_window->getHandle());
+	}
+
+	void RHICommandList::swapBuffers()
+	{
+		glfwSwapBuffers(m_window->getHandle());
 	}
 
 	void RHICommandList::clear(const RHIClearState& state)
@@ -127,7 +124,7 @@ namespace volucris
 	{
 		if (!resource->isCreated())
 		{
-			auto id = resource->create(this);
+			auto id = resource->create(&m_state);
 			resource->m_id = id;
 		}
 		resource->bind(&m_state);
@@ -135,8 +132,11 @@ namespace volucris
 
 	void RHICommandList::deleteResource(RHIResource* resource)
 	{
-		resource->destroy(this);
-		resource->m_id = 0;
+		if (resource)
+		{
+			resource->destroy(&m_state);
+			resource->m_id = 0;
+		}
 	}
 
 	void RHICommandList::setViewport(int x, int y, int w, int h)

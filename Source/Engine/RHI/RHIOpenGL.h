@@ -27,9 +27,9 @@ namespace volucris
 		switch (format)
 		{
 		case volucris::Texture::EPixelFormat::R8G8B8:
-			return GL_RGB;
+			return GL_RGB8;
 		case volucris::Texture::EPixelFormat::R8G8B8A8:
-			return GL_RGBA;
+			return GL_RGBA8;
 		default:
 			break;
 		}

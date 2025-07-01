@@ -39,7 +39,7 @@ namespace volucris
 		m_handle = glfwCreateWindow(800, 600, m_title.c_str(), nullptr, nullptr);
 		if (!offscreen)
 		{
-			m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_handle);
+			m_imguiRenderer = std::make_unique<ImGuiRenderer>(this);
 
 			glfwSetWindowUserPointer(m_handle, this);
 			glfwSetWindowCloseCallback(m_handle, [](GLFWwindow* handle) {
@@ -49,7 +49,7 @@ namespace volucris
 
 			glfwSetWindowSizeCallback(m_handle, [](GLFWwindow* handle, int width, int height) {
 				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-				window->setSize({ width, height });
+				//window->setSize({ width, height });
 				});
 
 			glfwSetWindowFocusCallback(m_handle, [](GLFWwindow* handle, int focused) {
@@ -57,6 +57,8 @@ namespace volucris
 				gApp->setFocusedWindow(window);
 				});
 		}
+
+		AttachStateChanged.invoke(this, true);
 	}
 
 	void Window::destroy()
@@ -66,6 +68,7 @@ namespace volucris
 		{
 			glfwDestroyWindow(m_handle);
 			m_handle = nullptr;
+			AttachStateChanged.invoke(this, false);
 		}
 	}
 
@@ -76,7 +79,6 @@ namespace volucris
 
 	void Window::onBuild()
 	{
-		m_imguiRenderer->makeCurrent();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();

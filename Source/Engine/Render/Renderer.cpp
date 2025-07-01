@@ -9,9 +9,15 @@
 #include <RHI/RHICommandList.h>
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHIBuffer.h>
+#include <Render/View.h>
+#include <Core/VectorHelp.h>
 
 namespace volucris
 {
+	Renderer::~Renderer()
+	{
+	}
+
 	Renderer::Renderer()
 		: Runable(1024)
 	{
@@ -19,14 +25,11 @@ namespace volucris
 
 	void Renderer::main()
 	{
-		RENDER_SCOPE(Frame)
-		ENQUEUE_COMMMAND_LIST(BindRenderTarget, [this](RHICommandList* cmdList) {
-			cmdList->setRenderTarget(m_renderTarget.get());
-			RHIClearState state;
-			state.color = glm::vec4(1.0,0.0,1.0,1.0);
-			cmdList->clear(state);
-			m_reader->readColor(cmdList, {0, 0, 800, 600}, m_renderTarget.get());
-			});
+		for (auto& view : m_views)
+		{
+			// todo: frame update
+			view->render(m_cmdList.get());
+		}
 		FrameSynthesier::getInstance().countRenderFrame();
 	}
 
@@ -35,37 +38,37 @@ namespace volucris
 		glfwMakeContextCurrent(nullptr);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		auto context = glfwGetCurrentContext();
+		glfwMakeContextCurrent(nullptr);
 		m_window = std::make_unique<Window>();
 		m_window->create(true);
+		glfwMakeContextCurrent(context);
 		start(std::bind(&Renderer::main, this));
 	}
 
 	bool Renderer::initialize()
 	{
-		bool inited = RHICmdList.initialize(std::move(m_window));
-		if (inited)
-		{
-			RHITextureDesc desc;
-			desc.pixelFormat = Texture::EPixelFormat::R8G8B8;
-			m_renderTarget = std::make_shared<RHIRenderTarget>(Size(800, 600));
-			m_renderTarget->attachColor(desc, 0);
-
-			m_reader = std::make_shared<RHIReadPixelBuffer>(800 * 600 * 4, RHIBuffer::StreamRead);
-
-			ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
-				m_renderTarget->init(cmdList);
-				m_reader->init(cmdList);
-				});
-		}
+		m_cmdList = std::make_unique<RHICommandList>();
+		bool inited = m_cmdList->initialize(m_window.get());
 		return inited;
 	}
 
 	void Renderer::destroy()
 	{
-		ENQUEUE_COMMMAND_LIST(CreateRenderTarget, [this](RHICommandList* cmdList) {
-			cmdList->deleteResource(m_renderTarget.get());
-			cmdList->deleteResource(m_reader.get());
+		m_views.clear();
+		m_window->destroy();
+		m_cmdList->destroy();
+	}
+
+	void Renderer::addView(std::unique_ptr<View> view)
+	{
+		m_views.emplace_back(std::move(view));
+	}
+
+	void Renderer::removeView(View* view)
+	{
+		VectorHelp::quickRemoveAllIf<std::unique_ptr<View>>(m_views, [view](const std::unique_ptr<View>& v) {
+			return v.get() == view;
 			});
-		RHICmdList.destroy();
 	}
 }

@@ -2,15 +2,44 @@
 #define __volucris_viewport_widget_h__
 
 #include <Engine/Application/Widget.h>
+#include <Engine/Core/TextureDefines.h>
 
 namespace volucris
 {
+	class View;
+	class Window;
+	class RHITexture2D;
+	class RHICommandList;
+	class RHIWritePixelBuffer;
+
 	class ViewportWidget : public Widget
 	{
 	public:
+		ViewportWidget();
 
 	protected:
 		void onBuild() override;
+
+		void onTopWidgetChanged(Widget* old, Widget* current) override;
+
+		void viewSizeChanged(Size size);
+
+		void onWindowAttachStateChanged(Window* window, bool attached);
+
+	private:
+		void recreateUploaders();
+
+		void clearUploaders();
+
+		void setViewData(Texture::TextureData& data);
+
+	private:
+		View* m_view;
+		Size m_size;
+		RHICommandList* m_cmdList;
+		int m_current;
+		std::vector<std::unique_ptr<RHITexture2D>> m_textures;
+		std::vector<std::unique_ptr<RHIWritePixelBuffer>> m_uploaders;
 	};
 }
 

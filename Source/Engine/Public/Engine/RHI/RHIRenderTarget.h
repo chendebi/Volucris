@@ -32,12 +32,14 @@ namespace volucris
 			return nullptr;
 		}
 
+		Size getSize() const { return m_size; }
+
 	protected:
-		uint32 create(RHICommandList* command) override;
+		uint32 create(RHIState* state) override;
 
 		void bind(RHIState* state) override;
 
-		void destroy(RHICommandList* command) override;
+		void destroy(RHIState* state) override;
 
 	private:
 		Size m_size;

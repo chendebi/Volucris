@@ -9,10 +9,9 @@
 namespace volucris
 {
     MaterialEditorWidget::MaterialEditorWidget()
-        : m_viewport(std::make_unique<ViewportWidget>())
-        //, m_browserWidget(std::make_shared<ContentBrowserWidget>())
+        : m_viewport(std::make_shared<ViewportWidget>())
     {
-        //addChild(std::make_shared<ViewportWidget>());
+        addChild(m_viewport);
     }
 
     void MaterialEditorWidget::onBuild()
@@ -60,9 +59,4 @@ namespace volucris
         ImGui::Text("Hello, ImGui!");
 		ImGui::End();
 	}
-
-    void MaterialEditorWidget::parentSizeChanged(Size size)
-    {
-        V_LOG_INFO(Editor, "size chaged {}", size);
-    }
 } // namespace volucris

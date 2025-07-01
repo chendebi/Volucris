@@ -20,6 +20,7 @@ namespace volucris
 		: m_focusedWindow(nullptr)
 		, m_mainWindow(nullptr)
 		, m_windows()
+		, m_queue(1024)
 	{
 		if (s_instance != nullptr)
 		{
@@ -114,6 +115,12 @@ namespace volucris
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;
+
+			std::function<void()> command;
+			while (m_queue.pop(command, false))
+			{
+				command();
+			}
 
 			m_focusedWindow->build();
 
