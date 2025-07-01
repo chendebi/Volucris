@@ -54,7 +54,7 @@ namespace volucris
 
 		bool init(RHICommandList* command) override;
 
-		void update(RHICommandList* command, const Rect& rect,  const std::vector<uint8>& data);
+		//void update(RHICommandList* command, const Rect& rect,  const std::vector<uint8>& data);
 
 		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
 
