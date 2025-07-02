@@ -68,10 +68,13 @@ namespace volucris
 		std::vector<DirectoryItem> m_subItems;
 	};
 
-	//DECLARE_EVENT(PathSelectedEvent, void, std::string)
+	//DECLARE_EVENT_DELEGATE(OnPathSelectedEvent, void, std::string)
 
 	class PathTreeWidget : Widget
 	{
+	public:
+		//OnPathSelectedEvent pathSelectedEvent;
+
 	public:
 		PathTreeWidget();
 
@@ -81,7 +84,7 @@ namespace volucris
 
 		void setWidth(float width) { m_width = width; }
 
-		void connectToDirectoryEvent(PathSelectedEvent& event) {
+		void connectToDirectoryEvent(OnPathSelectedEvent& event) {
 			m_pathSelectedEvent = &event;
 		}
 
@@ -101,7 +104,7 @@ namespace volucris
 
 		DirectoryItem* findParent(DirectoryItem* root, DirectoryItem* target);
 
-		PathSelectedEvent* getSelectedEvent() { return m_pathSelectedEvent; }
+		OnPathSelectedEvent* getSelectedEvent() { return m_pathSelectedEvent; }
 
 	protected:
 
@@ -120,7 +123,7 @@ namespace volucris
 		char m_inputBuffer[128] = "";
 		std::shared_ptr<AddResourceDialog> m_addResourceDlg;
 
-		PathSelectedEvent* m_pathSelectedEvent = nullptr;
+		OnPathSelectedEvent* m_pathSelectedEvent = nullptr;
 
 	};
 }

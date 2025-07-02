@@ -2,11 +2,9 @@
 #define __volucris_content_browser_events_h__
 
 #include <string>
-#include <Engine/Application/Event.h>
+#include <Engine/Core/Delegate.h>
 
 
-DECLARE_EVENT(PathSelectedEvent, void, std::string)
-
-
+DECLARE_EVENT_DELEGATE(OnPathSelectedEvent, void, std::string)
 
 #endif // !__volucris_content_browser_events_h__

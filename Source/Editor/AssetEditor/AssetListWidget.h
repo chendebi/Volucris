@@ -37,7 +37,7 @@ namespace volucris
 
 		//void handleObjectClick(std::shared_ptr<ResourceObject> obj);
 
-		PathSelectedEvent& getDirectorySelectedEvent() { return m_pathSelectedEvent; }
+		OnPathSelectedEvent& getDirectorySelectedEvent() { return m_pathSelectedEvent; }
 
 
 	private:
@@ -53,7 +53,7 @@ namespace volucris
 
 		bool m_showAlreadySavedPopup;   //是否保存弹窗标志
 
-		PathSelectedEvent m_pathSelectedEvent;
+		OnPathSelectedEvent m_pathSelectedEvent;
 	};
 }
 

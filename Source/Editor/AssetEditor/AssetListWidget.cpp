@@ -28,9 +28,9 @@ namespace volucris
 		//, m_assetObjects()
 		, m_showAlreadySavedPopup(false)
 	{
-		//m_pathSelectedEvent = [this](const std::string& path) {
-		//	this->setCurrentPath(path);
-		//	};
+		m_pathSelectedEvent.bind([&](std::string& path){
+			this->setCurrentPath(path);
+			});
 
 		//ResourceRegistry::Instance().AssetRegistryed.addObject(this, &AssetListWidget::setAssetObject);
 		//m_eventToken = m_pathSelectedEvent.addLambda(
@@ -79,15 +79,15 @@ namespace volucris
 				//		AssetReader reader;
 				//		auto existed = reader.loadAsset();
 				//		if (!existed.uuid.valid() || existed.uuid != (*selectedIt)->getAsset().uuid)
-				//		{
+		//		{
 				//			m_showAlreadySavedPopup = true;
-				//		}
-				//	}
+		//		}
+		//	}
 				//
 				//	ResourceRegistry::Instance().save(*selectedIt);
 				//	(*selectedIt)->getPackage().pkDirty = true;
 				//	m_assetObjects.erase(selectedIt);
-				//}
+		//}
 			}
 		}
 

@@ -138,11 +138,14 @@ namespace volucris
 			// 点击节点时加载文件列表
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
 
-				if (m_manager->getSelectedEvent())
-				{
-					(*(m_manager->getSelectedEvent()))(m_manager->getSelectedPathItem()->getDirectoryPath()); // 触发事件
-				}
+				m_manager->getSelectedEvent()->invoke(m_manager->getSelectedPathItem()->getDirectoryPath());
+
+				//if (m_manager->getSelectedEvent())
+				//{
+				//	//(*(m_manager->getSelectedEvent()))(m_manager->getSelectedPathItem()->getDirectoryPath()); // 触发事件
+				//}
 			}
+		
 		}
 		else
 		{
