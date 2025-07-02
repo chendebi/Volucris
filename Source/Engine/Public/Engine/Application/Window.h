@@ -4,12 +4,14 @@
 #include <Engine/Application/Widget.h>
 #include <string>
 #include <Engine/Core/Delegate.h>
+#include <Engine/Core/TypesHelp.h>
 
 struct GLFWwindow;
 
 namespace volucris
 {
 	DECLARE_EVENT_MUTI_DELEGATE(OnWindowAttachStateChanged, void, class Window*, bool)
+	DECLARE_EVENT_MUTI_DELEGATE(OnWindowCurrentStateChanged, void, class Window*, bool)
 
 	class ImGuiRenderer;
 
@@ -17,6 +19,7 @@ namespace volucris
 	{
 	public:
 		OnWindowAttachStateChanged AttachStateChanged;
+		OnWindowCurrentStateChanged CurrentStateChanged;
 
 	public:
 		Window();
@@ -37,6 +40,8 @@ namespace volucris
 
 		GLFWwindow* getHandle() const { return m_handle; }
 
+		bool isCurrent() const { return m_focused; }
+
 	protected:
 		void onBuild() override;
 
@@ -44,6 +49,8 @@ namespace volucris
 		friend class Application;
 		friend class Renderer;
 		friend class RHICommandList;
+
+		void setFocused(bool focused);
 
 		void create(bool offscreen = false);
 
@@ -55,6 +62,7 @@ namespace volucris
 		GLFWwindow* m_handle;
 		std::unique_ptr<ImGuiRenderer> m_imguiRenderer;
 		std::string m_title;
+		uint8 m_focused;
 	};
 }
 

@@ -11,7 +11,7 @@ namespace volucris
     MaterialEditorWidget::MaterialEditorWidget()
         : m_viewport(std::make_shared<ViewportWidget>())
     {
-        addChild(m_viewport);
+        
     }
 
     void MaterialEditorWidget::onBuild()
@@ -59,4 +59,10 @@ namespace volucris
         ImGui::Text("Hello, ImGui!");
 		ImGui::End();
 	}
+
+    void MaterialEditorWidget::onTopWidgetChanged(Widget* old, Widget* current)
+    {
+		m_viewport->onTopWidgetChanged(old, current);
+    }
+
 } // namespace volucris

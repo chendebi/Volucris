@@ -8,6 +8,8 @@
 #include <Engine/Render/ImGuiRenderer.h>
 #include <Engine/RHI/RHIBuffer.h>
 #include <Engine/RHI/RHITexture.h>
+#include <EditorCore/editor.h>
+#include <Engine/Application/Application.h>
 
 namespace volucris
 {
@@ -40,8 +42,9 @@ namespace volucris
 		: Widget()
 		, m_view(nullptr)
 		, m_size()
-		, m_cmdList(nullptr)
+		, m_window(nullptr)
 		, m_current(0)
+		, m_viewTexture(nullptr)
 		, m_uploaders()
 		, m_textures()
 	{
@@ -50,6 +53,7 @@ namespace volucris
 	void ViewportWidget::onBuild()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::Begin("Preview");
 
 		auto pos = ImGui::GetWindowPos();
@@ -58,39 +62,44 @@ namespace volucris
 		Size viewSize = Size((int)size.x, (int)size.y);
 		if (viewSize != m_size)
 		{
+			V_LOG_DEBUG(Editor, "ViewportWidget size changed: {}, {}", viewSize.width, viewSize.height);
 			viewSizeChanged(viewSize);
 		}
 
-		/*Renderer::getInstance().push([this]() {
-			setViewData(m_view->getViewData());
-			});
+		if (m_view)
+		{
+			Renderer::getInstance().push([client = this, view = m_view]() {
+				auto data = view->getViewData();
+				gApp->pushCommand([client, data = std::move(data)]() {
+					client->setViewData(std::move(data));
+					});
+				});
 
-		auto id = m_textures[m_current]->getId();
-		if (id > 0)
-		{
-			ImGui::Image((ImTextureID)(intptr_t)id, ImVec2(viewSize.width, viewSize.height), ImVec2(0, 1), ImVec2(1, 0));
+			if (m_viewTexture)
+			{
+				auto id = m_viewTexture->getId();
+				if (id > 0)
+				{
+					ImTextureID texID = (ImTextureID)(intptr_t)id;
+					ImGui::Image(texID, size, ImVec2(0, 1), ImVec2(1, 0));
+				}
+			}
 		}
-		else
-		{
-			ImGui::Text("No texture available");
-		}*/
 
 		ImGui::End();
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 	}
 
 	void ViewportWidget::onTopWidgetChanged(Widget* old, Widget* current)
 	{
-		if (old)
+		if (m_window)
 		{
-			if (auto window = dynamic_cast<Window*>(old))
-			{
-				window->AttachStateChanged.unbind(this);
+			m_window->AttachStateChanged.unbind(this);
 
-				if (m_view)
-				{
-					onWindowAttachStateChanged(window, false);
-				}
+			if (m_view)
+			{
+				Renderer::getInstance().flushCommands();
+				onWindowAttachStateChanged(m_window, false);
 			}
 		}
 
@@ -99,6 +108,7 @@ namespace volucris
 		{
 			return;
 		}
+		m_window = window;
 		window->AttachStateChanged.bindObject(this, &ViewportWidget::onWindowAttachStateChanged);
 		if (window->getImGuiRenderer())
 		{
@@ -111,10 +121,20 @@ namespace volucris
 		if (m_view)
 		{
 			m_size = size;
-			//recreateUploaders();
-			Renderer::getInstance().push([view=m_view, size]() {
+			recreateUploaders(m_window->getImGuiRenderer()->getCommandList());
+			Renderer::getInstance().push([client=this, view=m_view, size]() {
 				view->resize(size.width, size.height);
+				Renderer::getInstance().renderFrame();
+				Renderer::getInstance().renderFrame();
+
+				auto data = view->getViewData();
+				gApp->pushCommand([client, data = std::move(data)]() {
+					client->setViewData(std::move(data));
+					});
+
 				});
+			// 确保执行完成
+			Renderer::getInstance().flushCommands();
 		}
 	}
 
@@ -127,28 +147,30 @@ namespace volucris
 			m_view = view.get();
 			CreateViewTask task = CreateViewTask(std::move(view), m_size);
 			Renderer::getInstance().push(createTask(std::move(task)));
-			m_cmdList = window->getImGuiRenderer()->getCommandList();
-			//recreateUploaders();
+			recreateUploaders(window->getImGuiRenderer()->getCommandList());
 		}
 		else
 		{
+			auto cmdList = window->getImGuiRenderer()->getCommandList();
 			Renderer::getInstance().push([view = m_view]() {
 				Renderer::getInstance().removeView(view);
 				});
+			clearUploaders(cmdList);
+			if (m_viewTexture)
+			{
+				cmdList->deleteResource(m_viewTexture.get());
+				m_viewTexture = nullptr;
+			}
+			Renderer::getInstance().flushCommands();
+			gApp->flushCommmands();
 			m_view = nullptr;
-			m_cmdList = nullptr;
-			clearUploaders();
+			m_window = nullptr;
 		}
 	}
 
-	void ViewportWidget::recreateUploaders()
+	void ViewportWidget::recreateUploaders(RHICommandList* cmdList)
 	{
-		if (m_size.width < 8 || m_size.height < 8 || !m_cmdList)
-		{
-			return;
-		}
-
-		clearUploaders();
+		clearUploaders(cmdList);
 
 		auto size = m_size.width * m_size.height * 3;
 		RHITextureDesc desc;
@@ -157,55 +179,64 @@ namespace volucris
 		desc.texClass = RHITextureDesc::Texture2D;
 		for (int i = 0; i < 2; ++i)
 		{
-			auto uploader = std::make_unique<RHIWritePixelBuffer>(size, RHIBuffer::StreamWrite);
-			uploader->init(m_cmdList);
+			auto uploader = std::make_shared<RHIWritePixelBuffer>(size, RHIBuffer::StreamWrite);
+			uploader->init(cmdList);
 			m_uploaders.push_back(std::move(uploader));
 
-			auto texture = std::make_unique<RHITexture2D>(desc);
-			texture->init(m_cmdList);
+			auto texture = std::make_shared<RHITexture2D>(desc);
+			texture->init(cmdList);
 			m_textures.push_back(std::move(texture));
 		}
 
 		m_current = 0;
 	}
 
-	void ViewportWidget::clearUploaders()
+	void ViewportWidget::clearUploaders(RHICommandList* cmdList)
 	{
 		for (auto& uploader : m_uploaders)
 		{
-			m_cmdList->deleteResource(uploader.get());
+			cmdList->deleteResource(uploader.get());
 		}
 
 		for (auto& texture : m_textures)
 		{
-			m_cmdList->deleteResource(texture.get());
+			if (texture != m_viewTexture)
+			{
+				cmdList->deleteResource(texture.get());
+			}
 		}
 
 		m_textures.clear();
 		m_uploaders.clear();
 	}
 
-	void ViewportWidget::setViewData(Texture::TextureData& data)
+	void ViewportWidget::setViewData(Texture::TextureData data)
 	{
-		if (!m_view)
+		if (!m_view || !m_window || !m_window->isCurrent())
 		{
 			return;
 		}
 		if (data.size.width != m_size.width || data.size.height != m_size.height)
 		{
-			/*V_LOG_ERROR(Editor, "ViewportWidget::setViewData size mismatch: expected {}x{}, got {}x{}",
-				m_size.width, m_size.height, data.size.width, data.size.height);*/
 			return;
 		}
 
 		if (m_uploaders.empty())
 		{
-			//recreateUploaders();
+			return;
 		}
 
+		auto cmdList = m_window->getImGuiRenderer()->getCommandList();
 		auto& currentUploader = m_uploaders[m_current];
-		currentUploader->startWrite(m_cmdList, std::move(data.data));
+		currentUploader->startWrite(cmdList, std::move(data.data));
+
+		if (m_viewTexture != m_textures[m_current])
+		{
+			cmdList->deleteResource(m_viewTexture.get());
+		}
+
 		m_current = (m_current + 1) % m_uploaders.size();
-		m_uploaders[m_current]->writeTo(m_textures[m_current].get(), m_cmdList);
+		m_uploaders[m_current]->writeTo(m_textures[m_current].get(), cmdList);
+		m_viewTexture = m_textures[m_current];
 	}
 }

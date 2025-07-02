@@ -17,29 +17,30 @@ namespace volucris
 	public:
 		ViewportWidget();
 
+		void onTopWidgetChanged(Widget* old, Widget* current) override;
+
 	protected:
 		void onBuild() override;
-
-		void onTopWidgetChanged(Widget* old, Widget* current) override;
 
 		void viewSizeChanged(Size size);
 
 		void onWindowAttachStateChanged(Window* window, bool attached);
 
 	private:
-		void recreateUploaders();
+		void recreateUploaders(RHICommandList* cmdList);
 
-		void clearUploaders();
+		void clearUploaders(RHICommandList* cmdList);
 
-		void setViewData(Texture::TextureData& data);
+		void setViewData(Texture::TextureData data);
 
 	private:
 		View* m_view;
 		Size m_size;
-		RHICommandList* m_cmdList;
+		Window* m_window;
 		int m_current;
-		std::vector<std::unique_ptr<RHITexture2D>> m_textures;
-		std::vector<std::unique_ptr<RHIWritePixelBuffer>> m_uploaders;
+		std::shared_ptr<RHITexture2D> m_viewTexture;
+		std::vector<std::shared_ptr<RHITexture2D>> m_textures;
+		std::vector<std::shared_ptr<RHIWritePixelBuffer>> m_uploaders;
 	};
 }
 

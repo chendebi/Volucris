@@ -16,6 +16,7 @@ namespace volucris
 		, m_handle(nullptr)
 		, m_imguiRenderer(nullptr)
 		, m_title("Window")
+		, m_focused(false)
 	{
 	}
 
@@ -31,6 +32,20 @@ namespace volucris
 		{
 			glfwSetWindowTitle(m_handle, title.c_str());
 		}
+	}
+
+	void Window::setFocused(bool focused)
+	{
+		if (m_focused == focused)
+		{
+			return;
+		}
+		m_focused = focused;
+		if (m_focused)
+		{
+			m_imguiRenderer->makeCurrent();
+		}
+		CurrentStateChanged.invoke(this, m_focused);
 	}
 
 	void Window::create(bool offscreen)
@@ -57,7 +72,6 @@ namespace volucris
 				gApp->setFocusedWindow(window);
 				});
 		}
-
 		AttachStateChanged.invoke(this, true);
 	}
 
@@ -68,12 +82,13 @@ namespace volucris
 		{
 			glfwDestroyWindow(m_handle);
 			m_handle = nullptr;
-			AttachStateChanged.invoke(this, false);
 		}
 	}
 
 	void Window::destroyImGuiRenderer()
 	{
+		AttachStateChanged.invoke(this, false);
+		setFocused(false);
 		m_imguiRenderer = nullptr;
 	}
 

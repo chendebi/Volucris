@@ -5,6 +5,7 @@
 #include <Engine/Core/Size.h>
 #include <Engine/Core/TextureDefines.h>
 #include <Engine/Core/TypesHelp.h>
+#include <Engine/Core/Rect.h>
 
 namespace volucris
 {
@@ -53,6 +54,8 @@ namespace volucris
 		~RHITexture2D() override;
 
 		bool init(RHICommandList* command) override;
+
+		void update(RHICommandList* command, const Rect& rect,  const std::vector<uint8>& data);
 
 		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
 

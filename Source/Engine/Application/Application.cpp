@@ -29,6 +29,15 @@ namespace volucris
 		s_instance = this;
 	}
 
+	void Application::flushCommmands()
+	{
+		std::function<void()> command;
+		while (m_queue.pop(command, false))
+		{
+			command();
+		}
+	}
+
 	void Application::addWindow(const std::shared_ptr<Window>& window)
 	{
 		if (window->isValid())
@@ -73,7 +82,6 @@ namespace volucris
 			window->destroyImGuiRenderer();
 			// 上下文切换到主窗口
 			setFocusedWindow(m_mainWindow.get());
-
 			window->destroy();
 			VectorHelp::quickRemove(m_windows, window);
 		}
@@ -90,15 +98,24 @@ namespace volucris
 
 	void Application::setFocusedWindow(Window* window)
 	{
+		if (m_focusedWindow == window)
+		{
+			return;
+		}
+
+		if (m_focusedWindow)
+		{
+			m_focusedWindow->setFocused(false);
+		}
+
 		m_focusedWindow = window;
 		if (m_focusedWindow && m_focusedWindow->getImGuiRenderer())
 		{
-			m_focusedWindow->getImGuiRenderer()->makeCurrent();
+			m_focusedWindow->setFocused(true);
+			//// 渲染一帧
+			//m_focusedWindow->build();
 
-			// 渲染一帧
-			m_focusedWindow->build();
-
-			m_focusedWindow->getImGuiRenderer()->render();
+			//m_focusedWindow->getImGuiRenderer()->render();
 		}
 	}
 
@@ -108,29 +125,13 @@ namespace volucris
 		{
 			return 0;
 		}
-		std::cout << std::this_thread::get_id();
 		Renderer::getInstance().run();
-		glfwMakeContextCurrent(m_mainWindow->m_handle);
-		double lastFrameTime = glfwGetTime();
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;
-
-			std::function<void()> command;
-			while (m_queue.pop(command, false))
-			{
-				command();
-			}
+			flushCommmands();
 
 			m_focusedWindow->build();
-
-			/*for (auto renderer : m_renderers)
-			{
-				for (auto scene : m_scenes)
-				{
-					scene->update(renderer);
-				}
-			}*/
 
 			Renderer::getInstance().push(nullptr);
 
