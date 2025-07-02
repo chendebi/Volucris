@@ -8,6 +8,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <Render/ImGuiRenderer.h>
 #include <Core/Volucris.h>
+#include <Core/Assert.h>
 
 namespace volucris
 {
@@ -94,6 +95,7 @@ namespace volucris
 
 	void Window::onBuild()
 	{
+		v_check(glfwGetCurrentContext() == m_handle)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();

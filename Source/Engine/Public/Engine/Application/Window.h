@@ -42,6 +42,8 @@ namespace volucris
 
 		bool isCurrent() const { return m_focused; }
 
+		std::string getTitle() const { return m_title; }
+
 	protected:
 		void onBuild() override;
 

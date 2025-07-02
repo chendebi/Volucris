@@ -30,6 +30,7 @@ namespace volucris
 		ImGuiContext* m_imguiContext;
 		std::unique_ptr<RHICommandList> m_cmdList;
 		RHIClearState m_clear;
+		Window* m_window;
 	};
 }
 

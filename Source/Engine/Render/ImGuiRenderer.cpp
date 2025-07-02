@@ -24,6 +24,7 @@ namespace volucris
 		: m_imguiContext(nullptr)
 		, m_cmdList(std::make_unique<RHICommandList>())
 		, m_clear()
+		, m_window(window)
 	{
 		m_cmdList->initialize(window, true);
 
@@ -31,7 +32,7 @@ namespace volucris
 		m_imguiContext = ImGui::CreateContext();
 		ImGui::SetCurrentContext(m_imguiContext);
 		ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), true);
-		if (!ImGui_ImplOpenGL3_Init("#version 330"))
+		if (!ImGui_ImplOpenGL3_Init("#version 430"))
 		{
 			V_LOG_CRITICAL(Engine, "imgui initialize failed");
 		}
@@ -95,6 +96,7 @@ namespace volucris
 
 	void ImGuiRenderer::makeCurrent()
 	{
+		V_LOG_DEBUG(Engine, "make context current for window: {}", m_window->getTitle());
 		ImGui::SetCurrentContext(m_imguiContext);
 		m_cmdList->makeCurrent();
 	}

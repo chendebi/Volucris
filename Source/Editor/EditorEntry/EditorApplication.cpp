@@ -23,59 +23,6 @@ namespace volucris
 
 using namespace volucris;
 
-static bool ContentItemButton(RHITexture2D* texture, Point pos, const char* label)
-{
-	static float uvSize = 64.0f / 2048.0f;
-
-	ImVec2 uv_min = ImVec2(pos.x * uvSize, 1.0f - pos.y * uvSize); // 左上角UV坐标
-	ImVec2 uv_max = ImVec2(uv_min.x + uvSize, uv_min.y - uvSize); // 右下角UV坐标
-
-	ImGuiWindow* window = ImGui::GetCurrentWindow();
-	if (window->SkipItems)
-		return false;
-
-	const ImVec2 button_size(96, 128);
-	ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
-
-	// 1. 创建按钮点击区域
-	ImGui::InvisibleButton("##xx", button_size);
-	bool clicked = ImGui::IsItemClicked();
-	bool hovered = ImGui::IsItemHovered();
-
-	// 2. 绘制背景（整个按钮区域）
-	ImU32 bg_color = IM_COL32(0, 0, 0, 255);
-	window->DrawList->AddRectFilled(cursor_pos,
-		ImVec2(cursor_pos.x + button_size.x, cursor_pos.y + button_size.y),
-		bg_color);
-
-	auto id = texture->getId();
-	ImTextureID texID = (ImTextureID)(intptr_t)id;
-	ImVec2 imgPos = { cursor_pos.x + 4, cursor_pos.y+4 };
-	/*window->DrawList->AddImage(texID,
-		imgPos,
-		ImVec2(imgPos.x + 92, imgPos.y + 92),
-		uv_min, uv_max);*/
-	bg_color = IM_COL32(0, 128, 200, 255);
-	window->DrawList->AddRectFilled(imgPos,
-		ImVec2(imgPos.x + 88, imgPos.y + 88),
-		bg_color);
-
-	ImVec2 text_pos(cursor_pos.x + 32, cursor_pos.y + 80); // 垂直居中
-	ImU32 text_color = IM_COL32(255, 255, 255, 255);
-
-	// 文字居中处理
-	ImVec2 text_size = ImGui::CalcTextSize(label);
-	text_pos.x -= text_size.x * 0.5f;
-
-	window->DrawList->AddText(text_pos, text_color, label);
-
-	if (hovered) {
-		window->DrawList->AddRect(cursor_pos,
-			ImVec2(cursor_pos.x + button_size.x, cursor_pos.y + button_size.y),
-			IM_COL32(200, 200, 200, 255));
-	}
-}
-
 class MWidget : public Widget
 {
 public:

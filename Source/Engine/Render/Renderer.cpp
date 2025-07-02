@@ -35,7 +35,6 @@ namespace volucris
 
 	void Renderer::run()
 	{
-		glfwMakeContextCurrent(nullptr);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		auto context = glfwGetCurrentContext();
