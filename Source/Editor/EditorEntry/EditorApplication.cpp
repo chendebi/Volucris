@@ -84,7 +84,7 @@ public:
 
 	void onBuild() override
 	{
-		int width = 96 * 1.5;
+		int width = 96 * 1.;
 		int space = 10;
 		ImGui::Begin("Grid Layout");
 		auto size = ImGui::GetContentRegionAvail();
@@ -166,13 +166,13 @@ private:
 			m_iconTexture->init(cmdList);
 			m_iconTexture->update(cmdList, { 0, 0, textureData.size.width, textureData.size.height }, textureData.data);
 
-			m_items[0].setIcon(m_iconTexture.get(), {0,0}, {64,64});
-			m_items[1].setIcon(m_iconTexture.get(), { 1,0 }, { 64,64 });
-			m_items[2].setIcon(m_iconTexture.get(), { 2,0 }, { 64,64 });
+			m_items[0].setIcon(m_iconTexture.get(), {0,0}, {128,128});
+			m_items[1].setIcon(m_iconTexture.get(), { 0,0 }, { 128,128 });
+			m_items[2].setIcon(m_iconTexture.get(), { 0,0 }, { 128,128 });
 
-			m_items[0].setScale(1.5);
-			m_items[1].setScale(1.5);
-			m_items[2].setScale(1.5);
+			m_items[0].setScale(1.);
+			m_items[1].setScale(1.);
+			m_items[2].setScale(1.);
 		}
 	}
 
