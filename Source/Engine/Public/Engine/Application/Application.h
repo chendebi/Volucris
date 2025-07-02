@@ -25,6 +25,8 @@ namespace volucris
 			m_queue.push(command);
 		}
 
+		void flushCommmands();
+
 		void addWindow(const std::shared_ptr<Window>& window);
 
 		void removeWindow(const std::shared_ptr<Window>& window);

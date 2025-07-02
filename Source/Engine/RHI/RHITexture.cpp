@@ -5,6 +5,20 @@
 
 namespace volucris
 {
+	GLenum getTextureInternalFormat(Texture::EPixelFormat format)
+	{
+		switch (format)
+		{
+		case volucris::Texture::EPixelFormat::R8G8B8:
+			return GL_RGB8;
+		case volucris::Texture::EPixelFormat::R8G8B8A8:
+			return GL_RGBA8;
+		default:
+			break;
+		}
+		return GL_NONE;
+	}
+
 	RHITexture::RHITexture()
 		: RHIResource()
 	{
@@ -43,15 +57,18 @@ namespace volucris
 			return false;
 		}
 		command->setTexture(this);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_size.width, m_size.height);
+		glTexStorage2D(GL_TEXTURE_2D, 1, getTextureInternalFormat(m_pixelFormat), m_size.width, m_size.height);
+		GL_CHECK()
 		return true;
 	}
 
-	/*void RHITexture2D::update(RHICommandList* command, const std::vector<uint8>& data)
+	void RHITexture2D::update(RHICommandList* command, const Rect& rect, const std::vector<uint8>& data)
 	{
 		command->bindResource(this);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, )
-	}*/
+		GL_CHECK()
+		glTexSubImage2D(GL_TEXTURE_2D, 0, rect.x, rect.y, rect.width, rect.height, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+		GL_CHECK()
+	}
 
 	void RHITexture2D::bind(RHIState* state)
 	{

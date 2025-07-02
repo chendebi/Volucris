@@ -27,16 +27,16 @@ namespace volucris
 		void onWindowAttachStateChanged(Window* window, bool attached);
 
 	private:
-		void recreateUploaders();
+		void recreateUploaders(RHICommandList* cmdList);
 
-		void clearUploaders();
+		void clearUploaders(RHICommandList* cmdList);
 
 		void setViewData(Texture::TextureData data);
 
 	private:
 		View* m_view;
 		Size m_size;
-		RHICommandList* m_cmdList;
+		Window* m_window;
 		int m_current;
 		std::shared_ptr<RHITexture2D> m_viewTexture;
 		std::vector<std::shared_ptr<RHITexture2D>> m_textures;

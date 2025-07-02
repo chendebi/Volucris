@@ -28,6 +28,15 @@ namespace volucris
 		s_instance = this;
 	}
 
+	void Application::flushCommmands()
+	{
+		std::function<void()> command;
+		while (m_queue.pop(command, false))
+		{
+			command();
+		}
+	}
+
 	void Application::addWindow(const std::shared_ptr<Window>& window)
 	{
 		if (window->isValid())
@@ -69,11 +78,9 @@ namespace volucris
 		}
 		else
 		{
+			window->destroyImGuiRenderer();
 			// 上下文切换到主窗口
 			setFocusedWindow(m_mainWindow.get());
-
-			window->destroyImGuiRenderer();
-
 			window->destroy();
 			VectorHelp::quickRemove(m_windows, window);
 		}
@@ -94,11 +101,16 @@ namespace volucris
 		{
 			return;
 		}
+
+		if (m_focusedWindow)
+		{
+			m_focusedWindow->setFocused(false);
+		}
+
 		m_focusedWindow = window;
 		if (m_focusedWindow && m_focusedWindow->getImGuiRenderer())
 		{
-			//m_focusedWindow->getImGuiRenderer()->makeCurrent();
-
+			m_focusedWindow->setFocused(true);
 			//// 渲染一帧
 			//m_focusedWindow->build();
 
@@ -117,11 +129,7 @@ namespace volucris
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;
-			std::function<void()> command;
-			while (m_queue.pop(command, false))
-			{
-				command();
-			}
+			flushCommmands();
 
 			m_focusedWindow->build();
 

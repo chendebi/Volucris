@@ -25,9 +25,9 @@ namespace volucris
 
 		struct TextureData
 		{
-			ESourceFormat format;
-			Size size;
-			std::vector<uint8> data;
+			ESourceFormat format = ESourceFormat::Invalid;
+			Size size = {};
+			std::vector<uint8> data = {};
 		};
 
 		static ESourceFormat getSourceFormat(EPixelFormat format)
@@ -42,6 +42,20 @@ namespace volucris
 				break;
 			}
 			return ESourceFormat::Invalid;
+		}
+
+		static EPixelFormat getPixelFormat(ESourceFormat format)
+		{
+			switch (format)
+			{
+			case volucris::Texture::ESourceFormat::RGB:
+				return EPixelFormat::R8G8B8;
+			case volucris::Texture::ESourceFormat::RGBA:
+				return EPixelFormat::R8G8B8A8;
+			default:
+				break;
+			}
+			return EPixelFormat::Invalid;
 		}
 	}
 }

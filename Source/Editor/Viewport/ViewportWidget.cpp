@@ -42,7 +42,7 @@ namespace volucris
 		: Widget()
 		, m_view(nullptr)
 		, m_size()
-		, m_cmdList(nullptr)
+		, m_window(nullptr)
 		, m_current(0)
 		, m_viewTexture(nullptr)
 		, m_uploaders()
@@ -92,16 +92,14 @@ namespace volucris
 
 	void ViewportWidget::onTopWidgetChanged(Widget* old, Widget* current)
 	{
-		if (old)
+		if (m_window)
 		{
-			if (auto window = dynamic_cast<Window*>(old))
-			{
-				window->AttachStateChanged.unbind(this);
+			m_window->AttachStateChanged.unbind(this);
 
-				if (m_view)
-				{
-					onWindowAttachStateChanged(window, false);
-				}
+			if (m_view)
+			{
+				Renderer::getInstance().flushCommands();
+				onWindowAttachStateChanged(m_window, false);
 			}
 		}
 
@@ -110,6 +108,7 @@ namespace volucris
 		{
 			return;
 		}
+		m_window = window;
 		window->AttachStateChanged.bindObject(this, &ViewportWidget::onWindowAttachStateChanged);
 		if (window->getImGuiRenderer())
 		{
@@ -122,7 +121,7 @@ namespace volucris
 		if (m_view)
 		{
 			m_size = size;
-			recreateUploaders();
+			recreateUploaders(m_window->getImGuiRenderer()->getCommandList());
 			Renderer::getInstance().push([client=this, view=m_view, size]() {
 				view->resize(size.width, size.height);
 				Renderer::getInstance().renderFrame();
@@ -148,28 +147,30 @@ namespace volucris
 			m_view = view.get();
 			CreateViewTask task = CreateViewTask(std::move(view), m_size);
 			Renderer::getInstance().push(createTask(std::move(task)));
-			m_cmdList = window->getImGuiRenderer()->getCommandList();
-			recreateUploaders();
+			recreateUploaders(window->getImGuiRenderer()->getCommandList());
 		}
 		else
 		{
+			auto cmdList = window->getImGuiRenderer()->getCommandList();
 			Renderer::getInstance().push([view = m_view]() {
 				Renderer::getInstance().removeView(view);
 				});
-			clearUploaders();
+			clearUploaders(cmdList);
 			if (m_viewTexture)
 			{
-				m_cmdList->deleteResource(m_viewTexture.get());
+				cmdList->deleteResource(m_viewTexture.get());
 				m_viewTexture = nullptr;
 			}
+			Renderer::getInstance().flushCommands();
+			gApp->flushCommmands();
 			m_view = nullptr;
-			m_cmdList = nullptr;
+			m_window = nullptr;
 		}
 	}
 
-	void ViewportWidget::recreateUploaders()
+	void ViewportWidget::recreateUploaders(RHICommandList* cmdList)
 	{
-		clearUploaders();
+		clearUploaders(cmdList);
 
 		auto size = m_size.width * m_size.height * 3;
 		RHITextureDesc desc;
@@ -179,29 +180,29 @@ namespace volucris
 		for (int i = 0; i < 2; ++i)
 		{
 			auto uploader = std::make_shared<RHIWritePixelBuffer>(size, RHIBuffer::StreamWrite);
-			uploader->init(m_cmdList);
+			uploader->init(cmdList);
 			m_uploaders.push_back(std::move(uploader));
 
 			auto texture = std::make_shared<RHITexture2D>(desc);
-			texture->init(m_cmdList);
+			texture->init(cmdList);
 			m_textures.push_back(std::move(texture));
 		}
 
 		m_current = 0;
 	}
 
-	void ViewportWidget::clearUploaders()
+	void ViewportWidget::clearUploaders(RHICommandList* cmdList)
 	{
 		for (auto& uploader : m_uploaders)
 		{
-			m_cmdList->deleteResource(uploader.get());
+			cmdList->deleteResource(uploader.get());
 		}
 
 		for (auto& texture : m_textures)
 		{
 			if (texture != m_viewTexture)
 			{
-				m_cmdList->deleteResource(texture.get());
+				cmdList->deleteResource(texture.get());
 			}
 		}
 
@@ -211,7 +212,7 @@ namespace volucris
 
 	void ViewportWidget::setViewData(Texture::TextureData data)
 	{
-		if (!m_view)
+		if (!m_view || !m_window || !m_window->isCurrent())
 		{
 			return;
 		}
@@ -225,16 +226,17 @@ namespace volucris
 			return;
 		}
 
+		auto cmdList = m_window->getImGuiRenderer()->getCommandList();
 		auto& currentUploader = m_uploaders[m_current];
-		currentUploader->startWrite(m_cmdList, std::move(data.data));
+		currentUploader->startWrite(cmdList, std::move(data.data));
 
 		if (m_viewTexture != m_textures[m_current])
 		{
-			m_cmdList->deleteResource(m_viewTexture.get());
+			cmdList->deleteResource(m_viewTexture.get());
 		}
 
 		m_current = (m_current + 1) % m_uploaders.size();
-		m_uploaders[m_current]->writeTo(m_textures[m_current].get(), m_cmdList);
+		m_uploaders[m_current]->writeTo(m_textures[m_current].get(), cmdList);
 		m_viewTexture = m_textures[m_current];
 	}
 }
