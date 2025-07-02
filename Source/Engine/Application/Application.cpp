@@ -10,6 +10,7 @@
 #include <Engine/Profile/Profile.h>
 #include <Profile/ProfileManager.h>
 #include <tracy/Tracy.hpp>
+#include <iostream>
 
 namespace volucris
 {
@@ -124,7 +125,6 @@ namespace volucris
 		{
 			return 0;
 		}
-
 		Renderer::getInstance().run();
 		while (m_mainWindow->isValid())
 		{

@@ -11,6 +11,8 @@
 #include <imgui_internal.h>
 #include <ContentBrowser/ContentItemWidget.h>
 
+#include <AssetEditor/ContentBrowerWidget.h>
+
 namespace volucris
 {
 	EditorApplication::EditorApplication()
@@ -192,6 +194,7 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 	window1->setTitle("Volucris Editor");
 	window1->addChild(std::make_shared<MWidget>());
 	window2->setTitle("Material Editor");
+	window1->addChild(std::make_shared<ContentBrowserWidget>());
 	window2->addChild(std::make_shared<MaterialEditorWidget>());
 	app->addWindow(window1);
 	app->addWindow(window2);

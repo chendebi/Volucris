@@ -56,6 +56,7 @@ namespace volucris
         ImGui::SetNextWindowClass(&no_title_class);
 		ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_NoTitleBar);
 		ImGui::Text("This is a material editor widget.");
+        ImGui::Text("Hello, ImGui!");
 		ImGui::End();
 	}
 
