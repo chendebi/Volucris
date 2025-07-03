@@ -6,7 +6,7 @@ namespace volucris
 {
 	GameObject::GameObject()
 		: Object()
-		, m_outer(nullptr)
+		, m_parent(nullptr)
 		, m_objects()
 	{
 	}
@@ -19,19 +19,19 @@ namespace volucris
 		}
 	}
 
-	void GameObject::setOuter(GameObject* outer)
+	void GameObject::setParent(GameObject* parent)
 	{
-		if (m_outer != outer)
+		if (m_parent != parent)
 		{
-			if (m_outer)
+			if (m_parent)
 			{
-				VectorHelp::quickRemove(m_outer->m_objects, this);
+				VectorHelp::quickRemove(m_parent->m_objects, this);
 			}
 
-			m_outer = outer;
-			if (m_outer)
+			m_parent = parent;
+			if (m_parent)
 			{
-				m_outer->m_objects.push_back(getShared<GameObject>());
+				m_parent->m_objects.push_back(getShared<GameObject>());
 			}
 		}
 	}

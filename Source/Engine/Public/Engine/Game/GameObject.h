@@ -6,6 +6,8 @@
 
 namespace volucris
 {
+	class Package;
+
 	class GameObject : public Object
 	{
 	public:
@@ -13,10 +15,10 @@ namespace volucris
 
 		~GameObject() override;
 
-		void setOuter(GameObject* outer);
+		void setParent(GameObject* parent);
 
 	private:
-		GameObject* m_outer;
+		GameObject* m_parent;
 		std::vector< std::shared_ptr<GameObject>> m_objects;
 	};
 }
