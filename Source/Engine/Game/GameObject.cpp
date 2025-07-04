@@ -1,21 +1,29 @@
 #include "Engine/Game/GameObject.h"
 #include <Engine/Core/VectorHelp.h>
 #include <Core/Assert.h>
+#include <Asset/AssetManager.h>
+#include <Core/Volucris.h>
 
 namespace volucris
 {
 	GameObject::GameObject()
 		: Object()
 		, m_parent(nullptr)
-		, m_objects()
+		, m_children()
 	{
 	}
 
 	GameObject::~GameObject()
 	{
-		for (auto object : m_objects)
+		if (m_parent)
 		{
-			v_check(object.use_count() == 1);
+			setParent(nullptr);
+		}
+
+		for (const auto& object : m_children)
+		{
+			v_checkf(object.use_count() == 2, Engine, "object ref count: {}", object.use_count());
+			object->m_parent = nullptr;
 		}
 	}
 
@@ -25,14 +33,31 @@ namespace volucris
 		{
 			if (m_parent)
 			{
-				VectorHelp::quickRemove(m_parent->m_objects, this);
+				VectorHelp::quickRemove(m_parent->m_children, this);
 			}
 
 			m_parent = parent;
 			if (m_parent)
 			{
-				m_parent->m_objects.push_back(getShared<GameObject>());
+				m_parent->m_children.push_back(getShared<GameObject>());
 			}
 		}
+	}
+
+	void GameObject::addDependence(const std::string& path)
+	{
+		if (AssetManager::getInstance().isPackageRegistered(path))
+		{
+			m_dependences.push_back(path);
+		}
+		else
+		{
+			V_LOG_WARN(Engine, "Package {} is not registered.", path);
+		}
+	}
+
+	void GameObject::removeDependence(const std::string& path)
+	{
+		VectorHelp::quickRemove(m_dependences, path);
 	}
 }

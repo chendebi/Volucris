@@ -28,6 +28,14 @@ namespace volucris
 			ESourceFormat format = ESourceFormat::Invalid;
 			Size size = {};
 			std::vector<uint8> data = {};
+
+			template <class Archive>
+			void serialize(Archive& ar, const unsigned int version)
+			{
+				ar& format;
+				ar& size;
+				ar& data;
+			}
 		};
 
 		static ESourceFormat getSourceFormat(EPixelFormat format)

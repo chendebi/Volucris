@@ -116,7 +116,7 @@ namespace volucris
 			{
 				std::string relativePart = path.substr(mp.path.length());
 				fs::path physicalPath = fs::path(mp.physicalPath) / relativePart;
-				for (auto entry : fs::directory_iterator(physicalPath))
+				for (const auto& entry : fs::directory_iterator(physicalPath))
 				{
 					if (entry.is_directory() && (filters & (int)EFileType::Directory))
 					{

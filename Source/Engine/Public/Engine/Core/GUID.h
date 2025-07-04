@@ -4,15 +4,18 @@
 #include <Engine/Core/TypesHelp.h>
 #include <string>
 #include <fmt/format.h>
+#include <array>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/array.hpp>
 
 namespace volucris
 {
 	struct GUID
 	{
-		unsigned long  Data1;
-		unsigned short Data2;
-		unsigned short Data3;
-		unsigned char  Data4[8];
+		unsigned long  Data1 = 0;
+		unsigned short Data2 = 0;
+		unsigned short Data3 = 0;
+		std::array<unsigned char, 8> Data4;
 
 		std::string toString() const {
 			char buffer[64];
@@ -27,6 +30,15 @@ namespace volucris
 		}
 
 		static GUID generate();
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& Data1;
+			ar& Data2;
+			ar& Data3;
+			ar& Data4;
+		}
 	};
 }
 

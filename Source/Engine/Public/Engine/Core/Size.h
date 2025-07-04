@@ -49,6 +49,13 @@ namespace volucris
 		{
 			return !operator==(size);
 		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& width;
+			ar& height;
+		}
 	};
 }
 

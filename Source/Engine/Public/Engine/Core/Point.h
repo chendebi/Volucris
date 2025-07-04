@@ -39,6 +39,13 @@ namespace volucris
 			y -= p.y;
 			return *this;
 		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& x;
+			ar& y;
+		}
 	};
 }
 

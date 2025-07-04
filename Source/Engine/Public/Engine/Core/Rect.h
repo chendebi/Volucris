@@ -38,6 +38,15 @@ namespace volucris
 		{
 			return !operator==(other);
 		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& x;
+			ar& y;
+			ar& width;
+			ar& height;
+		}
 	};
 }
 
