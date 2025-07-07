@@ -10,17 +10,10 @@ struct GLFWwindow;
 
 namespace volucris
 {
-	DECLARE_EVENT_MUTI_DELEGATE(OnWindowAttachStateChanged, void, class Window*, bool)
-	DECLARE_EVENT_MUTI_DELEGATE(OnWindowCurrentStateChanged, void, class Window*, bool)
-
 	class ImGuiRenderer;
 
 	class Window : public Widget
 	{
-	public:
-		OnWindowAttachStateChanged AttachStateChanged;
-		OnWindowCurrentStateChanged CurrentStateChanged;
-
 	public:
 		Window();
 
@@ -46,6 +39,8 @@ namespace volucris
 
 	protected:
 		void onBuild() override;
+
+		void onWindowFocusChanged(FocusEvent* event) override;
 
 	private:
 		friend class Application;

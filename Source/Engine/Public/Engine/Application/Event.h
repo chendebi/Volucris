@@ -18,6 +18,11 @@ namespace volucris
 		Point pos;
 		std::vector<std::string> files;
 	};
+
+	struct FocusEvent
+	{
+		bool focused = false;
+	};
 }
 
 #endif // !__volucris_event_h__

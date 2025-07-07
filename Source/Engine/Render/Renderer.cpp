@@ -11,6 +11,7 @@
 #include <RHI/RHIBuffer.h>
 #include <Render/View.h>
 #include <Core/VectorHelp.h>
+#include <Render/Scene.h>
 
 namespace volucris
 {

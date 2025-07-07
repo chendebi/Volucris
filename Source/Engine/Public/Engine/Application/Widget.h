@@ -9,7 +9,9 @@
 namespace volucris
 {
 	class Widget;
+	class RHICommandList;
 	struct DropEvent;
+	struct FocusEvent;
 
 	class Widget : public Object
 	{
@@ -32,10 +34,19 @@ namespace volucris
 			}
 			return this;
 		}
+
+		RHICommandList* getContext() const { return m_context; }
+
 	protected:
 		void topWidgetChanged(Widget* old, Widget* current);
 
 		bool setDropEvent(DropEvent* event);
+
+		void setFocusEvent(FocusEvent* event);
+
+		void rendererCreated(RHICommandList* cmdList);
+
+		void beforeRedererDestroy(RHICommandList* cmdList);
 
 		virtual void onBuild() {}
 
@@ -43,12 +54,19 @@ namespace volucris
 
 		virtual void onTopWidgetChanged(Widget* old, Widget* current) {}
 
+		virtual void onRendererBuild(RHICommandList* cmdList) {}
+
+		virtual void onRendererDestroy(RHICommandList* cmdList) {}
+
 		virtual bool onDrop(DropEvent* event) { return false; }
+
+		virtual void onWindowFocusChanged(FocusEvent* event) {}
 
 	private:
 		Widget* m_parent;
 		std::vector <std::shared_ptr<Widget>> m_children;
 		Rect m_rect;
+		RHICommandList* m_context;
 	};
 }
 

@@ -7,6 +7,7 @@
 
 namespace volucris
 {
+	class Scene;
 	class RHIRenderTarget;
 	class RHIReadPixelBuffer;
 
@@ -14,6 +15,8 @@ namespace volucris
 	{
 	public:
 		View();
+
+		View(const std::shared_ptr<Scene>& scene);
 
 		~View();
 
@@ -33,6 +36,7 @@ namespace volucris
 		std::vector<std::unique_ptr<RHIReadPixelBuffer>> m_targetReaders;
 		Texture::TextureData m_targetData;
 		int m_current;
+		std::shared_ptr<Scene> m_scene;
 	};
 }
 

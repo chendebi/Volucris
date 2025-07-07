@@ -14,7 +14,14 @@ namespace volucris
 		, m_targetReaders()
 		, m_targetData()
 		, m_current(0)
+		, m_scene(nullptr)
 	{
+	}
+
+	View::View(const std::shared_ptr<Scene>& scene)
+		: View()
+	{
+		m_scene = scene;
 	}
 
 	View::~View()

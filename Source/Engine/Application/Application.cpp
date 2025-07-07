@@ -11,6 +11,7 @@
 #include <Profile/ProfileManager.h>
 #include <tracy/Tracy.hpp>
 #include <iostream>
+#include <Game/Universe.h>
 
 namespace volucris
 {
@@ -45,6 +46,8 @@ namespace volucris
 			return;
 		}
 
+		setFocusedWindow(nullptr);
+
 		window->create();
 		m_windows.push_back(window);
 		if (m_mainWindow == nullptr)
@@ -74,8 +77,8 @@ namespace volucris
 			{
 				window->destroy();
 			}
-			m_windows.clear();
 			setFocusedWindow(nullptr);
+			m_windows.clear();
 		}
 		else
 		{
@@ -119,6 +122,16 @@ namespace volucris
 		}
 	}
 
+	void Application::addUniverse(const std::shared_ptr<Universe>& universe)
+	{
+		m_universes.push_back(universe);
+	}
+
+	void Application::removeUniverse(const std::shared_ptr<Universe>& universe)
+	{
+		VectorHelp::quickRemove(m_universes, universe);
+	}
+
 	int Application::exec()
 	{
 		if (!m_mainWindow)
@@ -132,6 +145,11 @@ namespace volucris
 			flushCommmands();
 
 			m_focusedWindow->build();
+
+			for (const auto& universe : m_universes)
+			{
+				universe->update();
+			}
 
 			Renderer::getInstance().push(nullptr);
 

@@ -15,6 +15,7 @@
 
 #include <Engine/RHI/RHICommandList.h>
 #include <Engine/Application/Window.h>
+#include <backends/imgui_impl_glfw.cpp>
 
 namespace volucris
 {
@@ -31,7 +32,7 @@ namespace volucris
 		IMGUI_CHECKVERSION();
 		m_imguiContext = ImGui::CreateContext();
 		ImGui::SetCurrentContext(m_imguiContext);
-		ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), true);
+		ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), false);
 		if (!ImGui_ImplOpenGL3_Init("#version 430"))
 		{
 			V_LOG_CRITICAL(Engine, "imgui initialize failed");
@@ -99,6 +100,19 @@ namespace volucris
 		V_LOG_DEBUG(Engine, "make context current for window: {}", m_window->getTitle());
 		ImGui::SetCurrentContext(m_imguiContext);
 		m_cmdList->makeCurrent();
+	}
+
+	void ImGuiRenderer::installedCallbacks(bool install)
+	{
+		ImGui_ImplGlfw_Data* bd = (ImGui_ImplGlfw_Data*)m_imguiContext->IO.BackendPlatformUserData;
+		if (install && !bd->InstalledCallbacks)
+		{
+			ImGui_ImplGlfw_InstallCallbacks(m_window->getHandle());
+		}
+		else if (bd->InstalledCallbacks)
+		{
+			ImGui_ImplGlfw_RestoreCallbacks(m_window->getHandle());
+		}
 	}
 
 	RHICommandList* ImGuiRenderer::getCommandList() const

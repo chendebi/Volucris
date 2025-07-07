@@ -54,55 +54,19 @@ public:
 	}
 
 private:
-	void onTopWidgetChanged(Widget* old, Widget* current) override
+	void onRendererBuild(RHICommandList* context) override
 	{
-		if (old)
-		{
-			if (auto window = dynamic_cast<Window*>(old))
-			{
-				window->AttachStateChanged.unbind(this);
-
-				if (m_iconTexture)
-				{
-					onWindowAttachStateChanged(window, false);
-				}
-			}
-		}
-
-		auto window = dynamic_cast<Window*>(current);
-		if (!window)
-		{
-			return;
-		}
-		window->AttachStateChanged.bindObject(this, &MWidget::onWindowAttachStateChanged);
-		if (window->getImGuiRenderer())
-		{
-			onWindowAttachStateChanged(window, true);
-		}
+		loadIcons(context);
 	}
 
-	void onWindowAttachStateChanged(Window* window, bool attached)
+	void onRendererDestroy(RHICommandList* context) override
 	{
-		if (attached)
-		{
-			auto cmdList = window->getImGuiRenderer()->getCommandList();
-			loadIcons(cmdList);
-		}
-		else
-		{
-			window->getImGuiRenderer()->getCommandList()->deleteResource(m_iconTexture.get());
-			m_iconTexture = nullptr;
-		}
+		context->deleteResource(m_iconTexture.get());
+		m_iconTexture = nullptr;
 	}
 
-	void loadIcons(RHICommandList* cmdList)
+	void loadIcons(RHICommandList* cmdList) 
 	{
-		if (m_iconTexture)
-		{
-			cmdList->deleteResource(m_iconTexture.get());
-			m_iconTexture = nullptr;
-		}
-
 		std::string filepath = gFileSystem.virtualToPhysical("/Engine/Resource/Images/icons.png");
 		V_LOG_DEBUG(Editor, "icon load file path: {}", filepath);
 		ImageLoader loader = ImageLoader(filepath);

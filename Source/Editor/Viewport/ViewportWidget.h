@@ -7,6 +7,7 @@
 namespace volucris
 {
 	class View;
+	class Universe;
 	class Window;
 	class RHITexture2D;
 	class RHICommandList;
@@ -17,14 +18,16 @@ namespace volucris
 	public:
 		ViewportWidget();
 
-		void onTopWidgetChanged(Widget* old, Widget* current) override;
+		void setUniverse(const std::shared_ptr<Universe>& universe);
 
 	protected:
 		void onBuild() override;
 
 		void viewSizeChanged(Size size);
 
-		void onWindowAttachStateChanged(Window* window, bool attached);
+		void onRendererBuild(RHICommandList* cmdList) override;
+
+		void onRendererDestroy(RHICommandList* cmdList) override;
 
 	private:
 		void recreateUploaders(RHICommandList* cmdList);
@@ -33,14 +36,20 @@ namespace volucris
 
 		void setViewData(Texture::TextureData data);
 
+		void createView();
+
+		void releaseView();
+
 	private:
 		View* m_view;
 		Size m_size;
-		Window* m_window;
 		int m_current;
 		std::shared_ptr<RHITexture2D> m_viewTexture;
 		std::vector<std::shared_ptr<RHITexture2D>> m_textures;
 		std::vector<std::shared_ptr<RHIWritePixelBuffer>> m_uploaders;
+
+	private:
+		std::shared_ptr<Universe> m_universe;
 	};
 }
 

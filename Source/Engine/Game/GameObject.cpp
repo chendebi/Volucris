@@ -60,4 +60,15 @@ namespace volucris
 	{
 		VectorHelp::quickRemove(m_dependences, path);
 	}
+
+	RTTR_REGISTRATION
+	{
+		rttr::registration::class_<GameObject>("GameObject")
+			 .constructor<>()
+			 .property("Name", &GameObject::getDisplayName, &GameObject::setDisplayName)
+			(
+				rttr::metadata("Group", "Common"),
+				rttr::metadata("Description", "object name")
+			);
+	}
 }

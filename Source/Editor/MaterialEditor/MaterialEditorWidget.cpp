@@ -5,13 +5,14 @@
 #include <Engine/FileSystem/FileSystem.h>
 #include <EditorCore/editor.h>
 #include <Viewport/ViewportWidget.h>
+#include <Engine/Game/Universe.h>
 
 namespace volucris
 {
     MaterialEditorWidget::MaterialEditorWidget()
         : m_viewport(std::make_shared<ViewportWidget>())
+        , m_universe(std::make_shared<Universe>())
     {
-        
     }
 
     void MaterialEditorWidget::onBuild()
@@ -60,9 +61,14 @@ namespace volucris
 		ImGui::End();
 	}
 
-    void MaterialEditorWidget::onTopWidgetChanged(Widget* old, Widget* current)
+    void MaterialEditorWidget::onRendererBuild(RHICommandList* cmdList)
     {
-		m_viewport->onTopWidgetChanged(old, current);
+
     }
+
+    void MaterialEditorWidget::onRendererDestroy(RHICommandList* cmdList)
+    {
+    }
+
 
 } // namespace volucris

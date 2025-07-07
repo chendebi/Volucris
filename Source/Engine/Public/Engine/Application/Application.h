@@ -9,6 +9,7 @@
 namespace volucris
 {
 	class Window;
+	class Universe;
 
 	class Application : public Object
 	{
@@ -37,6 +38,10 @@ namespace volucris
 
 		int getWindowCount() const { return m_windows.size(); }
 
+		void addUniverse(const std::shared_ptr<Universe>& universe);
+
+		void removeUniverse(const std::shared_ptr<Universe>& universe);
+
 		int exec();
 
 	private:
@@ -45,6 +50,7 @@ namespace volucris
 		std::shared_ptr<Window> m_mainWindow;
 		std::vector<std::shared_ptr<Window>> m_windows;
 		CircleQueue<std::function<void()>> m_queue;
+		std::vector<std::shared_ptr<Universe>> m_universes;
 	};
 }
 

@@ -5,6 +5,7 @@
 
 namespace volucris
 {
+	class Universe;
 	class ViewportWidget;
 
 	class MaterialEditorWidget : public Widget
@@ -16,10 +17,13 @@ namespace volucris
 	protected:
 		void onBuild() override;
 
-		void onTopWidgetChanged(Widget* old, Widget* current) override;
+		void onRendererBuild(RHICommandList* cmdList) override;
+
+		void onRendererDestroy(RHICommandList* cmdList) override;
 
 	private:
 		std::shared_ptr<ViewportWidget> m_viewport;
+		std::shared_ptr<Universe> m_universe;
 	};
 }
 

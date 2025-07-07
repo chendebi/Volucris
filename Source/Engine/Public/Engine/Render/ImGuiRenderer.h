@@ -24,6 +24,8 @@ namespace volucris
 
 		void makeCurrent();
 
+		void installedCallbacks(bool install);
+
 		RHICommandList* getCommandList() const;
 
 	private:

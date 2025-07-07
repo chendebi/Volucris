@@ -2,6 +2,7 @@
 #include <Core/VectorHelp.h>
 #include <Core/Volucris.h>
 #include <imgui/imgui.h>
+#include <Application/Window.h>
 
 namespace volucris
 {
@@ -9,6 +10,7 @@ namespace volucris
 		: Object()
 		, m_parent(nullptr)
 		, m_children()
+		, m_context(nullptr)
 	{
 
 	}
@@ -41,19 +43,28 @@ namespace volucris
 	{
 		if (m_parent != parent)
 		{
+			auto shared = getShared<Widget>();
 			auto oldTopWidget = getTopWidget();
 			if (m_parent)
 			{
-				VectorHelp::quickRemove<Widget>(m_parent->m_children, this);
+				if (m_context)
+				{
+					beforeRedererDestroy(m_context);
+					m_context = nullptr;
+				}
+				VectorHelp::quickRemove(m_parent->m_children, shared);
 			}
-			auto oldParent = m_parent;
+
 			m_parent = parent;
 			if (m_parent)
 			{
-				m_parent->m_children.push_back(getShared<Widget>());
+				m_parent->m_children.push_back(shared);
+
+				if (m_parent->m_context)
+				{
+					rendererCreated(m_parent->m_context);
+				}
 			}
-			parentChanged(oldParent, m_parent);
-			topWidgetChanged(oldTopWidget, getTopWidget());
 		}
 	}
 
@@ -92,5 +103,34 @@ namespace volucris
 			}
 		}
 		return false;
+	}
+
+	void Widget::setFocusEvent(FocusEvent* event)
+	{
+		onWindowFocusChanged(event);
+		for (const auto& child : m_children)
+		{
+			child->setFocusEvent(event);
+		}
+	}
+
+	void Widget::rendererCreated(RHICommandList* cmdList)
+	{
+		m_context = cmdList;
+		onRendererBuild(cmdList);
+		for (const auto& child : m_children)
+		{
+			child->rendererCreated(cmdList);
+		}
+	}
+
+	void Widget::beforeRedererDestroy(RHICommandList* cmdList)
+	{
+		onRendererDestroy(cmdList);
+		for (const auto& child : m_children)
+		{
+			child->beforeRedererDestroy(cmdList);
+		}
+		m_context = nullptr;
 	}
 }

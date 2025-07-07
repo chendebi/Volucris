@@ -46,8 +46,12 @@ namespace volucris
 		if (m_focused)
 		{
 			m_imguiRenderer->makeCurrent();
+			glfwFocusWindow(m_handle);
 		}
-		CurrentStateChanged.invoke(this, m_focused);
+
+		FocusEvent e;
+		e.focused = m_focused;
+		setFocusEvent(&e);
 	}
 
 	void Window::create(bool offscreen)
@@ -71,7 +75,10 @@ namespace volucris
 
 			glfwSetWindowFocusCallback(m_handle, [](GLFWwindow* handle, int focused) {
 				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-				gApp->setFocusedWindow(window);
+				if (focused)
+				{
+					gApp->setFocusedWindow(window);
+				}
 				});
 
 			glfwSetDropCallback(m_handle, [](GLFWwindow* handle, int count, const char** paths) {
@@ -93,8 +100,9 @@ namespace volucris
 					window->setDropEvent(&e);
 				}
 				});
+			rendererCreated(m_imguiRenderer->getCommandList());
+			setFocused(true);
 		}
-		AttachStateChanged.invoke(this, true);
 	}
 
 	void Window::destroy()
@@ -109,7 +117,7 @@ namespace volucris
 
 	void Window::destroyImGuiRenderer()
 	{
-		AttachStateChanged.invoke(this, false);
+		beforeRedererDestroy(m_imguiRenderer->getCommandList());
 		setFocused(false);
 		m_imguiRenderer = nullptr;
 	}
@@ -120,5 +128,15 @@ namespace volucris
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+	}
+
+	void Window::onWindowFocusChanged(FocusEvent* event)
+	{
+		if (!m_imguiRenderer)
+		{
+			return;
+		}
+
+		m_imguiRenderer->installedCallbacks(event->focused);
 	}
 }

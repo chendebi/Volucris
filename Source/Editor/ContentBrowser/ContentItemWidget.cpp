@@ -124,15 +124,19 @@ namespace volucris
 			);
 		}
 
-		auto id = m_texture->getId();
-		ImTextureID texID = (ImTextureID)(intptr_t)id;
 		ImVec2 imgPos = { cursorPos.x + m_iconSpace.x, cursorPos.y + m_iconSpace.y };
 
-		window->DrawList->AddImage(texID,
-			imgPos,
-			ImVec2(imgPos.x + m_iconSize.x, imgPos.y + m_iconSize.y),
-			{m_minUV.x, m_minUV.y},
-			{m_maxUV.x, m_maxUV.y});
+		if (m_texture)
+		{
+			auto id = m_texture->getId();
+			ImTextureID texID = (ImTextureID)(intptr_t)id;
+
+			window->DrawList->AddImage(texID,
+				imgPos,
+				ImVec2(imgPos.x + m_iconSize.x, imgPos.y + m_iconSize.y),
+				{ m_minUV.x, m_minUV.y },
+				{ m_maxUV.x, m_maxUV.y });
+		}
 
 		ImVec2 fontRectMin = { cursorPos.x + m_iconSpace.x, imgPos.y + m_iconSize.y + m_iconSpace.y };
 		ImVec2 fontRectMax = { cursorPos.x + m_size.x - m_iconSpace.x, cursorPos.y + m_size.y};
