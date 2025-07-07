@@ -15,15 +15,15 @@ namespace volucris
 
 	GameObject::~GameObject()
 	{
+		for (const auto& object : m_children)
+		{
+			v_checkf(object.use_count() == 1, Engine, "object ref count: {}", object.use_count());
+			object->m_parent = nullptr;
+		}
+
 		if (m_parent)
 		{
 			setParent(nullptr);
-		}
-
-		for (const auto& object : m_children)
-		{
-			v_checkf(object.use_count() == 2, Engine, "object ref count: {}", object.use_count());
-			object->m_parent = nullptr;
 		}
 	}
 

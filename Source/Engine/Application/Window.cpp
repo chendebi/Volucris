@@ -9,6 +9,7 @@
 #include <Render/ImGuiRenderer.h>
 #include <Core/Volucris.h>
 #include <Core/Assert.h>
+#include <Application/Event.h>
 
 namespace volucris
 {
@@ -71,6 +72,26 @@ namespace volucris
 			glfwSetWindowFocusCallback(m_handle, [](GLFWwindow* handle, int focused) {
 				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
 				gApp->setFocusedWindow(window);
+				});
+
+			glfwSetDropCallback(m_handle, [](GLFWwindow* handle, int count, const char** paths) {
+				auto window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+				if (count <= 0)
+				{
+					return;
+				}
+				double x, y;
+				glfwGetCursorPos(handle, &x, &y);
+				DropEvent e;
+				for (auto i = 0; i < count; ++i)
+				{
+					e.files.push_back(paths[i]);
+				}
+
+				e.pos = Point(static_cast<float>(x), static_cast<float>(y));
+				{
+					window->setDropEvent(&e);
+				}
 				});
 		}
 		AttachStateChanged.invoke(this, true);

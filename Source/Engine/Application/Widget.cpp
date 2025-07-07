@@ -76,4 +76,21 @@ namespace volucris
 			child->topWidgetChanged(old, current);
 		}
 	}
+
+	bool Widget::setDropEvent(DropEvent* event)
+	{
+		if (onDrop(event))
+		{
+			return true;
+		}
+
+		for (const auto& child : m_children)
+		{
+			if (child->setDropEvent(event))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }

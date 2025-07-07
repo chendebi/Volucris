@@ -9,6 +9,7 @@
 namespace volucris
 {
 	class Widget;
+	struct DropEvent;
 
 	class Widget : public Object
 	{
@@ -34,11 +35,15 @@ namespace volucris
 	protected:
 		void topWidgetChanged(Widget* old, Widget* current);
 
+		bool setDropEvent(DropEvent* event);
+
 		virtual void onBuild() {}
 
 		virtual void parentChanged(Widget* old, Widget* current) {}
 
 		virtual void onTopWidgetChanged(Widget* old, Widget* current) {}
+
+		virtual bool onDrop(DropEvent* event) { return false; }
 
 	private:
 		Widget* m_parent;

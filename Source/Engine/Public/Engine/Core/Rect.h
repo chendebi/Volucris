@@ -39,6 +39,11 @@ namespace volucris
 			return !operator==(other);
 		}
 
+		bool contains(const Point& point) const
+		{
+			return point.x >= x && point.x < (x + width) && point.y >= y && point.y < (y + height);
+		}
+
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{

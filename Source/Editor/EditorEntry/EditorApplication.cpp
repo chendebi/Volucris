@@ -150,21 +150,22 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 	app->addWindow(window2);
 
 	const std::string iconPath = "/Engine/Content/Editor/Textures/T_Icons";
-	/*std::string filepath = gFileSystem.virtualToPhysical(iconPath);
+	std::string filepath = gFileSystem.virtualToPhysical("/Engine/Resource/Images/icons.png");
 	V_LOG_DEBUG(Editor, "icon load file path: {}", filepath);
 	ImageLoader loader = ImageLoader(filepath);
 	if (loader.load())
 	{
 		const auto& textureData = loader.getTextureData();
-		auto texture2d = std::make_shared<Texture2D>(textureData);
 		auto package = std::make_shared<Package>();
+		auto texture2d = std::make_shared<Texture2D>(textureData);
 		texture2d->setParent(package.get());
 
 		AssetManager::getInstance().registry(package.get());
 		AssetManager::getInstance().save(package.get());
-	}*/
-	Texture2D t;
-	auto package = AssetManager::getInstance().load(iconPath);
+		//texture2d = nullptr;
+	}
+	/*Texture2D t;
+	auto package = AssetManager::getInstance().load(iconPath);*/
 
 	return app;
 }
