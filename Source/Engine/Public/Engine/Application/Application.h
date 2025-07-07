@@ -44,6 +44,8 @@ namespace volucris
 
 		int exec();
 
+		bool isRunning() const { return  m_running; }
+
 	private:
 		static Application* s_instance;
 		Window* m_focusedWindow;
@@ -51,6 +53,7 @@ namespace volucris
 		std::vector<std::shared_ptr<Window>> m_windows;
 		CircleQueue<std::function<void()>> m_queue;
 		std::vector<std::shared_ptr<Universe>> m_universes;
+		bool m_running;
 	};
 }
 

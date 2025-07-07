@@ -13,13 +13,10 @@ namespace volucris
 	public:
 		MaterialEditorWidget();
 
-
 	protected:
 		void onBuild() override;
 
-		void onRendererBuild(RHICommandList* cmdList) override;
-
-		void onRendererDestroy(RHICommandList* cmdList) override;
+		void onWindowFocusChanged(FocusEvent* event) override;
 
 	private:
 		std::shared_ptr<ViewportWidget> m_viewport;

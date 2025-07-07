@@ -26,6 +26,8 @@ namespace volucris
 
 		void build();
 
+		void buildChildren();
+
 		Widget* getTopWidget() 
 		{
 			if (m_parent)

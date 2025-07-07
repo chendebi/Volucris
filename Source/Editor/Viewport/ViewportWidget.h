@@ -20,6 +20,8 @@ namespace volucris
 
 		void setUniverse(const std::shared_ptr<Universe>& universe);
 
+		void setViewData(Texture::TextureData data);
+
 	protected:
 		void onBuild() override;
 
@@ -29,12 +31,12 @@ namespace volucris
 
 		void onRendererDestroy(RHICommandList* cmdList) override;
 
+		void onWindowFocusChanged(FocusEvent* event) override;
+
 	private:
 		void recreateUploaders(RHICommandList* cmdList);
 
 		void clearUploaders(RHICommandList* cmdList);
-
-		void setViewData(Texture::TextureData data);
 
 		void createView();
 
@@ -47,6 +49,7 @@ namespace volucris
 		std::shared_ptr<RHITexture2D> m_viewTexture;
 		std::vector<std::shared_ptr<RHITexture2D>> m_textures;
 		std::vector<std::shared_ptr<RHIWritePixelBuffer>> m_uploaders;
+		bool m_ready;
 
 	private:
 		std::shared_ptr<Universe> m_universe;

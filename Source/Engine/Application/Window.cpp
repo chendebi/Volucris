@@ -128,6 +128,8 @@ namespace volucris
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		buildChildren();
 	}
 
 	void Window::onWindowFocusChanged(FocusEvent* event)

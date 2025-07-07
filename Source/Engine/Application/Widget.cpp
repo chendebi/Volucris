@@ -71,7 +71,10 @@ namespace volucris
 	void Widget::build()
 	{
 		onBuild();
+	}
 
+	void Widget::buildChildren()
+	{
 		for (const auto& child : m_children)
 		{
 			child->build();

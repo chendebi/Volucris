@@ -10,6 +10,8 @@
 #include <Engine/RHI/RHITexture.h>
 #include <EditorCore/editor.h>
 #include <Engine/Application/Application.h>
+#include <Engine/Game/Universe.h>
+#include <Engine/Application/Event.h>
 
 namespace volucris
 {
@@ -17,24 +19,37 @@ namespace volucris
 	{
 		mutable std::unique_ptr<View> view;
 		Size size;
+		ViewportWidget* client;
 
 		CreateViewTask(std::unique_ptr<View> v, Size s)
-			: view(std::move(v)), size(s) {}
+			: view(std::move(v)), size(s), client(nullptr) {}
 
 		CreateViewTask(const CreateViewTask& task)
 		{
 			view = std::move(task.view);
 			size = task.size;
+			client = nullptr;
 		}
 
 		CreateViewTask(CreateViewTask&& task) noexcept
-			: view(std::move(task.view)), size(task.size) {
+			: view(std::move(task.view)), size(task.size), client(task.client)
+		{
 		}
 
 		void execute()
 		{
 			view->resize(size.width, size.height);
+			auto v = view.get();
 			Renderer::getInstance().addView(std::move(view));
+			Renderer::getInstance().renderFrame();
+			Renderer::getInstance().renderFrame();
+			if (client)
+			{
+				auto data = v->getViewData();
+				gApp->pushCommand([client=client, data = std::move(data)]() {
+					client->setViewData(std::move(data));
+					});
+			}
 		}
 	};;
 
@@ -47,6 +62,7 @@ namespace volucris
 		, m_uploaders()
 		, m_textures()
 		, m_universe(nullptr)
+		, m_ready(false)
 	{
 	}
 
@@ -82,7 +98,7 @@ namespace volucris
 					});
 				});
 
-			if (m_viewTexture)
+			if (m_ready)
 			{
 				auto id = m_viewTexture->getId();
 				if (id > 0)
@@ -129,6 +145,22 @@ namespace volucris
 		releaseView();
 	}
 
+	void ViewportWidget::onWindowFocusChanged(FocusEvent* event)
+	{
+		if (event->focused)
+		{
+			createView();
+		}
+		else
+		{
+			releaseView();
+			if (!gApp->isRunning())
+			{
+				m_ready = false;
+			}
+		}
+	}
+
 	void ViewportWidget::recreateUploaders(RHICommandList* cmdList)
 	{
 		clearUploaders(cmdList);
@@ -173,7 +205,8 @@ namespace volucris
 
 	void ViewportWidget::setViewData(Texture::TextureData data)
 	{
-		if (!m_view)
+		auto context = getContext();
+		if (!m_view || !context)
 		{
 			return;
 		}
@@ -196,6 +229,11 @@ namespace volucris
 			cmdList->deleteResource(m_viewTexture.get());
 		}
 
+		if (!m_ready && m_current == 1)
+		{
+			m_ready = true;
+		}
+
 		m_current = (m_current + 1) % m_uploaders.size();
 		m_uploaders[m_current]->writeTo(m_textures[m_current].get(), cmdList);
 		m_viewTexture = m_textures[m_current];
@@ -203,13 +241,24 @@ namespace volucris
 
 	void ViewportWidget::createView()
 	{
-		if (auto context = getContext())
+		auto context = getContext();
+		if (m_universe && context)
 		{
-			auto view = std::make_unique<View>();
+			auto view = std::make_unique<View>(m_universe->getScene());
 			m_view = view.get();
 			CreateViewTask task = CreateViewTask(std::move(view), m_size);
+			if (gApp->isRunning())
+			{
+				task.client = this;
+			}
 			Renderer::getInstance().push(createTask(std::move(task)));
 			recreateUploaders(context);
+
+			if (gApp->isRunning())
+			{
+				Renderer::getInstance().flushCommands();
+				gApp->flushCommmands();
+			}
 		}
 	}
 

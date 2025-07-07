@@ -22,6 +22,7 @@ namespace volucris
 		, m_mainWindow(nullptr)
 		, m_windows()
 		, m_queue(1024)
+		, m_running(false)
 	{
 		if (s_instance != nullptr)
 		{
@@ -138,7 +139,10 @@ namespace volucris
 		{
 			return 0;
 		}
+
 		Renderer::getInstance().run();
+		m_running = true;
+
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;

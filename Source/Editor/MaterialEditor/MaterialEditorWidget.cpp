@@ -6,6 +6,8 @@
 #include <EditorCore/editor.h>
 #include <Viewport/ViewportWidget.h>
 #include <Engine/Game/Universe.h>
+#include <Engine/Application/Application.h>
+#include <Engine/Application/Event.h>
 
 namespace volucris
 {
@@ -13,6 +15,8 @@ namespace volucris
         : m_viewport(std::make_shared<ViewportWidget>())
         , m_universe(std::make_shared<Universe>())
     {
+        addChild(m_viewport);
+        m_viewport->setUniverse(m_universe);
     }
 
     void MaterialEditorWidget::onBuild()
@@ -61,14 +65,16 @@ namespace volucris
 		ImGui::End();
 	}
 
-    void MaterialEditorWidget::onRendererBuild(RHICommandList* cmdList)
+    void MaterialEditorWidget::onWindowFocusChanged(FocusEvent* event)
     {
-
+        if (event->focused)
+        {
+            gApp->addUniverse(m_universe);
+        }
+        else
+        {
+            gApp->removeUniverse(m_universe);
+        }
     }
-
-    void MaterialEditorWidget::onRendererDestroy(RHICommandList* cmdList)
-    {
-    }
-
 
 } // namespace volucris

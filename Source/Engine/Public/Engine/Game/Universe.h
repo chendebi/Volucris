@@ -15,6 +15,8 @@ namespace volucris
 		virtual ~Universe();
 
 		void update();
+
+		std::shared_ptr<Scene> getScene();
 		
 	protected:
 		
