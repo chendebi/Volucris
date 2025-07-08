@@ -20,6 +20,8 @@ namespace volucris
 			return inst;
 		}
 
+		void pushRenderCommand(std::function<void(RHICommandList*)> command, bool block = true);
+
 		RHICommandList* getRenderCommand() { return m_cmdList.get(); }
 
 		void addView(std::unique_ptr<View> view);

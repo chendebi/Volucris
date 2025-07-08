@@ -60,6 +60,13 @@ namespace volucris
 		m_cmdList->destroy();
 	}
 
+	void Renderer::pushRenderCommand(std::function<void(RHICommandList*)> command, bool block)
+	{
+		push([command = std::move(command), this]() {
+			command(m_cmdList.get());
+			}, block);
+	}
+
 	void Renderer::addView(std::unique_ptr<View> view)
 	{
 		m_views.emplace_back(std::move(view));

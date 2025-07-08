@@ -28,4 +28,5 @@ set(VOLUCRIS_ENGINE_PRIVATE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/Source/Engine)
 
 add_subdirectory(Test)
 add_subdirectory(Source/Engine)
+add_subdirectory(Source/Shader)
 add_subdirectory(Source/ThirdParty EXCLUDE_FROM_ALL)

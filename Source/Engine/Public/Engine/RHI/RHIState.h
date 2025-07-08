@@ -9,6 +9,7 @@ namespace volucris
 {
 	class RHITexture;
 	class RHIRenderTarget;
+	class RHIProgram;
 	class RHICommandList;
 
 	struct RHIClearState
@@ -33,6 +34,7 @@ namespace volucris
 		RHITexture* texture = nullptr;
 		RHITexture* texture2d = nullptr;
 		RHIRenderTarget* renderTarget = nullptr;
+		RHIProgram* program = nullptr;
 	};
 }
 

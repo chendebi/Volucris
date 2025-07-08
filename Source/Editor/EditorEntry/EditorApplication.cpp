@@ -101,6 +101,7 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 {
 	// 仅在测试时使用
 	gFileSystem.mount("/Engine/Resource", fmt::format("{}/Resource", VOLUCRIS_ENGINE_ROOT));
+	gFileSystem.mount("/Engine/Shader", fmt::format("{}/Source/Shader", VOLUCRIS_ENGINE_ROOT));
 	
 	auto app = std::make_shared<EditorApplication>();
 	auto window1 = std::make_shared<Window>();
@@ -113,23 +114,24 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 	app->addWindow(window1);
 	app->addWindow(window2);
 
-	const std::string iconPath = "/Engine/Content/Editor/Textures/T_Icons";
-	std::string filepath = gFileSystem.virtualToPhysical("/Engine/Resource/Images/icons.png");
-	V_LOG_DEBUG(Editor, "icon load file path: {}", filepath);
-	ImageLoader loader = ImageLoader(filepath);
-	if (loader.load())
-	{
-		const auto& textureData = loader.getTextureData();
-		auto package = std::make_shared<Package>();
-		auto texture2d = std::make_shared<Texture2D>(textureData);
-		texture2d->setParent(package.get());
+	//const std::string iconPath = "/Engine/Content/Editor/Textures/T_Icons";
+	//std::string filepath = gFileSystem.virtualToPhysical("/Engine/Resource/Images/icons.png");
+	//V_LOG_DEBUG(Editor, "icon load file path: {}", filepath);
+	//ImageLoader loader = ImageLoader(filepath);
+	//if (loader.load())
+	//{
+	//	const auto& textureData = loader.getTextureData();
+	//	auto package = std::make_shared<Package>();
+	//	auto texture2d = std::make_shared<Texture2D>(textureData);
+	//	texture2d->setParent(package.get());
 
-		AssetManager::getInstance().registry(package.get());
-		AssetManager::getInstance().save(package.get());
-		//texture2d = nullptr;
-	}
-	/*Texture2D t;
-	auto package = AssetManager::getInstance().load(iconPath);*/
+	//	AssetManager::getInstance().registry(package.get());
+	//	AssetManager::getInstance().save(package.get());
+	//	//texture2d = nullptr;
+	//}
+
+	Texture2D t;
+	auto texture = AssetManager::getInstance().loadAsset<Texture2D>("/Engine/Content/Editor/Textures/T_Icons");
 
 	return app;
 }

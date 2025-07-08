@@ -38,6 +38,23 @@ namespace volucris
 
 		std::shared_ptr<Package> load(const std::string& packageName);
 
+		template<typename T>
+		std::shared_ptr<T> loadAsset(const std::string& packageName)
+		{
+			if (auto package = load(packageName))
+			{
+				for (const auto& child : package->getChildren())
+				{
+					if (auto asset = std::dynamic_pointer_cast<T>(child))
+					{
+						asset->setParent(nullptr);
+						return asset;
+					}
+				}
+			}
+			return nullptr;
+		}
+
 	private:
 		AssetManager();
 
