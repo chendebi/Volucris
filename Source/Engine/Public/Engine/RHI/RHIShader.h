@@ -16,20 +16,20 @@ namespace volucris
 		};
 
 	public:
-		RHIShader(ShaderType shaderType, const std::string& source);
+		RHIShader(ShaderType shaderType);
 
-		bool init(RHICommandList* command) override;
+		~RHIShader() override;
+
+		uint32 getId();
+
+		bool init(const std::string& source);
 
 		ShaderType getShaderType() const { return m_shaderType; }
 
-	protected:
-		uint32 create(RHIState* state);
-
-		void destroy(RHIState* state);
-
 	private:
 		ShaderType m_shaderType;
-		std::string m_source;
+		bool m_valid;
+		uint32 m_id;
 	};
 }
 

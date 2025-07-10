@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <Engine/Core/Rect.h>
 #include <Engine/Core/TypesHelp.h>
+#include <Engine/RHI/RHIBuffer.h>
 
 namespace volucris
 {
@@ -31,9 +32,11 @@ namespace volucris
 		RHICommandList* commandList = nullptr;
 		Rect viewport = { 0,0,0,0 };
 		RHIClearState clearState = RHIClearState();
-		RHITexture* texture = nullptr;
 		RHITexture* texture2d = nullptr;
+		RHIRenderTarget* readTarget = nullptr;
+		RHIRenderTarget* writeTarget = nullptr;
 		RHIRenderTarget* renderTarget = nullptr;
+		std::unordered_map<RHIBuffer::Type, RHIBuffer*> buffers = {};
 		RHIProgram* program = nullptr;
 	};
 }

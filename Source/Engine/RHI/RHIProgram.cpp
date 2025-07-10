@@ -6,9 +6,33 @@
 
 namespace volucris
 {
-	bool RHIProgram::init(RHICommandList* command, const std::vector<std::shared_ptr<RHIShader>>& shaders)
+	RHIProgram::RHIProgram()
+		: RHIResource()
+		, m_id(0)
+		, m_valid(false)
 	{
-		auto program = getId();
+	}
+
+	RHIProgram::~RHIProgram()
+	{
+		if (m_id > 0)
+		{
+			glDeleteProgram(m_id);
+		}
+	}
+
+	uint32 RHIProgram::getId()
+	{
+		if (m_id == 0)
+		{
+			m_id = glCreateProgram();
+		}
+		return m_id;
+	}
+
+	bool RHIProgram::init(const std::vector<std::shared_ptr<RHIShader>>& shaders)
+	{
+		auto program = m_id;
 		for (const auto& shader : shaders)
 		{
 			glAttachShader(program, shader->getId());
@@ -24,34 +48,7 @@ namespace volucris
 			V_LOG_WARN(Engine, "{}", msg);
 			return false;
 		}
+		m_valid = true;
 		return true;
 	}
-
-	uint32 RHIProgram::create(RHIState* state)
-	{
-		return glCreateProgram();
-	}
-
-	void RHIProgram::bind(RHIState* state)
-	{
-		if (state->program == this)
-		{
-			return;
-		}
-		auto id = getId();
-		glUseProgram(id);
-		state->program = this;
-	}
-
-	void RHIProgram::destroy(RHIState* state)
-	{
-		if (state->program == this)
-		{
-			state->program = nullptr;
-		}
-		auto id = getId();
-		glDeleteProgram(id);
-	}
-
-
 }

@@ -4,6 +4,7 @@
 #include <RHI/RHIRenderTarget.h>
 #include <Core/Volucris.h>
 #include <Render/Renderer.h>
+#include <RHI/RHIPixelBuffer.h>
 
 constexpr int FrameCount = 2;
 
@@ -28,12 +29,7 @@ namespace volucris
 	{
 		for (auto& target : m_targets)
 		{
-			RHICmdList->deleteResource(target.get());
-		}
-
-		for (auto& reader : m_targetReaders)
-		{
-			RHICmdList->deleteResource(reader.get());
+			RHICmdList->unsetRenderTarget(target.get());
 		}
 	}
 
@@ -48,13 +44,9 @@ namespace volucris
 
 		for (auto& target : m_targets)
 		{
-			RHICmdList->deleteResource(target.get());
+			RHICmdList->unsetRenderTarget(target.get());
 		}
 		
-		for (auto& reader : m_targetReaders)
-		{
-			RHICmdList->deleteResource(reader.get());
-		}
 		m_targets.clear();
 		m_targetReaders.clear();
 
@@ -68,13 +60,16 @@ namespace volucris
 
 		for (int i = 0; i < FrameCount; ++i)
 		{
+			auto texture = RHICreateTexture(desc);
 			auto target = std::make_unique<RHIRenderTarget>(Size(width, height));
-			target->attachColor(desc, 0);
-			target->init(RHICmdList);
+			RHICmdList->setRenderTarget(target.get());
+			target->attachColor(texture, 0);
+			v_check(target->checkCompletion())
 			m_targets.emplace_back(std::move(target));
 
-			auto reader = std::make_unique<RHIReadPixelBuffer>(size);
-			reader->init(RHICmdList);
+			auto reader = std::make_unique<RHIReadPixelBuffer>(RHIBuffer::StreamRead);
+			RHICmdList->setBuffer(reader.get());
+			reader->init(size);
 			m_targetReaders.emplace_back(std::move(reader));
 		}
 		m_current = 0;
@@ -84,7 +79,7 @@ namespace volucris
 	{
 		RENDER_SCOPE(View);
 
-		cmdList->bindResource(m_targets[m_current].get());
+		cmdList->setRenderTarget(m_targets[m_current].get());
 		RHIClearState state;
 		state.color = { 0.0, 0.0, 1.0, 1.0 };
 		cmdList->clear(state);
@@ -98,9 +93,9 @@ namespace volucris
 		rect.setSize(m_targets[m_current]->getSize());
 
 		int next = (m_current + 1) % FrameCount;
-		m_targetReaders[next]->startRead(cmdList, rect, m_targets[m_current].get(), 0);
+		m_targetReaders[next]->startRead(rect, m_targets[m_current].get(), 0);
 
-		m_targetReaders[m_current]->readColorTo(m_targetData.data, cmdList);
+		m_targetReaders[m_current]->readColorTo(m_targetData.data);
 		m_current = next;
 	}
 }

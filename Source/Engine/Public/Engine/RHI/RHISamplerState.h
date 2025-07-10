@@ -10,12 +10,6 @@ namespace volucris
 	public:
 		RHISamplerState();
 
-		bool init(RHICommandList* command) override;
-
-	protected:
-		uint32 create(RHIState* state) override;
-
-		void destroy(RHIState* state) override;
 	};
 }
 

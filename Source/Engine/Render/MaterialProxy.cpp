@@ -21,8 +21,6 @@ namespace volucris
 			m_program = std::make_unique<RHIProgram>();
 			m_program->init(RHICmdList, { vs, fs });
 		}
-		RHICmdList->deleteResource(vs.get());
-		RHICmdList->deleteResource(fs.get());
 	}
 
 	void MaterialProxy::setParameters(const std::vector<MaterialParameterInfo>& parameters)

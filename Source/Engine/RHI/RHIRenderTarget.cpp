@@ -7,113 +7,87 @@
 
 namespace volucris
 {
-	RHIRenderTarget::RHIRenderTarget(const Size& size)
+	static GLenum getGLRenderTarget(RHIRenderTarget::Usage usage)
+	{
+		GLenum target = GL_NONE;
+		switch (usage)
+		{
+		case volucris::RHIRenderTarget::ReadOnly:
+			target = GL_READ_FRAMEBUFFER;
+			break;
+		case volucris::RHIRenderTarget::WriteOnly:
+			target = GL_DRAW_FRAMEBUFFER;
+			break;
+		case volucris::RHIRenderTarget::ReadWrite:
+			target = GL_FRAMEBUFFER;
+			break;
+		default:
+			break;
+		}
+		return usage;
+	}
+
+	RHIRenderTarget::RHIRenderTarget(const Size& size, Usage usage)
 		: RHIResource()
 		, m_size(size)
+		, m_usage(usage)
 		, m_colorAttachments()
 		, m_depthAttachment()
+		, m_valid(false)
+		, m_id(0)
 	{
 
 	}
 
-	void RHIRenderTarget::attachColor(RHITextureDesc desc, int32 index)
+	RHIRenderTarget::~RHIRenderTarget()
 	{
-		desc.size = m_size;
-		m_colorAttachments[index] = RHICreateTexture(desc);
+		if (m_id > 0)
+		{
+			glDeleteBuffers(1, &m_id);
+		}
 	}
 
-
-	bool RHIRenderTarget::init(RHICommandList* command)
+	void RHIRenderTarget::setUsage(RHICommandList* cmdList, Usage usage)
 	{
-		command->bindResource(this);
-		for (const auto& [idx, attachment] : m_colorAttachments)
-		{
-			if (!attachment->init(command))
-			{
-				return false;
-			}
+		m_usage = usage;
+	}
 
-			if (attachment->isA<RHITexture>())
-			{
-				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, attachment->getId(), 0);
-			}
-			else
-			{
-				// 支持RBO
-				v_check(false);
-				return false;
-			}
-		}
-
-		if (m_depthAttachment)
-		{
-			if (!m_depthAttachment->init(command))
-			{
-				return false;
-			}
-
-			if (m_depthAttachment->isA<RHITexture>())
-			{
-				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthAttachment->getId(), 1);
-			}
-			else
-			{
-				// 支持RBO
-				v_check(false);
-				return false;
-			}
-		}
-
-		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if (status != GL_FRAMEBUFFER_COMPLETE)
-		{
-			V_LOG_WARN(Engine, "frame buffer init failed.{}", status)
-		}
-
+	void RHIRenderTarget::attachColor(const std::shared_ptr<RHITexture>& texture, int32 index)
+	{
+		auto target = getGLRenderTarget(m_usage);
+		glFramebufferTexture(target, GL_COLOR_ATTACHMENT0 + index, texture->getId(), 0);
+		m_colorAttachments[index] = texture;
 		GL_CHECK()
+	}
+
+	void RHIRenderTarget::attachDepth(const std::shared_ptr<RHITexture2D>& texture)
+	{
+		auto target = getGLRenderTarget(m_usage);
+		glFramebufferTexture(target, GL_DEPTH_ATTACHMENT, texture->getId(), 0);
+		m_depthAttachment = texture;
+		GL_CHECK()
+	}
+
+	uint32 RHIRenderTarget::getId()
+	{
+		if (m_id == 0)
+		{
+			glGenFramebuffers(1, &m_id);
+		}
+		return m_id;
+	}
+
+	bool RHIRenderTarget::update()
+	{
+		auto target = getGLRenderTarget(m_usage);
+		v_check(target != GL_NONE)
+		if (glCheckFramebufferStatus(target) != GL_FRAMEBUFFER_COMPLETE) 
+		{
+			V_LOG_WARN(Engine, "render target not complete");
+			return false;
+		}
+		m_valid = true;
 		return true;
 	}
 
-	uint32 RHIRenderTarget::create(RHIState* state)
-	{
-		uint32 id;
-		glGenFramebuffers(1, &id);
-
-		return id;
-	}
-
-	void RHIRenderTarget::bind(RHIState* state)
-	{
-		if (state->renderTarget == this)
-		{
-			return;
-		}
-		glBindFramebuffer(GL_FRAMEBUFFER, getId());
-		state->renderTarget = this;
-	}
-
-	void RHIRenderTarget::destroy(RHIState* state)
-	{
-		auto command = state->commandList;
-		for (auto & [idx, attachment] : m_colorAttachments)
-		{
-			if (attachment)
-			{
-				command->deleteResource(attachment.get());
-			}
-		}
-
-		if (m_depthAttachment)
-		{
-			command->deleteResource(m_depthAttachment.get());
-		}
-
-		if (state->renderTarget == this)
-		{
-			state->renderTarget = nullptr;
-		}
-
-		uint32 id = getId();
-		glDeleteFramebuffers(1, &id);
-	}
 }

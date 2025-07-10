@@ -9,21 +9,19 @@ namespace volucris
 	class RHIProgram : public RHIResource
 	{
 	public:
-		RHIProgram() : RHIResource() {}
+		RHIProgram();
 
-		bool init(RHICommandList* command) override { return false; }
+		~RHIProgram() override;
 
-		bool init(RHICommandList* command, const std::vector<std::shared_ptr<RHIShader>>& shaders);
+		uint32 getId();
 
-	protected:
-		uint32 create(RHIState* state) override;
+		bool init(const std::vector<std::shared_ptr<RHIShader>>& shaders);
 
-		void bind(RHIState* state) override;
-
-		void destroy(RHIState* state) override;
+		bool isValid() const { return m_valid; }
 
 	private:
-
+		uint32 m_id;
+		bool m_valid;
 	};
 }
 

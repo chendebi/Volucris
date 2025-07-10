@@ -11,15 +11,14 @@ namespace volucris
 {
 	class RHICommandList;
 
+	enum class TextureType
+	{
+		Texture2D
+	};
+
 	struct RHITextureDesc
 	{
-		enum ETextureClass
-		{
-			Texture,
-			Texture2D
-		};
-
-		ETextureClass texClass = ETextureClass::Texture2D;
+		TextureType texClass = TextureType::Texture2D;
 		Size size = { 0, 0 };
 		Texture::EPixelFormat pixelFormat = Texture::EPixelFormat::Invalid;
 		Texture::ESourceFormat sourceFormat = Texture::ESourceFormat::Invalid;
@@ -28,7 +27,7 @@ namespace volucris
 		static RHITextureDesc create2D(int width, int height, Texture::EPixelFormat format)
 		{
 			RHITextureDesc desc;
-			desc.texClass = Texture2D;
+			desc.texClass = TextureType::Texture2D;
 			desc.size = { width, height };
 			desc.pixelFormat = format;
 			return desc;
@@ -40,8 +39,10 @@ namespace volucris
 	public:
 		RHITexture();
 
-	protected:
-		uint32 create(RHIState* state) override;
+		TextureType getType() const { return m_type; }
+
+	private:
+		TextureType m_type;
 	};
 
 	class RHITexture2D : public RHITexture
@@ -53,18 +54,13 @@ namespace volucris
 
 		~RHITexture2D() override;
 
-		bool init(RHICommandList* command) override;
+		bool init();
 
-		void update(RHICommandList* command, const Rect& rect,  const std::vector<uint8>& data);
+		void update(const Rect& rect,  const std::vector<uint8>& data);
 
 		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
 
 		Size getSize() const { return m_size; }
-
-	protected:
-		void bind(RHIState* state) override;
-
-		void destroy(RHIState* state) override;
 
 	private:
 		Size m_size;

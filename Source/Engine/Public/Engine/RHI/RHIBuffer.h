@@ -7,14 +7,20 @@
 
 namespace volucris
 {
-	class RHITexture2D;
-	class RHIRenderTarget;
-	class RHICommandList;
+	class RHIOpenGLBuffer;
 
 	class RHIBuffer : public RHIResource
 	{
 	public:
-		enum EBufferUsage
+		enum Type
+		{
+			VertexBuffer,
+			IndexBuffer,
+			PixelPackBuffer,
+			PixelUnpackBuffer,
+		};
+
+		enum Usage
 		{
 			StaticDraw,
 			DynamicDraw,
@@ -22,45 +28,22 @@ namespace volucris
 			StreamWrite
 		};
 
-		bool init(RHICommandList* command) override;
+		RHIBuffer(Type type, Usage usage);
+
+		~RHIBuffer() override;
+
+		void init(uint64 bufferSize);
+
+		void init(const std::vector<uint8>& data);
+
+		Type getType() const { return m_type; }
 
 	protected:
-		struct Impl;
-		RHIBuffer(std::unique_ptr<Impl> buffer);
-
-		uint32 create(RHIState* state) override;
-
-		void bind(RHIState* state) override;
-
-		void destroy(RHIState* state) override;
-
-	protected:
-		std::unique_ptr<Impl> m_impl;
+		Type m_type;
+		Usage m_usage;
+		std::unique_ptr<RHIOpenGLBuffer> m_buffer;
 	};
 
-	class RHIReadPixelBuffer : public RHIBuffer
-	{
-	public:
-		RHIReadPixelBuffer(size_t size, EBufferUsage usage = StaticDraw);
-
-		void startRead(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index = 0);
-
-		std::vector<uint8> readColor(RHICommandList* command);
-
-		bool readColorTo(std::vector<uint8>& data, RHICommandList* command);
-	};
-
-	class RHIWritePixelBuffer : public RHIBuffer
-	{
-	public:
-		RHIWritePixelBuffer(size_t size, EBufferUsage usage = StaticDraw);
-
-		void startWrite(RHICommandList* command, std::vector<uint8> data);
-
-		std::vector<uint8> readColor(RHICommandList* command);
-
-		bool writeTo(RHITexture2D* texture, RHICommandList* command);
-	};
 }
 
 #endif // !__volucris_rhi_buffer_h__

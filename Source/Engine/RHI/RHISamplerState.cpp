@@ -9,23 +9,4 @@ namespace volucris
 	{
 
 	}
-
-	bool RHISamplerState::init(RHICommandList* command)
-	{
-		//command
-		return false;
-	}
-
-	uint32 RHISamplerState::create(RHIState* state)
-	{
-		uint32 id;
-		glGenSamplers(1, &id);
-		return id;
-	}
-
-	void RHISamplerState::destroy(RHIState* state)
-	{
-		auto id = getId();
-		glDeleteSamplers(1, &id);
-	}
 }

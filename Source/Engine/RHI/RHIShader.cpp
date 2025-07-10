@@ -4,17 +4,48 @@
 
 namespace volucris
 {
-	RHIShader::RHIShader(ShaderType shaderType, const std::string& source)
+	RHIShader::RHIShader(ShaderType shaderType)
 		: RHIResource()
 		, m_shaderType(shaderType)
-		, m_source(source)
+		, m_valid(false)
+		, m_id(0)
 	{
 
 	}
 
-	bool RHIShader::init(RHICommandList* command)
+	RHIShader::~RHIShader()
 	{
-		auto ss = m_source.c_str();
+		if (m_id > 0)
+		{
+			glDeleteShader(m_id);
+		}
+	}
+
+	uint32 RHIShader::getId()
+	{
+		if (m_id == 0)
+		{
+			GLenum type = GL_NONE;
+			switch (m_shaderType)
+			{
+			case volucris::RHIShader::VertexShader:
+				type = GL_VERTEX_SHADER;
+				break;
+			case volucris::RHIShader::FragmentShader:
+				type = GL_FRAGMENT_SHADER;
+				break;
+			default:
+				v_check(false)
+				break;
+			}
+			m_id = glCreateShader(type);
+		}
+		return m_id;
+	}
+
+	bool RHIShader::init(const std::string& source)
+	{
+		auto ss = source.c_str();
 		auto shader = getId();
 		glShaderSource(shader, 1, &ss, nullptr);
 		glCompileShader(shader);
@@ -27,34 +58,10 @@ namespace volucris
 			glGetShaderInfoLog(shader, 512, nullptr, msg);
 			V_LOG_WARN(Engine, "shader compile failed");
 			V_LOG_WARN(Engine, "{}", msg);
+			return false;
 		}
-		GL_CHECK()
-		return successs > 0;
-	}
-
-	uint32 RHIShader::create(RHIState* state)
-	{
-		GLenum type = GL_NONE;
-		switch (m_shaderType)
-		{
-		case volucris::RHIShader::VertexShader:
-			type = GL_VERTEX_SHADER;
-			break;
-		case volucris::RHIShader::FragmentShader:
-			type = GL_FRAGMENT_SHADER;
-			break;
-		default:
-			break;
-		}
-		return glCreateShader(type);
-	}
-
-	void RHIShader::destroy(RHIState* state)
-	{
-		auto id = getId();
-		if (id > 0)
-		{
-			glDeleteShader(id);
-		}
+		GL_CHECK();
+		m_valid = true;
+		return true;
 	}
 }

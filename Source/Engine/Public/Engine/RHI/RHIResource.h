@@ -13,26 +13,9 @@ namespace volucris
 	class RHIResource : public Object
 	{
 	public:
-		RHIResource() : Object(), m_id(0) {}
+		RHIResource() : Object() {}
 
 		~RHIResource() override;
-
-		uint32 getId() const { return m_id; }
-
-		bool isCreated() const { return m_id > 0; }
-
-		virtual bool init(RHICommandList* command) = 0;
-
-	protected:
-		virtual uint32 create(RHIState* state) = 0;
-		
-		virtual void bind(RHIState* state) {}
-
-		virtual void destroy(RHIState* state) = 0;
-
-	private:
-		friend class RHICommandList;
-		uint32 m_id;
 	};
 }
 

@@ -5,11 +5,29 @@
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHITexture.h>
 #include <RHI/RHIOpenGL.h>
-#include <FileSystem/FileSystem.h>
+#include <RHI/RHIOpenGLBuffer.h>
 
 namespace volucris
 {
-	static GLenum getGLUsage(RHIBuffer::EBufferUsage usage)
+	static GLenum getGLTarget(RHIBuffer::Type type)
+	{
+		switch (type)
+		{
+		case volucris::RHIBuffer::VertexBuffer:
+			return GL_VERTEX_ARRAY;
+		case volucris::RHIBuffer::IndexBuffer:
+			return GL_ELEMENT_ARRAY_BUFFER;
+		case volucris::RHIBuffer::PixelPackBuffer:
+			return GL_PIXEL_PACK_BUFFER;
+		case volucris::RHIBuffer::PixelUnpackBuffer:
+			return GL_PIXEL_UNPACK_BUFFER;
+		default:
+			break;
+		}
+		return GL_NONE;
+	}
+
+	static GLenum getGLUsage(RHIBuffer::Usage usage)
 	{
 		switch (usage)
 		{
@@ -27,178 +45,35 @@ namespace volucris
 		return GL_STATIC_DRAW;
 	}
 
-	static GLenum getGLReadFormat(Texture::EPixelFormat format)
-	{
-		switch (format)
-		{
-		case volucris::Texture::EPixelFormat::R8G8B8:
-			return GL_RGB;
-		case volucris::Texture::EPixelFormat::R8G8B8A8:
-			return GL_RGBA;
-		default:
-			break;
-		}
-		return GL_NONE;
-	}
 
-	static GLenum getGLPixelBufferTarget(RHIBuffer::EBufferUsage usage)
-	{
-		switch (usage)
-		{
-		case volucris::RHIBuffer::StreamRead:
-			return GL_PIXEL_PACK_BUFFER;
-		case volucris::RHIBuffer::StreamWrite:
-			return GL_PIXEL_UNPACK_BUFFER;
-		default:
-			break;
-		}
-		V_LOG_WARN(Engine, "try create a pixel buffer object in error usage: {}", (int)usage)
-		return GL_PIXEL_PACK_BUFFER;
-	}
-
-	struct RHIBuffer::Impl
-	{
-		struct GLBuffer
-		{
-			size_t size;
-			GLenum target;
-			GLenum usage;
-		};
-		GLBuffer buffer;
-
-		Impl(GLBuffer buff)
-			: buffer(buff)
-		{ }
-	};
-
-	RHIBuffer::RHIBuffer(std::unique_ptr<Impl> buffer)
-		: m_impl(std::move(buffer))
+	RHIBuffer::RHIBuffer(Type type, Usage usage)
+		: RHIResource()
+		, m_type(type)
+		, m_usage(usage)
+		, m_buffer(std::make_unique<RHIOpenGLBuffer>(RHIOpenGLBuffer({getGLTarget(type), getGLUsage(usage), 0})))
 	{
 	}
 
-	bool RHIBuffer::init(RHICommandList* command)
-	{
-		const auto buffer = m_impl->buffer;
-		command->bindResource(this);
-		GL_CHECK();
-		glBufferData(buffer.target, buffer.size, nullptr, buffer.usage);
-		GL_CHECK();
-		return true;
-	}
-
-	uint32 RHIBuffer::create(RHIState* state)
-	{
-		uint32 id;
-		glGenBuffers(1, &id);
-		return id;
-	}
-
-	void RHIBuffer::bind(RHIState* state)
-	{
-		glBindBuffer(m_impl->buffer.target, getId());
-	}
-
-	void RHIBuffer::destroy(RHIState* state)
+	RHIBuffer::~RHIBuffer()
 	{
 		auto id = getId();
-		glDeleteBuffers(1, &id);
-	}
-
-
-	RHIReadPixelBuffer::RHIReadPixelBuffer(size_t size, EBufferUsage usage)
-		: RHIBuffer(std::make_unique<Impl>(Impl::GLBuffer({size, GL_PIXEL_PACK_BUFFER, getGLUsage(usage)})))
-	{
-	}
-
-	void RHIReadPixelBuffer::startRead(RHICommandList* command, Rect rect, RHIRenderTarget* renderTarget, int index)
-	{
-		auto target = renderTarget->getAttachedColor(index);
-		if (!target)
+		if (id > 0)
 		{
-			return;
+			glDeleteBuffers(1, &id);
 		}
-
-		auto texture = dynamic_cast<RHITexture2D*>(target);
-		if (!texture)
-		{
-			return;
-		}
-
-		command->bindResource(renderTarget);
-		command->bindResource(this);
-		GL_CHECK();
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		GL_CHECK();
-		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
-		GL_CHECK();
-		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 	}
 
-	std::vector<uint8> RHIReadPixelBuffer::readColor(RHICommandList* command)
+	void RHIBuffer::init(uint64 bufferSize)
 	{
-		command->bindResource(this);
-		void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-		if (ptr == nullptr)
-		{
-			V_LOG_ERROR(Engine, "Failed to map pixel buffer for reading color data.")
-			return {};
-		}
-		std::vector<uint8> colorData(m_impl->buffer.size);
-		memcpy(colorData.data(), ptr, m_impl->buffer.size);
-		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-		return colorData;
+		glBufferData(m_buffer->target, bufferSize, nullptr, m_buffer->usage);
+		m_buffer->size = bufferSize;
+		GL_CHECK()
 	}
 
-
-	bool RHIReadPixelBuffer::readColorTo(std::vector<uint8>& data, RHICommandList* command)
+	void RHIBuffer::init(const std::vector<uint8>& data)
 	{
-		command->bindResource(this);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-		if (ptr == nullptr)
-		{
-			V_LOG_ERROR(Engine, "Failed to map pixel buffer for reading color data.")
-			return false;
-		}
-
-		if (data.size() != m_impl->buffer.size)
-		{
-			return false;
-		}
-		memcpy(data.data(), ptr, m_impl->buffer.size);
-		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-		glPixelStorei(GL_PACK_ALIGNMENT, 4);
-		return true;
-	}
-
-	RHIWritePixelBuffer::RHIWritePixelBuffer(size_t size, EBufferUsage usage)
-		: RHIBuffer(std::make_unique<Impl>(Impl::GLBuffer({ size, GL_PIXEL_UNPACK_BUFFER, getGLUsage(usage) })))
-	{
-
-	}
-
-	bool RHIWritePixelBuffer::writeTo(RHITexture2D* texture, RHICommandList* command)
-	{
-		command->bindResource(this);
-		command->bindResource(texture);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->getSize().width, texture->getSize().height,
-			getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
-		GL_CHECK();
-		return true;
-	}
-
-	void RHIWritePixelBuffer::startWrite(RHICommandList* command, std::vector<uint8> data)
-	{
-		command->bindResource(this);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-		if (ptr)
-		{
-			memcpy(ptr, data.data(), data.size());
-		}
-		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		GL_CHECK();
+		m_buffer->size = data.size();
+		glBufferData(m_buffer->target, m_buffer->size, data.data(), m_buffer->usage);
+		GL_CHECK()
 	}
 }

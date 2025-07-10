@@ -2,26 +2,31 @@
 #define __volucris_rhi_frame_buffer_h__
 
 #include <Engine/RHI/RHIResource.h>
+#include <Engine/RHI/RHIState.h>
 #include "RHITexture.h"
 
 namespace volucris
 {
-
 	class RHIRenderTarget : public RHIResource
 	{
 	public:
-		RHIRenderTarget(const Size& size);
+		enum Usage
+		{
+			ReadOnly,
+			WriteOnly,
+			ReadWrite
+		};
 
-		void attachColor(RHITextureDesc desc, int32 index);
+		RHIRenderTarget(const Size& size, Usage usage = ReadWrite);
+
+		~RHIRenderTarget();
+
+		void setUsage( RHICommandList* cmdList, Usage usage);
+
+		void attachColor(const std::shared_ptr<RHITexture>& texture, int32 index);
+
+		void attachDepth(const std::shared_ptr<RHITexture2D>& texture);
 		
-		/*void attachDepth(const RHITextureDesc& desc);
-
-		void attachStencil(const RHITextureDesc& desc);
-
-		void attachDepthStencil(const RHITextureDesc& desc);*/
-
-		bool init(RHICommandList* command) override;
-
 		RHIResource* getAttachedColor(int32 index) const
 		{
 			auto it = m_colorAttachments.find(index);
@@ -32,19 +37,21 @@ namespace volucris
 			return nullptr;
 		}
 
+		uint32 getId();
+
+		bool update();
+
 		Size getSize() const { return m_size; }
 
-	protected:
-		uint32 create(RHIState* state) override;
-
-		void bind(RHIState* state) override;
-
-		void destroy(RHIState* state) override;
+		Usage getUsage() const { return m_usage; }
 
 	private:
 		Size m_size;
+		Usage m_usage;
 		std::unordered_map<int32, std::shared_ptr<RHIResource>> m_colorAttachments;
 		std::shared_ptr<RHIResource> m_depthAttachment;
+		bool m_valid;
+		uint32 m_id;
 	};
 }
 

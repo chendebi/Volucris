@@ -6,6 +6,5 @@ namespace volucris
 {
 	RHIResource::~RHIResource()
 	{
-		v_checkf(!isCreated(), Engine, "rhi resource not destroyed by command list");
 	}
 }

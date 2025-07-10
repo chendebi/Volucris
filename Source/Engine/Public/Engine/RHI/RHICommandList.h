@@ -5,11 +5,12 @@
 #include <string>
 #include <Engine/Core/Core.h>
 #include <Engine/RHI/RHIState.h>
+#include <Engine/RHI/RHIRenderTarget.h>
 
 namespace volucris
 {
 	class Window;
-	class RHIResource;
+	class RHITexture2D;
 
 	struct RenderScope
 	{
@@ -37,15 +38,23 @@ namespace volucris
 
 		void executeCommand(const std::string& name);
 
-		void setTexture(RHITexture* texture);
+		void setTexture2D(RHITexture2D* texture);
 
-		void setRenderTarget(RHIRenderTarget* renderTarget);
+		void unsetTexture2D(RHITexture2D* texture);
 
-		void bindResource(RHIResource* resource);
+		void setRenderTarget(RHIRenderTarget* renderTarget, Rect rect = Rect());
 
-		void deleteResource(RHIResource* resource);
+		void unsetRenderTarget(RHIRenderTarget* renderTarget);
 
 		void setViewport(int x, int y, int w, int h);
+
+		void setViewport(const Rect& rect);
+
+		void setBuffer(RHIBuffer* buffer);
+
+		void unsetBuffer(RHIBuffer* buffer);
+
+		const RHIState& getState() const { return m_state; }
 
 	private:
 		Window* m_window;

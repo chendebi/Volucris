@@ -6,6 +6,8 @@
 #include <RHI/RHITexture.h>
 #include <RHI/RHIResource.h>
 #include <RHI/RHIRenderTarget.h>
+#include <RHI/RHIBuffer.h>
+#include <Core/Assert.h>
 
 namespace volucris
 {
@@ -110,42 +112,125 @@ namespace volucris
 		//glDebug
 	}
 
-	void RHICommandList::setTexture(RHITexture* texture)
+	void RHICommandList::setTexture2D(RHITexture2D* texture)
 	{
-		bindResource(texture);
-	}
-
-	void RHICommandList::setRenderTarget(RHIRenderTarget* renderTarget)
-	{
-		bindResource(renderTarget);
-	}
-
-	void RHICommandList::bindResource(RHIResource* resource)
-	{
-		if (!resource->isCreated())
+		if (m_state.texture2d == texture)
 		{
-			auto id = resource->create(&m_state);
-			resource->m_id = id;
+			return;
 		}
-		resource->bind(&m_state);
+		m_state.texture2d = texture;
+		if (!texture)
+		{
+			return;
+		}
+
+		auto id = texture->getId();
+		if (id == 0)
+		{
+			glGenTextures(1, &id);
+			static_cast<RHIResource*>(texture)->m_id = id;
+		}
+		glBindTexture(GL_TEXTURE_2D, id);
 	}
 
-	void RHICommandList::deleteResource(RHIResource* resource)
+	void RHICommandList::unsetTexture2D(RHITexture2D* texture)
 	{
-		if (resource)
+		if (m_state.texture2d == texture)
 		{
-			resource->destroy(&m_state);
-			resource->m_id = 0;
+			m_state.texture2d = nullptr;
+		}
+	}
+
+	void RHICommandList::setRenderTarget(RHIRenderTarget* renderTarget, Rect rect)
+	{
+		if (renderTarget == nullptr)
+		{
+			return;
+		}
+
+		auto id = renderTarget->getId();
+		if (id == 0)
+		{
+			glGenFramebuffers(1, &id);
+			static_cast<RHIResource*>(renderTarget)->m_id = id;
+		}
+		switch (renderTarget->getUsage())
+		{
+		case volucris::RHIRenderTarget::ReadOnly:
+			m_state.readTarget = renderTarget;
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, id);
+			break;
+		case volucris::RHIRenderTarget::WriteOnly:
+			m_state.writeTarget = renderTarget;
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+			break;
+		case volucris::RHIRenderTarget::ReadWrite:
+			m_state.readTarget = m_state.writeTarget = renderTarget;
+			m_state.readTarget = renderTarget;
+			glBindFramebuffer(GL_FRAMEBUFFER, id);
+			break;
+		default:
+			break;
+		}
+
+		if (rect.isValid())
+		{
+			setViewport(rect);
+		}
+	}
+
+	void RHICommandList::unsetRenderTarget(RHIRenderTarget* renderTarget)
+	{
+		if (!renderTarget)
+		{
+			return;
+		}
+
+		if (m_state.readTarget == renderTarget)
+		{
+			m_state.readTarget = nullptr;
+		}
+		if (m_state.writeTarget == renderTarget)
+		{
+			m_state.writeTarget = nullptr;
+		}
+		if (m_state.renderTarget == renderTarget)
+		{
+			m_state.readTarget = nullptr;
 		}
 	}
 
 	void RHICommandList::setViewport(int x, int y, int w, int h)
 	{
 		Rect viewport = { x, y, w, h };
-		if (m_state.viewport != viewport)
+		setViewport(viewport);
+	}
+
+	void RHICommandList::setViewport(const Rect& rect)
+	{
+		if (m_state.viewport != rect)
 		{
-			glViewport(x, y, w, h);
-			m_state.viewport = viewport;
+			glViewport(rect.x, rect.y, rect.width, rect.height);
+			m_state.viewport = rect;
+		}
+	}
+
+	void RHICommandList::setBuffer(RHIBuffer* buffer)
+	{
+		auto it = m_state.buffers.find(buffer->getType());
+		if (it != m_state.buffers.end() && (it->second == buffer))
+		{
+			return;
+		}
+		m_state.buffers[buffer->getType()] = buffer;
+	}
+
+	void RHICommandList::unsetBuffer(RHIBuffer* buffer)
+	{
+		auto it = m_state.buffers.find(buffer->getType());
+		if (it != m_state.buffers.end() && (it->second == buffer))
+		{
+			m_state.buffers[buffer->getType()] = nullptr;
 		}
 	}
 

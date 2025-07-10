@@ -12,6 +12,7 @@
 #include <Engine/Application/Application.h>
 #include <Engine/Game/Universe.h>
 #include <Engine/Application/Event.h>
+#include <Engine/RHI/RHIPixelBuffer.h>
 
 namespace volucris
 {
@@ -169,15 +170,15 @@ namespace volucris
 		RHITextureDesc desc;
 		desc.pixelFormat = Texture::EPixelFormat::R8G8B8;
 		desc.size = m_size;
-		desc.texClass = RHITextureDesc::Texture2D;
+		desc.texClass = TextureType::Texture2D;
 		for (int i = 0; i < 2; ++i)
 		{
-			auto uploader = std::make_shared<RHIWritePixelBuffer>(size, RHIBuffer::StreamWrite);
-			uploader->init(cmdList);
+			auto uploader = std::make_shared<RHIWritePixelBuffer>(RHIBuffer::StreamWrite);
+			uploader->init(size);
 			m_uploaders.push_back(std::move(uploader));
 
 			auto texture = std::make_shared<RHITexture2D>(desc);
-			texture->init(cmdList);
+			texture->init();
 			m_textures.push_back(std::move(texture));
 		}
 
@@ -188,14 +189,14 @@ namespace volucris
 	{
 		for (auto& uploader : m_uploaders)
 		{
-			cmdList->deleteResource(uploader.get());
+			cmdList->unsetBuffer(uploader.get());
 		}
 
 		for (auto& texture : m_textures)
 		{
 			if (texture != m_viewTexture)
 			{
-				cmdList->deleteResource(texture.get());
+				cmdList->unsetTexture2D(texture.get());
 			}
 		}
 
@@ -222,11 +223,11 @@ namespace volucris
 
 		auto cmdList = getContext();
 		auto& currentUploader = m_uploaders[m_current];
-		currentUploader->startWrite(cmdList, std::move(data.data));
+		currentUploader->startWrite(std::move(data.data));
 
 		if (m_viewTexture != m_textures[m_current])
 		{
-			cmdList->deleteResource(m_viewTexture.get());
+			cmdList->unsetTexture2D(m_viewTexture.get());
 		}
 
 		if (!m_ready && m_current == 1)
@@ -235,7 +236,7 @@ namespace volucris
 		}
 
 		m_current = (m_current + 1) % m_uploaders.size();
-		m_uploaders[m_current]->writeTo(m_textures[m_current].get(), cmdList);
+		m_uploaders[m_current]->writeTo(m_textures[m_current].get());
 		m_viewTexture = m_textures[m_current];
 	}
 
@@ -273,7 +274,7 @@ namespace volucris
 			clearUploaders(cmdList);
 			if (m_viewTexture)
 			{
-				cmdList->deleteResource(m_viewTexture.get());
+				cmdList->unsetTexture2D(m_viewTexture.get());
 				m_viewTexture = nullptr;
 			}
 			Renderer::getInstance().flushCommands();
