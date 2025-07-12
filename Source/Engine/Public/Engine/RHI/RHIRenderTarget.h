@@ -21,6 +21,8 @@ namespace volucris
 
 		~RHIRenderTarget();
 
+		void createGpuResource();
+
 		void setUsage( RHICommandList* cmdList, Usage usage);
 
 		void attachColor(const std::shared_ptr<RHITexture>& texture, int32 index);

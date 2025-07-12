@@ -38,11 +38,11 @@ namespace volucris
 
 		void executeCommand(const std::string& name);
 
-		void setTexture2D(RHITexture2D* texture);
+		bool setTexture2D(RHITexture2D* texture);
 
 		void unsetTexture2D(RHITexture2D* texture);
 
-		void setRenderTarget(RHIRenderTarget* renderTarget, Rect rect = Rect());
+		bool setRenderTarget(RHIRenderTarget* renderTarget, Rect rect = Rect());
 
 		void unsetRenderTarget(RHIRenderTarget* renderTarget);
 
@@ -50,7 +50,7 @@ namespace volucris
 
 		void setViewport(const Rect& rect);
 
-		void setBuffer(RHIBuffer* buffer);
+		bool setBuffer(RHIBuffer* buffer);
 
 		void unsetBuffer(RHIBuffer* buffer);
 

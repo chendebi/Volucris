@@ -9,23 +9,6 @@
 
 namespace volucris
 {
-	static GLenum getGLTarget(RHIBuffer::Type type)
-	{
-		switch (type)
-		{
-		case volucris::RHIBuffer::VertexBuffer:
-			return GL_VERTEX_ARRAY;
-		case volucris::RHIBuffer::IndexBuffer:
-			return GL_ELEMENT_ARRAY_BUFFER;
-		case volucris::RHIBuffer::PixelPackBuffer:
-			return GL_PIXEL_PACK_BUFFER;
-		case volucris::RHIBuffer::PixelUnpackBuffer:
-			return GL_PIXEL_UNPACK_BUFFER;
-		default:
-			break;
-		}
-		return GL_NONE;
-	}
 
 	static GLenum getGLUsage(RHIBuffer::Usage usage)
 	{
@@ -48,6 +31,7 @@ namespace volucris
 
 	RHIBuffer::RHIBuffer(Type type, Usage usage)
 		: RHIResource()
+		, m_id(0)
 		, m_type(type)
 		, m_usage(usage)
 		, m_buffer(std::make_unique<RHIOpenGLBuffer>(RHIOpenGLBuffer({getGLTarget(type), getGLUsage(usage), 0})))
@@ -55,16 +39,20 @@ namespace volucris
 	}
 
 	RHIBuffer::~RHIBuffer()
+	{	
+	}
+
+	void RHIBuffer::createGpuResource()
 	{
-		auto id = getId();
-		if (id > 0)
+		if (m_id == 0)
 		{
-			glDeleteBuffers(1, &id);
+			glGenBuffers(1, &m_id);
 		}
 	}
 
 	void RHIBuffer::init(uint64 bufferSize)
 	{
+		GL_CHECK()
 		glBufferData(m_buffer->target, bufferSize, nullptr, m_buffer->usage);
 		m_buffer->size = bufferSize;
 		GL_CHECK()

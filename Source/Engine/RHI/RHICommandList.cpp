@@ -8,6 +8,7 @@
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHIBuffer.h>
 #include <Core/Assert.h>
+#include "RHIOpenGL.h"
 
 namespace volucris
 {
@@ -112,25 +113,27 @@ namespace volucris
 		//glDebug
 	}
 
-	void RHICommandList::setTexture2D(RHITexture2D* texture)
+	bool RHICommandList::setTexture2D(RHITexture2D* texture)
 	{
 		if (m_state.texture2d == texture)
 		{
-			return;
+			return true;
 		}
-		m_state.texture2d = texture;
+		
 		if (!texture)
 		{
-			return;
+			m_state.texture2d = texture;
+			return true;
 		}
 
 		auto id = texture->getId();
-		if (id == 0)
+		if (id > 0)
 		{
-			glGenTextures(1, &id);
-			static_cast<RHIResource*>(texture)->m_id = id;
+			glBindTexture(GL_TEXTURE_2D, id);
+			m_state.texture2d = texture;
+			return true;
 		}
-		glBindTexture(GL_TEXTURE_2D, id);
+		return false;
 	}
 
 	void RHICommandList::unsetTexture2D(RHITexture2D* texture)
@@ -141,19 +144,19 @@ namespace volucris
 		}
 	}
 
-	void RHICommandList::setRenderTarget(RHIRenderTarget* renderTarget, Rect rect)
+	bool RHICommandList::setRenderTarget(RHIRenderTarget* renderTarget, Rect rect)
 	{
 		if (renderTarget == nullptr)
 		{
-			return;
+			return false;
 		}
 
 		auto id = renderTarget->getId();
 		if (id == 0)
 		{
-			glGenFramebuffers(1, &id);
-			static_cast<RHIResource*>(renderTarget)->m_id = id;
+			return false;
 		}
+		
 		switch (renderTarget->getUsage())
 		{
 		case volucris::RHIRenderTarget::ReadOnly:
@@ -170,13 +173,15 @@ namespace volucris
 			glBindFramebuffer(GL_FRAMEBUFFER, id);
 			break;
 		default:
-			break;
+			return false;
 		}
 
 		if (rect.isValid())
 		{
 			setViewport(rect);
 		}
+
+		return true;
 	}
 
 	void RHICommandList::unsetRenderTarget(RHIRenderTarget* renderTarget)
@@ -215,14 +220,21 @@ namespace volucris
 		}
 	}
 
-	void RHICommandList::setBuffer(RHIBuffer* buffer)
+	bool RHICommandList::setBuffer(RHIBuffer* buffer)
 	{
-		auto it = m_state.buffers.find(buffer->getType());
+		auto type = buffer->getType();
+		auto it = m_state.buffers.find(type);
 		if (it != m_state.buffers.end() && (it->second == buffer))
 		{
-			return;
+			return false;
 		}
-		m_state.buffers[buffer->getType()] = buffer;
+
+		if (buffer && buffer->getId() == 0)
+		{
+			return false;
+		}
+		glBindBuffer(getGLTarget(type), buffer->getId());
+		return true;
 	}
 
 	void RHICommandList::unsetBuffer(RHIBuffer* buffer)

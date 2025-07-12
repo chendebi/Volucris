@@ -21,7 +21,22 @@ namespace volucris
 
 	RHITexture::RHITexture()
 		: RHIResource()
+		, m_type(TextureType::Texture2D)
+		, m_id(0)
 	{
+	}
+
+	RHITexture::~RHITexture()
+	{
+		if (m_id > 0)
+		{
+			glDeleteTextures(1, &m_id);
+		}
+	}
+
+	void RHITexture::createGpuResource()
+	{
+		glGenTextures(1, &m_id);
 	}
 
 	RHITexture2D::RHITexture2D()

@@ -57,7 +57,7 @@ namespace volucris
 	ViewportWidget::ViewportWidget()
 		: Widget()
 		, m_view(nullptr)
-		, m_size()
+		, m_size(8, 8)
 		, m_current(0)
 		, m_viewTexture(nullptr)
 		, m_uploaders()
@@ -116,11 +116,15 @@ namespace volucris
 
 	void ViewportWidget::viewSizeChanged(Size size)
 	{
+		if (size.width < 8 || size.height < 8)
+		{
+			size = { 8, 8 };
+		}
 		m_size = size;
 		if (m_view)
 		{
 			recreateUploaders(getContext());
-			Renderer::getInstance().push([client=this, view=m_view, size]() {
+			Renderer::getInstance().push([client=this, view=m_view, size= m_size]() {
 				view->resize(size.width, size.height);
 				Renderer::getInstance().renderFrame();
 				Renderer::getInstance().renderFrame();
@@ -174,10 +178,14 @@ namespace volucris
 		for (int i = 0; i < 2; ++i)
 		{
 			auto uploader = std::make_shared<RHIWritePixelBuffer>(RHIBuffer::StreamWrite);
+			uploader->createGpuResource();
+			cmdList->setBuffer(uploader.get());
 			uploader->init(size);
 			m_uploaders.push_back(std::move(uploader));
 
 			auto texture = std::make_shared<RHITexture2D>(desc);
+			texture->createGpuResource();
+			cmdList->setTexture2D(texture.get());
 			texture->init();
 			m_textures.push_back(std::move(texture));
 		}

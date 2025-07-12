@@ -25,6 +25,7 @@ namespace volucris
 		m_scene = scene;
 	}
 
+
 	View::~View()
 	{
 		for (auto& target : m_targets)
@@ -51,6 +52,7 @@ namespace volucris
 		m_targetReaders.clear();
 
 		RHITextureDesc desc;
+		desc.size = { width, height };
 		desc.pixelFormat = Texture::EPixelFormat::R8G8B8;
 
 		auto size = 3 * width * height;
@@ -60,14 +62,22 @@ namespace volucris
 
 		for (int i = 0; i < FrameCount; ++i)
 		{
-			auto texture = RHICreateTexture(desc);
+			// 初始化贴图
+			auto texture = std::make_shared<RHITexture2D>(desc);
+			texture->createGpuResource();
+			RHICmdList->setTexture2D(texture.get());
+			texture->init();
+
+			// 
 			auto target = std::make_unique<RHIRenderTarget>(Size(width, height));
+			target->createGpuResource();
 			RHICmdList->setRenderTarget(target.get());
 			target->attachColor(texture, 0);
-			v_check(target->checkCompletion())
+			v_check(target->update())
 			m_targets.emplace_back(std::move(target));
 
 			auto reader = std::make_unique<RHIReadPixelBuffer>(RHIBuffer::StreamRead);
+			reader->createGpuResource();
 			RHICmdList->setBuffer(reader.get());
 			reader->init(size);
 			m_targetReaders.emplace_back(std::move(reader));
@@ -81,7 +91,7 @@ namespace volucris
 
 		cmdList->setRenderTarget(m_targets[m_current].get());
 		RHIClearState state;
-		state.color = { 0.0, 0.0, 1.0, 1.0 };
+		state.color = { 0.0, 0.8, 1.0, 1.0 };
 		cmdList->clear(state);
 
 		swapViewData(cmdList);

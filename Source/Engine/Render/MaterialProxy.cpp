@@ -14,12 +14,12 @@ namespace volucris
 
 	void MaterialProxy::setSource(const std::string& vss, const std::string& fss)
 	{
-		auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader, vss);
-		auto fs = std::make_shared<RHIShader>(RHIShader::FragmentShader, fss);
-		if (vs->init(RHICmdList) && fs->init(RHICmdList))
+		auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader);
+		auto fs = std::make_shared<RHIShader>(RHIShader::FragmentShader);
+		if (vs->init(vss) && fs->init(fss))
 		{
 			m_program = std::make_unique<RHIProgram>();
-			m_program->init(RHICmdList, { vs, fs });
+			m_program->init({ vs, fs });
 		}
 	}
 

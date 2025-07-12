@@ -32,13 +32,18 @@ namespace volucris
 
 		~RHIBuffer() override;
 
+		void createGpuResource();
+
 		void init(uint64 bufferSize);
 
 		void init(const std::vector<uint8>& data);
 
 		Type getType() const { return m_type; }
 
+		uint32 getId() const { return m_id; }
+
 	protected:
+		uint32 m_id;
 		Type m_type;
 		Usage m_usage;
 		std::unique_ptr<RHIOpenGLBuffer> m_buffer;

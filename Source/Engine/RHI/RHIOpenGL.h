@@ -5,13 +5,35 @@
 #include <Core/Assert.h>
 #include <Core/Volucris.h>
 #include <Core/TextureDefines.h>
+#include <RHI/RHIBuffer.h>
+
+inline std::string getGLErrorDesc(GLenum code)
+{
+	if (code == GL_INVALID_ENUM)
+	{
+		return "GL_INVALID_ENUM";
+	}
+	else if (code == GL_INVALID_OPERATION)
+	{
+		return "GL_INVALID_OPERATION";
+	}
+	else if (code == GL_INVALID_INDEX)
+	{
+		return "GL_INVALID_INDEX";
+	}
+	else if (code == GL_INVALID_VALUE)
+	{
+		return "GL_INVALID_VALUE";
+	}
+	return fmt::format("Unknown error: {}", code);
+}
 
 #define GL_CHECK() \
 	{\
 		auto err = glGetError(); \
 		while (err != GL_NO_ERROR) \
 		{ \
-			v_checkf(false, Engine, "gl error at {} : {}, code: {:X}", __FILE__, __LINE__, err); \
+			v_checkf(false, Engine, "gl error at {} : {}, {}", __FILE__, __LINE__, getGLErrorDesc(err)); \
 			err = glGetError(); \
 		} \
 	}
@@ -34,6 +56,24 @@ namespace volucris
 			break;
 		}
 		v_check(false)
+		return GL_NONE;
+	}
+
+	static GLenum getGLTarget(RHIBuffer::Type type)
+	{
+		switch (type)
+		{
+		case volucris::RHIBuffer::VertexBuffer:
+			return GL_VERTEX_ARRAY;
+		case volucris::RHIBuffer::IndexBuffer:
+			return GL_ELEMENT_ARRAY_BUFFER;
+		case volucris::RHIBuffer::PixelPackBuffer:
+			return GL_PIXEL_PACK_BUFFER;
+		case volucris::RHIBuffer::PixelUnpackBuffer:
+			return GL_PIXEL_UNPACK_BUFFER;
+		default:
+			break;
+		}
 		return GL_NONE;
 	}
 }

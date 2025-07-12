@@ -61,7 +61,6 @@ private:
 
 	void onRendererDestroy(RHICommandList* context) override
 	{
-		context->deleteResource(m_iconTexture.get());
 		m_iconTexture = nullptr;
 	}
 
@@ -76,11 +75,12 @@ private:
 			RHITextureDesc desc;
 			desc.pixelFormat = Texture::getPixelFormat(textureData.format);
 			desc.size = textureData.size;
-			desc.texClass = RHITextureDesc::Texture2D;
+			desc.texClass = TextureType::Texture2D;
 			m_iconTexture = std::make_unique<RHITexture2D>(desc);
-			cmdList->bindResource(m_iconTexture.get());
-			m_iconTexture->init(cmdList);
-			m_iconTexture->update(cmdList, { 0, 0, textureData.size.width, textureData.size.height }, textureData.data);
+			m_iconTexture->createGpuResource();
+			cmdList->setTexture2D(m_iconTexture.get());
+			m_iconTexture->init();
+			m_iconTexture->update({ 0, 0, textureData.size.width, textureData.size.height }, textureData.data);
 
 			m_items[0].setIcon(m_iconTexture.get(), {0,0}, {128,128});
 			m_items[1].setIcon(m_iconTexture.get(), { 0,0 }, { 128,128 });
@@ -111,7 +111,7 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 	window2->setTitle("Material Editor");
 	window1->addChild(std::make_shared<ContentBrowserWidget>());
 	window2->addChild(std::make_shared<MaterialEditorWidget>());
-	app->addWindow(window1);
+	//app->addWindow(window1);
 	app->addWindow(window2);
 
 	//const std::string iconPath = "/Engine/Content/Editor/Textures/T_Icons";

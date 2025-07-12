@@ -39,10 +39,17 @@ namespace volucris
 	public:
 		RHITexture();
 
+		~RHITexture();
+
+		void createGpuResource();
+
 		TextureType getType() const { return m_type; }
+
+		uint32 getId() const { return m_id; }
 
 	private:
 		TextureType m_type;
+		uint32 m_id;
 	};
 
 	class RHITexture2D : public RHITexture

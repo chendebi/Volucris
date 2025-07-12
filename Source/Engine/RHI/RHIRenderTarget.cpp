@@ -24,7 +24,7 @@ namespace volucris
 		default:
 			break;
 		}
-		return usage;
+		return target;
 	}
 
 	RHIRenderTarget::RHIRenderTarget(const Size& size, Usage usage)
@@ -44,6 +44,14 @@ namespace volucris
 		if (m_id > 0)
 		{
 			glDeleteBuffers(1, &m_id);
+		}
+	}
+
+	void RHIRenderTarget::createGpuResource()
+	{
+		if (m_id == 0)
+		{
+			glGenFramebuffers(1, &m_id);
 		}
 	}
 
