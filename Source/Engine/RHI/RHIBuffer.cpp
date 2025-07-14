@@ -44,10 +44,6 @@ namespace volucris
 	{
 		if (m_id > 0)
 		{
-			auto id = std::this_thread::get_id();
-			std::ostringstream oss;
-			oss << id;
-			V_LOG_DEBUG(Engine, "delete buffer: {}, {}, {}", (int)m_type, m_id, oss.str());
 			getContext()->unsetBuffer(this);
 			glDeleteBuffers(1, &m_id);
 		}
@@ -58,10 +54,6 @@ namespace volucris
 		if (m_id == 0)
 		{
 			glGenBuffers(1, &m_id);
-			auto id = std::this_thread::get_id();
-			std::ostringstream oss;
-			oss << id;
-			V_LOG_DEBUG(Engine, "create buffer: {}, {}, {}", (int)m_type, m_id, oss.str());
 		}
 	}
 

@@ -46,7 +46,9 @@ namespace volucris
 		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id,
 			GLenum severity, GLsizei length,
 			const GLchar* message, const void* userParam) {
-				V_LOG_WARN(Engine, "OpenGL Error: {}", message);
+				if (type == GL_DEBUG_TYPE_ERROR) {
+					V_LOG_WARN(Engine, "OpenGL Error: {}", message)
+				}
 			}, nullptr);
 		start(std::bind(&Renderer::main, this));
 	}

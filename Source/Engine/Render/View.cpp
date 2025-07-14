@@ -10,6 +10,7 @@
 #include <RHI/RHIProgram.h>
 #include <RHI/RHIShader.h>
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 constexpr int FrameCount = 2;
 
@@ -155,6 +156,7 @@ namespace volucris
 			reader->init(nullptr, (uint32)size);
 			m_targetReaders.emplace_back(std::move(reader));
 		}
+
 		m_current = 0;
 	}
 

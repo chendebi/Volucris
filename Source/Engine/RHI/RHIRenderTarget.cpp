@@ -43,7 +43,7 @@ namespace volucris
 	{
 		if (m_id > 0)
 		{
-			glDeleteBuffers(1, &m_id);
+			glDeleteFramebuffers(1, &m_id);
 		}
 	}
 

@@ -39,25 +39,52 @@ GLFWwindow* init()
 	return window;
 }
 
-static uint32 texID = 0;
+static uint32 pbo1, pbo2, vbo, ebo;
+
+uint32 createBuffer(GLenum type, size_t size)
+{
+	uint32 buffer = 0;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(type, buffer);
+	glBufferData(type, size, nullptr, GL_STATIC_DRAW);
+	return buffer;
+}
+
+void debugBuffers()
+{
+	V_LOG_INFO(OpenGLTest, "----------------")
+	V_LOG_INFO(OpenGLTest, "PBO 1: {}", pbo1)
+	V_LOG_INFO(OpenGLTest, "PBO 1: {}", pbo2)
+	V_LOG_INFO(OpenGLTest, "vbo: {}", vbo)
+	V_LOG_INFO(OpenGLTest, "ebo: {}", ebo)
+}
 
 int main()
 {
 	auto window = init();
 
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* win, int width, int height) {
-		glViewport(0, 0, width, height);
-		V_LOG_INFO(OpenGLTest, "Window resized to {}x{}", width, height);
-		if (texID > 0)
-		{
-			glDeleteTextures(1, &texID);
-			texID = 0;
-		}
-		glGenTextures(1, &texID);
-		glBindTexture(GL_TEXTURE_2D, texID);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
-		GL_CHECK();
-		});
+	pbo1 = createBuffer(GL_PIXEL_PACK_BUFFER, 8 * 8 * 3);
+	pbo2 = createBuffer(GL_PIXEL_UNPACK_BUFFER, 8 * 8 * 3);
+	vbo = createBuffer(GL_ARRAY_BUFFER, 128);
+	ebo = createBuffer(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint32));
+
+	debugBuffers();
+
+	glDeleteBuffers(1, &pbo1);
+	glDeleteBuffers(1, &pbo2);
+
+	pbo1 = createBuffer(GL_PIXEL_PACK_BUFFER, 128 * 8 * 3);
+	pbo2 = createBuffer(GL_PIXEL_UNPACK_BUFFER, 128 * 8 * 3);
+
+	debugBuffers();
+
+	GLint id = 0;
+	GLint vbo_id = 0;
+	glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &id);
+	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &vbo_id);
+	//v_check(vao_id == vao->getId());
+	//v_check(vbo_id == vao->getId());
+	v_check(id == ebo)
 
 	while (!glfwWindowShouldClose(window))
 	{

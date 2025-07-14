@@ -90,7 +90,7 @@ namespace volucris
 			viewSizeChanged(viewSize);
 		}
 
-		if (m_view && false)
+		if (m_view)
 		{
 			Renderer::getInstance().push([client = this, view = m_view]() {
 				auto data = view->getViewData();
@@ -123,7 +123,7 @@ namespace volucris
 		if (m_view && m_size != size)
 		{
 			m_size = size;
-			//recreateUploaders(getContext());
+			recreateUploaders(getContext());
 			Renderer::getInstance().push([client=this, view=m_view, size= m_size]() {
 				view->resize(size.width, size.height);
 				Renderer::getInstance().renderFrame();
@@ -260,7 +260,7 @@ namespace volucris
 				task.client = this;
 			}
 			Renderer::getInstance().push(createTask(std::move(task)));
-			//recreateUploaders(context);
+			recreateUploaders(context);
 
 			if (gApp->isRunning())
 			{
