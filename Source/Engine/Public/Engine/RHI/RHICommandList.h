@@ -24,7 +24,7 @@ namespace volucris
 	public:
 		RHICommandList();
 
-		~RHICommandList();
+		~RHICommandList() noexcept;
 
 		bool initialize(Window* widnow, bool sync = false);
 
@@ -55,6 +55,16 @@ namespace volucris
 		bool setBuffer(RHIBuffer* buffer);
 
 		void unsetBuffer(RHIBuffer* buffer);
+
+		void setVertexArray(RHIVertexArray* array);
+
+		void unsetVertexArray(RHIVertexArray* array);
+
+		void setProgram(RHIProgram* program);
+
+		void unsetProgram(RHIProgram* program);
+
+		void drawPrimitive(RHIProgram* program, RHIVertexArray* vao, RHIElementBuffer* ebo);
 
 		const RHIState& getState() const { return m_state; }
 

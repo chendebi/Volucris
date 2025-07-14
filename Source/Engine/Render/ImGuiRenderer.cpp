@@ -67,6 +67,8 @@ namespace volucris
 
 	ImGuiRenderer::~ImGuiRenderer()
 	{
+		m_cmdList = nullptr;
+
 		ImGui::SetCurrentContext(m_imguiContext);
 
 		if (!gFileSystem.directoryExists("/Engine/Config/"))

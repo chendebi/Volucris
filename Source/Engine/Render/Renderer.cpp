@@ -5,7 +5,6 @@
 #include <Application/Window.h>
 #include <Core/TypesHelp.h>
 #include <Application/FrameSynthesizer.h>
-#include <Render/Command/RenderCommand.h>
 #include <RHI/RHICommandList.h>
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHIBuffer.h>
@@ -43,6 +42,12 @@ namespace volucris
 		m_window = std::make_unique<Window>();
 		m_window->create(true);
 		glfwMakeContextCurrent(context);
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id,
+			GLenum severity, GLsizei length,
+			const GLchar* message, const void* userParam) {
+				V_LOG_WARN(Engine, "OpenGL Error: {}", message);
+			}, nullptr);
 		start(std::bind(&Renderer::main, this));
 	}
 

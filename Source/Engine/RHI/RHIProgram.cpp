@@ -32,7 +32,7 @@ namespace volucris
 
 	bool RHIProgram::init(const std::vector<std::shared_ptr<RHIShader>>& shaders)
 	{
-		auto program = m_id;
+		auto program = getId();
 		for (const auto& shader : shaders)
 		{
 			glAttachShader(program, shader->getId());
@@ -49,6 +49,7 @@ namespace volucris
 			return false;
 		}
 		m_valid = true;
+		GL_CHECK()
 		return true;
 	}
 }

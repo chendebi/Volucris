@@ -6,6 +6,8 @@
 #include <RHI/RHITexture.h>
 #include <RHI/RHIOpenGL.h>
 #include <RHI/RHIOpenGLBuffer.h>
+#include <thread>
+#include <sstream>
 
 namespace volucris
 {
@@ -39,7 +41,16 @@ namespace volucris
 	}
 
 	RHIBuffer::~RHIBuffer()
-	{	
+	{
+		if (m_id > 0)
+		{
+			auto id = std::this_thread::get_id();
+			std::ostringstream oss;
+			oss << id;
+			V_LOG_DEBUG(Engine, "delete buffer: {}, {}, {}", (int)m_type, m_id, oss.str());
+			getContext()->unsetBuffer(this);
+			glDeleteBuffers(1, &m_id);
+		}
 	}
 
 	void RHIBuffer::createGpuResource()
@@ -47,21 +58,22 @@ namespace volucris
 		if (m_id == 0)
 		{
 			glGenBuffers(1, &m_id);
+			auto id = std::this_thread::get_id();
+			std::ostringstream oss;
+			oss << id;
+			V_LOG_DEBUG(Engine, "create buffer: {}, {}, {}", (int)m_type, m_id, oss.str());
 		}
-	}
-
-	void RHIBuffer::init(uint64 bufferSize)
-	{
-		GL_CHECK()
-		glBufferData(m_buffer->target, bufferSize, nullptr, m_buffer->usage);
-		m_buffer->size = bufferSize;
-		GL_CHECK()
 	}
 
 	void RHIBuffer::init(const std::vector<uint8>& data)
 	{
-		m_buffer->size = data.size();
-		glBufferData(m_buffer->target, m_buffer->size, data.data(), m_buffer->usage);
+		init(data.data(), data.size());
+	}
+
+	void RHIBuffer::init(const uint8* data, uint32 size)
+	{
+		m_buffer->size = size;
+		glBufferData(m_buffer->target, size, data, m_buffer->usage);
 		GL_CHECK()
 	}
 }

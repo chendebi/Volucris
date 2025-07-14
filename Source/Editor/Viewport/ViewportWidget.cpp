@@ -90,7 +90,7 @@ namespace volucris
 			viewSizeChanged(viewSize);
 		}
 
-		if (m_view)
+		if (m_view && false)
 		{
 			Renderer::getInstance().push([client = this, view = m_view]() {
 				auto data = view->getViewData();
@@ -120,10 +120,10 @@ namespace volucris
 		{
 			size = { 8, 8 };
 		}
-		m_size = size;
-		if (m_view)
+		if (m_view && m_size != size)
 		{
-			recreateUploaders(getContext());
+			m_size = size;
+			//recreateUploaders(getContext());
 			Renderer::getInstance().push([client=this, view=m_view, size= m_size]() {
 				view->resize(size.width, size.height);
 				Renderer::getInstance().renderFrame();
@@ -181,7 +181,7 @@ namespace volucris
 			uploader->setContext(cmdList);
 			uploader->createGpuResource();
 			cmdList->setBuffer(uploader.get());
-			uploader->init(size);
+			uploader->init(nullptr, (uint32)size);
 			m_uploaders.push_back(std::move(uploader));
 
 			auto texture = std::make_shared<RHITexture2D>(desc);
@@ -250,7 +250,7 @@ namespace volucris
 	void ViewportWidget::createView()
 	{
 		auto context = getContext();
-		if (m_universe && context)
+		if (!m_view && m_universe && context)
 		{
 			auto view = std::make_unique<View>(m_universe->getScene());
 			m_view = view.get();
@@ -260,7 +260,7 @@ namespace volucris
 				task.client = this;
 			}
 			Renderer::getInstance().push(createTask(std::move(task)));
-			recreateUploaders(context);
+			//recreateUploaders(context);
 
 			if (gApp->isRunning())
 			{

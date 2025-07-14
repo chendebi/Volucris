@@ -11,6 +11,8 @@ namespace volucris
 	class RHITexture;
 	class RHIRenderTarget;
 	class RHIProgram;
+	class RHIVertexArray;
+	class RHIElementBuffer;
 	class RHICommandList;
 
 	struct RHIClearState
@@ -36,6 +38,7 @@ namespace volucris
 		RHIRenderTarget* readTarget = nullptr;
 		RHIRenderTarget* writeTarget = nullptr;
 		RHIRenderTarget* renderTarget = nullptr;
+		RHIVertexArray* vertexArray = nullptr;
 		std::unordered_map<RHIBuffer::Type, RHIBuffer*> buffers = {};
 		RHIProgram* program = nullptr;
 	};

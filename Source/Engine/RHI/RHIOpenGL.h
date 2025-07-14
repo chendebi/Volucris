@@ -64,8 +64,8 @@ namespace volucris
 		switch (type)
 		{
 		case volucris::RHIBuffer::VertexBuffer:
-			return GL_VERTEX_ARRAY;
-		case volucris::RHIBuffer::IndexBuffer:
+			return GL_ARRAY_BUFFER;
+		case volucris::RHIBuffer::ElementBuffer:
 			return GL_ELEMENT_ARRAY_BUFFER;
 		case volucris::RHIBuffer::PixelPackBuffer:
 			return GL_PIXEL_PACK_BUFFER;

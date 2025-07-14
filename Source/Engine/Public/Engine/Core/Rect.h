@@ -55,4 +55,19 @@ namespace volucris
 	};
 }
 
+namespace fmt
+{
+	template <>
+	struct formatter<volucris::Rect> {
+		constexpr auto parse(format_parse_context& ctx) {
+			return ctx.begin();
+		}
+
+		auto format(const volucris::Rect& rect, format_context& ctx) const {
+			auto out = ctx.out();
+			return fmt::format_to(out, "[ {}, {}, {}, {} ]", rect.x, rect.y, rect.width, rect.height);
+		}
+	};
+}
+
 #endif // !__volucris_rect_h__

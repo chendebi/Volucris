@@ -5,11 +5,45 @@
 #include <Core/Volucris.h>
 #include <Render/Renderer.h>
 #include <RHI/RHIPixelBuffer.h>
+#include <RHI/RHIVertexBuffer.h>
+#include <RHI/RHIVertexArray.h>
+#include <RHI/RHIProgram.h>
+#include <RHI/RHIShader.h>
+#include <glm/glm.hpp>
 
 constexpr int FrameCount = 2;
 
 namespace volucris
 {
+
+	static std::shared_ptr<RHIVertexArray> vao = nullptr;
+	static std::shared_ptr<RHIElementBuffer> ebo = nullptr;
+	static std::shared_ptr<RHIProgram> shader = nullptr;
+
+	static glm::vec3 vertices[] = {
+		{-0.5f, -0.5f, 1.0f},
+		{ 0.5f, -0.5f, 1.0f},
+		{ 0.5f,  0.5f, 1.0f},
+		{-0.5f,  0.5f, 1.0f},
+	};
+
+	static uint32 indices[] = {
+		0, 1, 2, 0, 2, 3
+	};
+
+	static char* vss = R"(
+		#version 330 core
+		layout(location=0) in vec3 v_pos;
+		void main() {
+		gl_Position=vec4(v_pos, 1.0);}
+	)";
+
+	static char* fss = R"(
+		#version 330 core
+		layout (location=0) out vec4 color;
+		void main() {  color = vec4(1.0, 0.0, 0.0, 1.0); }
+	)";
+
 	View::View()
 		: m_targets()
 		, m_targetReaders()
@@ -32,10 +66,46 @@ namespace volucris
 		{
 			RHICmdList->unsetRenderTarget(target.get());
 		}
+		ebo = nullptr;
+		vao = nullptr;
 	}
 
 	void View::resize(int width, int height)
 	{
+		if (!vao)
+		{
+			auto vbo = std::make_shared<RHIVertexBuffer>(RHICmdList);
+			vbo->createGpuResource();
+			RHICmdList->setBuffer(vbo.get());
+			vbo->init((uint8*)vertices, sizeof(vertices));
+
+			RHIVertexBuffer::Description desc;
+			desc.location = 0;
+			desc.normalized = false;
+			desc.offset = 0;
+			desc.size = 3;
+			desc.type = RHIVertexBuffer::Float;
+			desc.stride = 3 * sizeof(float);
+			vbo->setDescriptions({ desc });
+
+			vao = std::make_shared<RHIVertexArray>(RHICmdList);
+			vao->init(vbo);
+
+			ebo = std::make_shared<RHIElementBuffer>(RHICmdList);
+			ebo->createGpuResource();
+			v_check(RHICmdList->setBuffer(ebo.get()));
+			((RHIBuffer*)ebo.get())->init((uint8*)indices, (uint32)sizeof(indices));
+
+			auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader);
+			vs->init(vss);
+
+			auto fs = std::make_shared<RHIShader>(RHIShader::FragmentShader);
+			fs->init(fss);
+
+			shader = std::make_shared<RHIProgram>();
+			shader->init({ vs, fs });
+		}
+
 		if (width <= 8 || height <= 8)
 		{
 			width = height = 8;
@@ -81,8 +151,8 @@ namespace volucris
 			auto reader = std::make_unique<RHIReadPixelBuffer>(RHIBuffer::StreamRead);
 			reader->setContext(RHICmdList);
 			reader->createGpuResource();
-			RHICmdList->setBuffer(reader.get());
-			reader->init(size);
+			v_check(RHICmdList->setBuffer(reader.get()))
+			reader->init(nullptr, (uint32)size);
 			m_targetReaders.emplace_back(std::move(reader));
 		}
 		m_current = 0;
@@ -91,11 +161,15 @@ namespace volucris
 	void View::render(RHICommandList* cmdList)
 	{
 		RENDER_SCOPE(View);
-
-		cmdList->setRenderTarget(m_targets[m_current].get());
+		Rect vp;
+		vp.setPoint({ 0,0 });
+		vp.setSize(m_targets[m_current]->getSize());
+		cmdList->setRenderTarget(m_targets[m_current].get(), vp);
 		RHIClearState state;
 		state.color = { 0.0, 0.8, 1.0, 1.0 };
 		cmdList->clear(state);
+
+		RHICmdList->drawPrimitive(shader.get(), vao.get(), ebo.get());
 
 		swapViewData(cmdList);
 	}

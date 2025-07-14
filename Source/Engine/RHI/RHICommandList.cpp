@@ -7,8 +7,13 @@
 #include <RHI/RHIResource.h>
 #include <RHI/RHIRenderTarget.h>
 #include <RHI/RHIBuffer.h>
+#include <RHI/RHIVertexArray.h>
+#include <RHI/RHIProgram.h>
+#include <RHI/RHIVertexBuffer.h>
 #include <Core/Assert.h>
 #include "RHIOpenGL.h"
+#include <thread>
+#include <sstream>
 
 namespace volucris
 {
@@ -233,12 +238,39 @@ namespace volucris
 		{
 			return false;
 		}
-
+		m_state.buffers[type] = buffer;
 		if (buffer && buffer->getId() == 0)
 		{
 			return false;
 		}
-		glBindBuffer(getGLTarget(type), buffer->getId());
+		if (buffer)
+		{
+			auto getDebugType = [type]()->std::string {
+				auto ttype = getGLTarget(type);
+				if (ttype == GL_ARRAY_BUFFER)
+				{
+					return "GL_VERTEX_ARRAY";
+				}
+				else if (ttype == GL_ELEMENT_ARRAY_BUFFER)
+				{
+					return "GL_ELEMENT_ARRAY_BUFFER";
+				}
+				else if (ttype == GL_PIXEL_PACK_BUFFER)
+				{
+					return "GL_PIXEL_PACK_BUFFER";
+				}
+				else if (ttype == GL_PIXEL_UNPACK_BUFFER)
+				{
+					return "GL_PIXEL_UNPACK_BUFFER";
+				}
+				return "Unknown Target";
+				};
+			std::ostringstream oss;
+			oss << std::this_thread::get_id();
+			V_LOG_DEBUG(Engine, "bind target {} to {} : {}", buffer->getId(), getDebugType(), oss.str());
+			glBindBuffer(getGLTarget(type), buffer->getId());
+		}
+		GL_CHECK();
 		return true;
 	}
 
@@ -248,6 +280,78 @@ namespace volucris
 		if (it != m_state.buffers.end() && (it->second == buffer))
 		{
 			m_state.buffers[buffer->getType()] = nullptr;
+		}
+	}
+
+	void RHICommandList::setVertexArray(RHIVertexArray* array)
+	{
+		if (m_state.vertexArray == array)
+		{
+			return;
+		}
+		m_state.vertexArray = array;
+		if (array)
+		{
+			glBindVertexArray(array->getId());
+		}
+	}
+
+	void RHICommandList::unsetVertexArray(RHIVertexArray* array)
+	{
+		if (array == m_state.vertexArray)
+		{
+			m_state.vertexArray = nullptr;
+		}
+	}
+
+	void RHICommandList::setProgram(RHIProgram* program)
+	{
+		if (m_state.program == program)
+		{
+			return;
+		}
+		m_state.program = program;
+		if (program)
+		{
+			glUseProgram(program->getId());
+		}
+	}
+
+	void RHICommandList::unsetProgram(RHIProgram* program)
+	{
+		if (m_state.program == program)
+		{
+			m_state.program = nullptr;
+		}
+	}
+
+	void RHICommandList::drawPrimitive(RHIProgram* program, RHIVertexArray* vao, RHIElementBuffer* ebo)
+	{
+		setProgram(program);
+		setVertexArray(vao);
+		setBuffer(ebo);
+		if (glDrawElements)
+		{
+			GLint id = 0;
+			GLint vao_id = 0;
+			GLint vbo_id = 0;
+			glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &id);
+			glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vao_id);
+			glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &vbo_id);
+			v_check(vao_id == vao->getId());
+			//v_check(vbo_id == vao->getId());
+			v_check(id == ebo->getId())
+			if (id != ebo->getId())
+			{
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo->getId());
+				GL_CHECK()
+				id = 0;
+				glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &id);
+				V_LOG_DEBUG(Engine, "ele: {}, {}", id, ebo->getId());
+				GL_CHECK()
+
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			}
 		}
 	}
 

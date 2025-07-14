@@ -4,6 +4,7 @@
 #include <Engine/RHI/RHIResource.h>
 #include <Engine/Core/TextureDefines.h>
 #include <Engine/Core/Rect.h>
+#include <Engine/Core/TypesHelp.h>
 
 namespace volucris
 {
@@ -15,7 +16,7 @@ namespace volucris
 		enum Type
 		{
 			VertexBuffer,
-			IndexBuffer,
+			ElementBuffer,
 			PixelPackBuffer,
 			PixelUnpackBuffer,
 		};
@@ -34,9 +35,9 @@ namespace volucris
 
 		void createGpuResource();
 
-		void init(uint64 bufferSize);
-
 		void init(const std::vector<uint8>& data);
+
+		void init(const uint8* data, uint32 size);
 
 		Type getType() const { return m_type; }
 
