@@ -95,7 +95,7 @@ namespace volucris
 			ebo = std::make_shared<RHIElementBuffer>(RHICmdList);
 			ebo->createGpuResource();
 			v_check(RHICmdList->setBuffer(ebo.get()));
-			((RHIBuffer*)ebo.get())->init((uint8*)indices, (uint32)sizeof(indices));
+			ebo->init((uint8*)indices, (uint32)sizeof(indices), RHIElementBuffer::UInt);
 
 			auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader);
 			vs->init(vss);

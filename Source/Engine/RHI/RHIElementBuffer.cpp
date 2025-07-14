@@ -1,4 +1,3 @@
-#include <RHI/RHIIndexBuffer.h>
 
 namespace volucris
 {

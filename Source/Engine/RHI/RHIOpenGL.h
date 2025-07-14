@@ -6,6 +6,7 @@
 #include <Core/Volucris.h>
 #include <Core/TextureDefines.h>
 #include <RHI/RHIBuffer.h>
+#include <RHI/RHIVertexBuffer.h>
 
 inline std::string getGLErrorDesc(GLenum code)
 {
@@ -71,6 +72,50 @@ namespace volucris
 			return GL_PIXEL_PACK_BUFFER;
 		case volucris::RHIBuffer::PixelUnpackBuffer:
 			return GL_PIXEL_UNPACK_BUFFER;
+		default:
+			break;
+		}
+		return GL_NONE;
+	}
+
+	static GLenum getGLElementDrawMode(RHIElementBuffer::DrawMode mode)
+	{
+		switch (mode)
+		{
+		case volucris::RHIElementBuffer::Points:
+			return GL_POINTS;
+		case volucris::RHIElementBuffer::LineStrip:
+			return GL_LINE_STRIP;
+		case volucris::RHIElementBuffer::LineLoop:
+			return GL_LINE_LOOP;
+		case volucris::RHIElementBuffer::Lines:
+			return GL_LINES;
+		case volucris::RHIElementBuffer::LineStripAdjacency:
+			return GL_LINE_STRIP_ADJACENCY;
+		case volucris::RHIElementBuffer::LinesAdjacency:
+			return GL_LINES_ADJACENCY;
+		case volucris::RHIElementBuffer::TraingleStrip:
+			return GL_TRIANGLE_STRIP;
+		case volucris::RHIElementBuffer::TraingleFan:
+			return GL_TRIANGLE_FAN;
+		case volucris::RHIElementBuffer::Traingles:
+			return GL_TRIANGLES;
+		default:
+			break;
+		}
+		return GL_NONE;
+	}
+
+	static GLenum getGLElementType(RHIElementBuffer::DataType type)
+	{
+		switch (type)
+		{
+		case volucris::RHIElementBuffer::UByte:
+			return GL_UNSIGNED_BYTE;
+		case volucris::RHIElementBuffer::UShort:
+			return GL_UNSIGNED_SHORT;
+		case volucris::RHIElementBuffer::UInt:
+			return GL_UNSIGNED_INT;
 		default:
 			break;
 		}

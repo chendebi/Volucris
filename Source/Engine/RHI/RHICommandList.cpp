@@ -307,7 +307,10 @@ namespace volucris
 		setProgram(program);
 		setVertexArray(vao);
 		setBuffer(ebo);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		auto mode = ebo->getDrawMode();
+		auto count = ebo->getCount();
+		auto type = ebo->getDataType();
+		glDrawElements(getGLElementDrawMode(mode), count, getGLElementType(type), 0);
 	}
 
 }
