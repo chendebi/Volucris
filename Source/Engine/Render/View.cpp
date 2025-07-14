@@ -64,12 +64,14 @@ namespace volucris
 		{
 			// 初始化贴图
 			auto texture = std::make_shared<RHITexture2D>(desc);
+			texture->setContext(RHICmdList);
 			texture->createGpuResource();
 			RHICmdList->setTexture2D(texture.get());
 			texture->init();
 
 			// 
 			auto target = std::make_unique<RHIRenderTarget>(Size(width, height));
+			target->setContext(RHICmdList);
 			target->createGpuResource();
 			RHICmdList->setRenderTarget(target.get());
 			target->attachColor(texture, 0);
@@ -77,6 +79,7 @@ namespace volucris
 			m_targets.emplace_back(std::move(target));
 
 			auto reader = std::make_unique<RHIReadPixelBuffer>(RHIBuffer::StreamRead);
+			reader->setContext(RHICmdList);
 			reader->createGpuResource();
 			RHICmdList->setBuffer(reader.get());
 			reader->init(size);

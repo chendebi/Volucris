@@ -7,15 +7,21 @@
 
 namespace volucris
 {
-	struct RHIState;
-	struct RHICommandList;
+	class RHICommandList;
 
 	class RHIResource : public Object
 	{
 	public:
-		RHIResource() : Object() {}
+		RHIResource(RHICommandList* context = nullptr);
 
 		~RHIResource() override;
+
+		RHICommandList* getContext() const { return m_context; }
+
+		void setContext(RHICommandList* context);
+
+	protected:
+		RHICommandList* m_context;
 	};
 }
 

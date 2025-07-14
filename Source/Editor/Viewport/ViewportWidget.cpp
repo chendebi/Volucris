@@ -178,12 +178,14 @@ namespace volucris
 		for (int i = 0; i < 2; ++i)
 		{
 			auto uploader = std::make_shared<RHIWritePixelBuffer>(RHIBuffer::StreamWrite);
+			uploader->setContext(cmdList);
 			uploader->createGpuResource();
 			cmdList->setBuffer(uploader.get());
 			uploader->init(size);
 			m_uploaders.push_back(std::move(uploader));
 
 			auto texture = std::make_shared<RHITexture2D>(desc);
+			texture->setContext(cmdList);
 			texture->createGpuResource();
 			cmdList->setTexture2D(texture.get());
 			texture->init();
@@ -230,13 +232,9 @@ namespace volucris
 		}
 
 		auto cmdList = getContext();
+
 		auto& currentUploader = m_uploaders[m_current];
 		currentUploader->startWrite(std::move(data.data));
-
-		if (m_viewTexture != m_textures[m_current])
-		{
-			cmdList->unsetTexture2D(m_viewTexture.get());
-		}
 
 		if (!m_ready && m_current == 1)
 		{
@@ -244,7 +242,8 @@ namespace volucris
 		}
 
 		m_current = (m_current + 1) % m_uploaders.size();
-		m_uploaders[m_current]->writeTo(m_textures[m_current].get());
+		currentUploader = m_uploaders[m_current];
+		currentUploader->writeTo(m_textures[m_current].get());
 		m_viewTexture = m_textures[m_current];
 	}
 

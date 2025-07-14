@@ -33,7 +33,9 @@ namespace volucris
 		{
 			return;
 		}
-
+		auto ctx = getContext();
+		ctx->setBuffer(this);
+		ctx->setTexture2D(texture);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 4);
@@ -42,6 +44,7 @@ namespace volucris
 
 	std::vector<uint8> RHIReadPixelBuffer::readColor()
 	{
+		getContext()->setBuffer(this);
 		void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 		if (ptr == nullptr)
 		{
@@ -83,6 +86,9 @@ namespace volucris
 
 	bool RHIWritePixelBuffer::writeTo(RHITexture2D* texture)
 	{
+		auto ctx = getContext();
+		ctx->setBuffer(this);
+		ctx->setTexture2D(texture);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->getSize().width, texture->getSize().height,
 			getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
@@ -92,8 +98,10 @@ namespace volucris
 
 	void RHIWritePixelBuffer::startWrite(std::vector<uint8> data)
 	{
+		getContext()->setBuffer(this);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		v_check(ptr)
 		if (ptr)
 		{
 			memcpy(ptr, data.data(), data.size());

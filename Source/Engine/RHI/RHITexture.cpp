@@ -55,7 +55,7 @@ namespace volucris
 
 	RHITexture2D::~RHITexture2D()
 	{
-		
+		getContext()->unsetTexture2D(this);
 	}
 
 	bool RHITexture2D::init()

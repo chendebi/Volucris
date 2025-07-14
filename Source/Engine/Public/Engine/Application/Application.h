@@ -46,6 +46,8 @@ namespace volucris
 
 		bool isRunning() const { return  m_running; }
 
+		void quit();
+
 	private:
 		static Application* s_instance;
 		Window* m_focusedWindow;

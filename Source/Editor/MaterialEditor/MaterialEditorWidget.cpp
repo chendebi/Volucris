@@ -62,6 +62,10 @@ namespace volucris
 		ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_NoTitleBar);
 		ImGui::Text("This is a material editor widget.");
         ImGui::Text("Hello, ImGui!");
+        if (ImGui::Button("quit"))
+        {
+            gApp->quit();
+        }
 		ImGui::End();
 	}
 

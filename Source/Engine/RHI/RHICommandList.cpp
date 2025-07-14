@@ -144,6 +144,11 @@ namespace volucris
 		}
 	}
 
+	void RHICommandList::resetTexture2D()
+	{
+		m_state.texture2d = nullptr;
+	}
+
 	bool RHICommandList::setRenderTarget(RHIRenderTarget* renderTarget, Rect rect)
 	{
 		if (renderTarget == nullptr)

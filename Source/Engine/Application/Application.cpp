@@ -146,7 +146,6 @@ namespace volucris
 		while (m_mainWindow->isValid())
 		{
 			V_SCOPED_PROFILE;
-			flushCommmands();
 
 			m_focusedWindow->build();
 
@@ -162,9 +161,16 @@ namespace volucris
 			m_focusedWindow->getImGuiRenderer()->render();
 
 			glfwPollEvents();
+
+			flushCommmands();
 		}
 
 		Renderer::getInstance().quit();
 		return 0;
+	}
+
+	void Application::quit()
+	{
+		pushCommand([this]() {removeWindow(m_mainWindow); });
 	}
 }

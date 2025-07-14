@@ -42,6 +42,8 @@ namespace volucris
 
 		void unsetTexture2D(RHITexture2D* texture);
 
+		void resetTexture2D();
+
 		bool setRenderTarget(RHIRenderTarget* renderTarget, Rect rect = Rect());
 
 		void unsetRenderTarget(RHIRenderTarget* renderTarget);
