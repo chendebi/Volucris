@@ -16,6 +16,7 @@ namespace volucris
     {
         addChild(m_viewport);
         addChild(m_logWidget);
+        m_logWidget->init();
         m_viewport->setUniverse(std::make_shared<Universe>());
     }
 

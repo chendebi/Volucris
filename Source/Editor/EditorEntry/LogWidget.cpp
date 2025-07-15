@@ -8,7 +8,17 @@ namespace volucris
 		: Widget()
 		, m_logs(1024)
 	{
-		//gApp->LogAdded.bindObject(this, &LogWidget::onLogAdded);
+		
+	}
+
+	LogWidget::~LogWidget()
+	{
+		gApp->LogAdded.unbind(this);
+	}
+
+	void LogWidget::init()
+	{
+		gApp->LogAdded.bindObject(this, &LogWidget::onLogAdded);
 	}
 
 	void LogWidget::onBuild()

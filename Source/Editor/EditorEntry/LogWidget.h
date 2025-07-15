@@ -11,6 +11,10 @@ namespace volucris
 	public:
 		LogWidget();
 
+		~LogWidget() override;
+
+		void init();
+
 	protected:
 		void onBuild() override;
 
