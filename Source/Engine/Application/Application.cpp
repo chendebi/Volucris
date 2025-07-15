@@ -17,6 +17,11 @@ namespace volucris
 {
 	Application* Application::s_instance = nullptr;
 
+	Config Application::config()
+	{
+		return Config("/Engine/Config/VolucrisApplication");
+	}
+
 	Application::Application()
 		: m_focusedWindow(nullptr)
 		, m_mainWindow(nullptr)

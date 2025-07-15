@@ -16,6 +16,9 @@ namespace volucris
 	class Widget : public Object
 	{
 	public:
+		static bool hasCustomLayout(const char* id);
+
+	public:
 		Widget();
 
 		~Widget();

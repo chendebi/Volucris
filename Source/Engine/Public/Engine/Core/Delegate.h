@@ -16,7 +16,7 @@ namespace volucris
 	public:
 		virtual ~DelegateCallable() = default;
 
-		virtual ReturnType invoke(Args... args) = 0;
+		virtual ReturnType invoke(Args&&... args) = 0;
 	};
 
 	template <typename Callable, typename ReturnType, typename ...Args>
@@ -30,9 +30,28 @@ namespace volucris
 			: m_callable(std::move(callable)) 
 		{
 		}
-		ReturnType invoke(Args... args)
+
+		ReturnType invoke(Args&&... args)
 		{
-			return m_callable(std::forward<Args>(std::move(args))...);
+			return m_callable(std::forward<Args>(args)...);
+		}
+
+	private:
+		Callable m_callable;
+	};
+
+	template <typename Callable, typename ReturnType, typename ...Args>
+	class FunctionCallableWrapper : public DelegateCallable<ReturnType, Args...>
+	{
+	public:
+		FunctionCallableWrapper(Callable callable)
+			: m_callable(callable) 
+		{
+		}
+
+		ReturnType invoke(Args&&... args)
+		{
+			return m_callable(std::forward<Args>(args)...);
 		}
 
 	private:
@@ -74,12 +93,18 @@ namespace volucris
 		template<typename Callable>
 		bool bind(Callable&& callable)
 		{
-			if (!m_callable)
+			if (m_callable)
 			{
-				m_callable = new DelegateCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(std::forward<Callable>(callable));
-				return true;
+				return false;
 			}
-			return false;
+
+			if constexpr (std::is_function_v<std::decay_t<Callable>>) {
+				m_callable = new FunctionCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(callable);
+			}
+			else {
+				m_callable = new DelegateCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(std::forward<Callable>(callable));
+			}
+			return true;
 		}
 
 		void unbind()
@@ -153,14 +178,16 @@ namespace volucris
 		EventHandle bindObject(T* object, Callable&& callable)
 		{
 			static_assert(std::is_base_of<Object, T>::value, "should inherit from Object");
-			auto handle = createHandle([object, callable](Args... args)->ReturnType {
+			ObjectCallable objectCallable;
+			objectCallable.object = object->getShared<Object>();
+			objectCallable.handle = createHandle([object, callable = callable](auto&& ...args)->ReturnType {
 				return std::invoke(callable, object, std::forward<Args>(args)...);
 				});
-			m_objectCallables.push_back({ object->getShared<Object>(), handle });
-			return handle;
+			m_objectCallables.push_back(objectCallable);
+			return objectCallable.handle;
 		}
 
-		void invoke(Args... args)
+		void invoke(Args&&... args)
 		{
 			for (auto & m_callable : m_callables)
 			{
@@ -205,8 +232,15 @@ namespace volucris
 		template<typename Callable>
 		EventHandle createHandle(Callable&& callable)
 		{
-			EventHandle handle = new DelegateCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(std::forward<Callable>(callable));
-			return handle;
+			if constexpr (std::is_function_v<std::decay_t<Callable>> ||
+				std::is_member_function_pointer_v<std::decay_t<Callable>>)
+			{
+				return new FunctionCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(callable);
+			}
+			else 
+			{
+				return new DelegateCallableWrapper<std::decay_t<Callable>, ReturnType, Args...>(std::forward<Callable>(callable));
+			}
 		}
 
 	private:
@@ -215,7 +249,7 @@ namespace volucris
 		{
 			std::weak_ptr<Object> object;
 			EventHandle handle;
-			void call(Args... args)
+			void call(Args&&... args)
 			{
 				if (auto obj = object.lock())
 				{

@@ -6,6 +6,7 @@
 #include <Core/Volucris.h>
 #include <Core/TextureDefines.h>
 #include <RHI/RHIBuffer.h>
+#include <Engine/Core/DataType.h>
 #include <RHI/RHIVertexBuffer.h>
 
 inline std::string getGLErrorDesc(GLenum code)
@@ -106,15 +107,15 @@ namespace volucris
 		return GL_NONE;
 	}
 
-	static GLenum getGLElementType(RHIElementBuffer::DataType type)
+	static GLenum getGLElementType(ElementDataType type)
 	{
 		switch (type)
 		{
-		case volucris::RHIElementBuffer::UByte:
+		case volucris::ElementDataType::UByte:
 			return GL_UNSIGNED_BYTE;
-		case volucris::RHIElementBuffer::UShort:
+		case volucris::ElementDataType::UShort:
 			return GL_UNSIGNED_SHORT;
-		case volucris::RHIElementBuffer::UInt:
+		case volucris::ElementDataType::UInt:
 			return GL_UNSIGNED_INT;
 		default:
 			break;

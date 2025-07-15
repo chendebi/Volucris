@@ -2,16 +2,13 @@
 #define __volucris_rhi_vertex_buffer_h__
 
 #include <Engine/RHI/RHIBuffer.h>
+#include <Engine/Core/DataType.h>
 
 namespace volucris
 {
 	class RHIVertexBuffer : public RHIBuffer
 	{
 	public:
-		enum DataType
-		{
-			Float,
-		};
 		struct Description
 		{
 			int location;
@@ -39,13 +36,6 @@ namespace volucris
 	class RHIElementBuffer : public RHIBuffer
 	{
 	public:
-		enum DataType
-		{
-			UByte,
-			UShort,
-			UInt
-		};
-
 		enum DrawMode
 		{
 			Points,
@@ -66,20 +56,20 @@ namespace volucris
 
 		void init(const std::vector<uint32>& elements);
 
-		void init(const std::vector<uint8>& elements, DataType type=DataType::UByte);
+		void init(const std::vector<uint8>& elements, ElementDataType type= ElementDataType::UByte);
 
-		void init(const uint8* elements, size_t size, DataType type=DataType::UByte);
+		void init(const uint8* elements, size_t size, ElementDataType type= ElementDataType::UByte);
 
 		void setDrawMode(DrawMode mode) { m_mode = mode; }
 
-		DataType getDataType() const { return m_type; }
+		ElementDataType getDataType() const { return m_type; }
 
 		uint32 getCount() const { return m_count; }
 
 		DrawMode getDrawMode() const { return m_mode; }
 
 	private:
-		DataType m_type;
+		ElementDataType m_type;
 		uint32 m_count;
 		DrawMode m_mode;
 	};

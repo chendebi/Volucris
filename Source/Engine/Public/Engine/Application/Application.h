@@ -5,14 +5,23 @@
 #include <vector>
 #include <functional>
 #include <Engine/Core/CircleQueue.h>
+#include <Engine/Core/Config.h>
+#include <Engine/Core/Delegate.h>
 
 namespace volucris
 {
 	class Window;
 	class Universe;
 
+	DECLARE_EVENT_MUTI_DELEGATE(OnLogAdded, void, const std::string&)
+
 	class Application : public Object
 	{
+	public:
+		static Config config();
+
+		OnLogAdded LogAdded;
+
 	public:
 		Application();
 
@@ -47,6 +56,8 @@ namespace volucris
 		bool isRunning() const { return  m_running; }
 
 		void quit();
+
+		void cacheLog(std::string log);
 
 	private:
 		static Application* s_instance;

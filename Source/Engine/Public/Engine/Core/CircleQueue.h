@@ -23,6 +23,11 @@ namespace volucris
 
 		}
 
+		~CircleQueue()
+		{
+			delete[] m_buffer;
+		}
+
 		bool push(const T& val, bool block = true)
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);

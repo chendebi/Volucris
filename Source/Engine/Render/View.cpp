@@ -85,7 +85,7 @@ namespace volucris
 			desc.normalized = false;
 			desc.offset = 0;
 			desc.size = 3;
-			desc.type = RHIVertexBuffer::Float;
+			desc.type = DataType::Float;
 			desc.stride = 3 * sizeof(float);
 			vbo->setDescriptions({ desc });
 
@@ -95,7 +95,7 @@ namespace volucris
 			ebo = std::make_shared<RHIElementBuffer>(RHICmdList);
 			ebo->createGpuResource();
 			v_check(RHICmdList->setBuffer(ebo.get()));
-			ebo->init((uint8*)indices, (uint32)sizeof(indices), RHIElementBuffer::UInt);
+			ebo->init((uint8*)indices, (uint32)sizeof(indices), ElementDataType::UInt);
 
 			auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader);
 			vs->init(vss);

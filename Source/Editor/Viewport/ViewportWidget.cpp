@@ -120,7 +120,10 @@ namespace volucris
 		{
 			size = { 8, 8 };
 		}
-		if (m_view && m_size != size)
+
+		auto curSize = m_size;
+		m_size = size;
+		if (m_view && m_size != curSize)
 		{
 			m_size = size;
 			recreateUploaders(getContext());

@@ -40,14 +40,16 @@ namespace volucris
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.IniFilename = nullptr;
-		m_imguiContext->SettingsLoaded = false;
-		if (gFileSystem.fileExists("/Engine/Config/ImGuiIniSettings.ini"))
-		{
-			const auto& configFilePath = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
-			//io.IniFilename = configFilePath.c_str();
-			ImGui::LoadIniSettingsFromDisk(configFilePath.c_str());
-			m_imguiContext->SettingsLoaded = true;
-		}
+
+		auto config = Application::config();
+		std::string font = config.getValue("font/family", "/Engine/Content/Font/wenquanyi.ttf");
+		float fontSize = config.getValue("font/size", 16.0f);
+		io.Fonts->AddFontFromFileTTF(
+			gFileSystem.virtualToPhysical(font).c_str(),
+			fontSize,                         
+			nullptr,
+			io.Fonts->GetGlyphRangesChineseFull()
+		);
 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -69,15 +71,7 @@ namespace volucris
 	{
 		m_cmdList = nullptr;
 
-		ImGui::SetCurrentContext(m_imguiContext);
-
-		if (!gFileSystem.directoryExists("/Engine/Config/"))
-		{
-			gFileSystem.createDirectory("/Engine/Config/");
-		}
-		const auto& configFilePath = gFileSystem.virtualToPhysical("/Engine/Config/ImGuiIniSettings.ini");
-		ImGui::SaveIniSettingsToDisk(configFilePath.c_str());
-
+		
 		ImGui_ImplGlfw_Shutdown();
 
 		// 2. 再清理 ImGui 的其他后端（如 OpenGL/Vulkan）
@@ -92,6 +86,7 @@ namespace volucris
 		m_cmdList->setViewport(0, 0, 800, 600);
 		m_cmdList->clear(m_clear);
 
+		ImGui::EndFrame();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		m_cmdList->swapBuffers();

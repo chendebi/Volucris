@@ -3,9 +3,17 @@
 #include <Core/Volucris.h>
 #include <imgui/imgui.h>
 #include <Application/Window.h>
+#include <imgui_internal.h>
 
 namespace volucris
 {
+	bool Widget::hasCustomLayout(const char* id)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindowSettings* settings = ImGui::FindWindowSettingsByID(ImHashStr(id));
+		return (settings != nullptr && settings->Pos.x != FLT_MAX);
+	}
+
 	Widget::Widget()
 		: Object()
 		, m_parent(nullptr)

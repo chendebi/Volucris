@@ -3,6 +3,7 @@
 #include <spdlog/sinks/base_sink.h>
 #include <spdlog/spdlog.h>
 #include <thread>
+#include <Application/Application.h>
 
 namespace volucris
 {
@@ -14,6 +15,9 @@ namespace volucris
 			spdlog::memory_buf_t formatted;
 			formatter_->format(msg, formatted);
 			// TODO 发送消息给编辑器或其他系统
+			gApp->pushCommand([msg = fmt::to_string(formatted)]() {
+				gApp->LogAdded.invoke(msg);
+				});
 		}
 
 		void flush_() override {}

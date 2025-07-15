@@ -5,11 +5,11 @@
 
 namespace volucris
 {
-	static GLenum getGLDataType(RHIVertexBuffer::DataType type)
+	static GLenum getGLDataType(DataType type)
 	{
 		switch (type)
 		{
-		case volucris::RHIVertexBuffer::Float:
+		case volucris::DataType::Float:
 			return GL_FLOAT;
 		default:
 			break;
