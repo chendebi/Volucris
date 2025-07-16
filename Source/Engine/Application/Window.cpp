@@ -122,7 +122,7 @@ namespace volucris
 		m_imguiRenderer = nullptr;
 	}
 
-	void Window::onBuild()
+	void Window::onBuild(bool init)
 	{
 		v_check(glfwGetCurrentContext() == m_handle)
 		ImGui_ImplOpenGL3_NewFrame();

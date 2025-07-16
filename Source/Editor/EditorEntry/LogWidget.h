@@ -16,7 +16,7 @@ namespace volucris
 		void init();
 
 	protected:
-		void onBuild() override;
+		void onBuild(bool init) override;
 
 	private:
 		void onLogAdded(const std::string& log);

@@ -5,11 +5,13 @@
 #include <map>
 #include "AssetData.h"
 #include <Engine/Core/Delegate.h>
+#include <Engine/Game/Package.h>
 
 namespace volucris
 {
 	DECLARE_EVENT_MUTI_DELEGATE(PackageRegistered, void, const std::string&)
 
+	class World;
 	class Package;
 
 	class AssetManager
@@ -36,18 +38,21 @@ namespace volucris
 
 		void save(Package* package);
 
-		std::shared_ptr<Package> load(const std::string& packageName);
+		std::shared_ptr<Package> load(const std::string& packageName, World* world = nullptr);
 
 		template<typename T>
-		std::shared_ptr<T> loadAsset(const std::string& packageName)
+		std::shared_ptr<T> loadAsset(const std::string& packageName, World* world = nullptr)
 		{
-			if (auto package = load(packageName))
+			if (auto package = load(packageName, world))
 			{
 				for (const auto& child : package->getChildren())
 				{
 					if (auto asset = std::dynamic_pointer_cast<T>(child))
 					{
-						asset->setParent(nullptr);
+						if (!world)
+						{
+							asset->setParent(nullptr);
+						}
 						return asset;
 					}
 				}

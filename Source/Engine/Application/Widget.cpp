@@ -76,16 +76,16 @@ namespace volucris
 		}
 	}
 
-	void Widget::build()
+	void Widget::build(bool init)
 	{
-		onBuild();
+		onBuild(init);
 	}
 
-	void Widget::buildChildren()
+	void Widget::buildChildren(bool init)
 	{
 		for (const auto& child : m_children)
 		{
-			child->build();
+			child->build(init);
 		}
 	}
 

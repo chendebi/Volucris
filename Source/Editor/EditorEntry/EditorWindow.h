@@ -7,6 +7,8 @@ namespace volucris
 {
 	class ViewportWidget;
 	class LogWidget;
+	class ContentBrowserWidget;
+	class RHITexture2D;
 
 	class MainWidget : public Widget
 	{
@@ -14,7 +16,7 @@ namespace volucris
 		MainWidget();
 
 	protected:
-		void onBuild() override;
+		void onBuild(bool init) override;
 
 	private:
 		void buildMenubar();
@@ -22,6 +24,7 @@ namespace volucris
 	private:
 		std::shared_ptr<ViewportWidget> m_viewport;
 		std::shared_ptr<LogWidget> m_logWidget;
+		std::shared_ptr<ContentBrowserWidget> m_contentBrowserWidget;
 	};
 
 	class EditorWindow : public Window
@@ -29,12 +32,14 @@ namespace volucris
 	public:
 		EditorWindow();
 
+		RHITexture2D* getEditorIconTexture() const;
+
 		void onRendererBuild(RHICommandList* cmdList) override;
 
 		void onRendererDestroy(RHICommandList* cmdList) override;
 
 	private:
-		std::shared_ptr<Widget> m_widget;
+		std::unique_ptr<RHITexture2D> m_iconTexture;
 	};
 }
 

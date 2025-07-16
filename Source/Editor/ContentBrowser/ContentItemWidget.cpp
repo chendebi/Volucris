@@ -49,46 +49,74 @@ namespace volucris
 		//draw_list->AddRect(rect_min, rect_max, IM_COL32(255, 0, 0, 128));
 	}
 
+	static glm::vec2 ItemSize = { 96,128 };
+
 	ContentItemWidget::ContentItemWidget()
 		: m_texture(nullptr)
 		, m_minUV()
 		, m_maxUV()
-		, m_size(96, 128)
+		, m_size(ItemSize)
 		, m_iconSpace()
 		, m_iconSize()
 		, m_hoverColor({ 0.9411, 0.850, 0.559 ,1.0})
 		, m_selectedColor({ 0.882, 0.725, 0.219 ,1.0 })
 		, m_selected(false)
+		, m_node()
 	{
 		setScale(1.0);
+	}
+
+	ContentItemWidget::ContentItemWidget(const FileNode& node)
+		: ContentItemWidget()
+	{
+		m_node = node;
 	}
 
 	ContentItemWidget::ContentItemWidget(RHITexture2D* texture, Point iconPos, Size iconSize)
 		: ContentItemWidget()
 	{
-		setIcon(texture, iconPos, iconSize);
+		setIcon(iconPos, iconSize);
+		setTexture(texture);
 	}
 
-	void ContentItemWidget::setIcon(RHITexture2D* texture, Point iconPos, Size iconSize)
+	void ContentItemWidget::setTexture(RHITexture2D* texture)
 	{
-		auto texSize = texture->getSize();
-		auto ustep = iconSize.width * 1.0f / texSize.width;
-		auto vstep = iconSize.height * 1.0f / texSize.height;
-
 		m_texture = texture;
-		m_minUV = { iconPos.x * ustep, 1.0f - iconPos.y * vstep };
-		m_maxUV = { m_minUV.x + ustep, m_minUV.y - vstep };
+		update();
+	}
+
+	void ContentItemWidget::setIcon(Point iconPos, Size iconSize)
+	{
+		m_iconPos = iconPos;
+		m_iconSize = iconSize;
+
+		update();
 	}
 
 	void ContentItemWidget::setScale(float scale)
 	{
-		m_size = m_size * scale;
+		m_size = ItemSize * scale;
 		float iconSize = 88 * scale;
-		m_iconSize = { iconSize , iconSize };
+		m_iconDrawSize = { iconSize , iconSize };
 		m_iconSpace.x = 4 * scale;
 		m_iconSpace.y = 4 * scale;
 
 		m_fontSize = 16 * scale;
+	}
+
+	void ContentItemWidget::update()
+	{
+		if (!m_texture)
+		{
+			return;
+		}
+
+		auto texSize = m_texture->getSize();
+		auto ustep = m_iconSize.width * 1.0f / texSize.width;
+		auto vstep = m_iconSize.height * 1.0f / texSize.height;
+
+		m_minUV = { m_iconPos.x * ustep, 1.0f - m_iconPos.y * vstep };
+		m_maxUV = { m_minUV.x + ustep, m_minUV.y - vstep };
 	}
 
 	void ContentItemWidget::build()
@@ -133,13 +161,18 @@ namespace volucris
 
 			window->DrawList->AddImage(texID,
 				imgPos,
-				ImVec2(imgPos.x + m_iconSize.x, imgPos.y + m_iconSize.y),
+				ImVec2(imgPos.x + m_iconDrawSize.x, imgPos.y + m_iconDrawSize.y),
 				{ m_minUV.x, m_minUV.y },
-				{ m_maxUV.x, m_maxUV.y });
+				{ m_maxUV.x, m_maxUV.y }
+			);
 		}
 
-		ImVec2 fontRectMin = { cursorPos.x + m_iconSpace.x, imgPos.y + m_iconSize.y + m_iconSpace.y };
+		ImVec2 fontRectMin = { cursorPos.x + m_iconSpace.x, imgPos.y + m_iconDrawSize.y + m_iconSpace.y };
 		ImVec2 fontRectMax = { cursorPos.x + m_size.x - m_iconSpace.x, cursorPos.y + m_size.y};
 		DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, "Test");
+	}
+	glm::vec2 ContentItemWidget::getItemSize(float scale)
+	{
+		return ItemSize * scale;
 	}
 }

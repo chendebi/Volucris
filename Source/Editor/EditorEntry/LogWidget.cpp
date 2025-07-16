@@ -21,7 +21,7 @@ namespace volucris
 		gApp->LogAdded.bindObject(this, &LogWidget::onLogAdded);
 	}
 
-	void LogWidget::onBuild()
+	void LogWidget::onBuild(bool init)
 	{
 		ImGui::Begin("Log");
 

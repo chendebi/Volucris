@@ -23,6 +23,19 @@ namespace volucris
 			RGBA
 		};
 
+		enum EFilter
+		{
+			Near,
+			Linear
+		};
+
+		enum EWrapMode
+		{
+			Repeat,
+			ClampToBorder,
+			ClampToEdge
+		};
+
 		struct TextureData
 		{
 			ESourceFormat format = ESourceFormat::Invalid;

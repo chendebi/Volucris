@@ -1,0 +1,33 @@
+#ifndef __volucris_content_widget_h__
+#define __volucris_content_widget_h__
+
+#include <Engine/Application/Widget.h>
+#include <glm/glm.hpp>
+
+namespace volucris
+{
+	class ContentItemWidget;
+	class RHITexture2D;
+
+	class ContentWidget : public Widget
+	{
+	public:
+		ContentWidget();
+
+		void setCurrentFolder(const std::string& folder);
+
+	protected:
+		void onBuild(bool init) override;
+
+		void onRendererBuild(RHICommandList* cmdList) override;
+
+		void onRendererDestroy(RHICommandList* cmdList) override;
+
+	private:
+		float m_scale;
+		glm::vec2 m_itemSize;
+		std::vector<std::unique_ptr<ContentItemWidget>> m_items;
+	};
+}
+
+#endif // !__volucris_folder_navigation_widget_h__

@@ -23,7 +23,7 @@ namespace volucris
 		void setViewData(Texture::TextureData data);
 
 	protected:
-		void onBuild() override;
+		void onBuild(bool init) override;
 
 		void viewSizeChanged(Size size);
 

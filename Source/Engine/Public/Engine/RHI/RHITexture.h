@@ -63,6 +63,8 @@ namespace volucris
 
 		bool init();
 
+		bool init(const std::vector<uint8>& data);
+
 		void update(const Rect& rect,  const std::vector<uint8>& data);
 
 		Texture::EPixelFormat getPixelFormat() const { return m_pixelFormat; }
@@ -72,6 +74,7 @@ namespace volucris
 	private:
 		Size m_size;
 		Texture::EPixelFormat m_pixelFormat;
+		Texture::ESourceFormat m_sourceFormat;
 	};
 
 	std::shared_ptr<RHITexture> RHICreateTexture(const RHITextureDesc& desc);

@@ -9,10 +9,16 @@
 
 namespace volucris
 {
-	EditorApplication::EditorApplication()
-		: Application()
+	EditorWorld::EditorWorld()
+		: World()
 	{
 
+	}
+
+	EditorApplication::EditorApplication()
+		: Application()
+		, m_world(std::make_unique<EditorWorld>())
+	{
 	}
 }
 
@@ -27,6 +33,10 @@ std::shared_ptr<volucris::Application> volucrisEntry(int argc, char* argv[])
 	auto app = std::make_shared<EditorApplication>();
 	auto window = std::make_shared<EditorWindow>();
 	app->addWindow(window);
+
+	window->setTitle("Volucris Editor");
+	auto widget = std::make_shared<MainWidget>();
+	window->addChild(widget);
 
 	return app;
 }

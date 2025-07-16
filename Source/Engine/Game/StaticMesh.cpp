@@ -10,9 +10,9 @@ namespace volucris
 
 	}
 
-	void StaticMesh::addPrimitiveInfo(PrimitiveInfo info)
+	void StaticMesh::setMeshData(MeshData data)
 	{
-		m_primitiveInfos.emplace_back(std::move(info));
+		m_data = std::move(data);
 	}
 
 	std::shared_ptr<StaticMeshProxy> StaticMesh::getProxy()

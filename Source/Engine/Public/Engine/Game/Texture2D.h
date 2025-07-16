@@ -24,6 +24,8 @@ namespace volucris
 			ar & boost::serialization::base_object<GameObject>(*this);
 			ar & m_data;
 		}
+
+		const Texture::TextureData& getTextureData() const { return m_data; }
 		
 	private:
 		Texture::TextureData m_data;

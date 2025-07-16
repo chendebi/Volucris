@@ -38,7 +38,7 @@ namespace volucris
 		std::string getTitle() const { return m_title; }
 
 	protected:
-		void onBuild() override;
+		void onBuild(bool init) override;
 
 		void onWindowFocusChanged(FocusEvent* event) override;
 

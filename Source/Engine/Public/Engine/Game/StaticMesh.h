@@ -3,6 +3,7 @@
 
 #include <Engine/Game/GameObject.h>
 #include <Engine/Core/PrimitiveInfo.h>
+#include <Engine/Game/MeshResourceData.h>
 
 namespace volucris
 {
@@ -13,18 +14,18 @@ namespace volucris
 	public:
 		StaticMesh();
 
-		void addPrimitiveInfo(PrimitiveInfo info);
+		void setMeshData(MeshData data);
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
-			ar& m_primitiveInfos;
+			ar& m_data;
 		}
 
 		std::shared_ptr<StaticMeshProxy> getProxy();
 
 	private:
-		std::vector<PrimitiveInfo> m_primitiveInfos;
+		MeshData m_data;
 		std::weak_ptr<StaticMeshProxy> m_proxy;
 	};
 }

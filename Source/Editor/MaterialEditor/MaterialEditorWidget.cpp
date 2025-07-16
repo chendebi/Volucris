@@ -19,7 +19,7 @@ namespace volucris
         m_viewport->setUniverse(m_universe);
     }
 
-    void MaterialEditorWidget::onBuild()
+    void MaterialEditorWidget::onBuild(bool init)
 	{
         auto dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
         //ImGuiIO& io = ImGui::GetIO();

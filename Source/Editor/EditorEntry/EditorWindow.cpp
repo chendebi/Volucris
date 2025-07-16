@@ -6,6 +6,11 @@
 #include <Viewport/ViewportWidget.h>
 #include <Engine/Game/Universe.h>
 #include <EditorEntry/LogWidget.h>
+#include <ContentBrowser/ContentBrowserWidget.h>
+#include <Engine/RHI/RHITexture.h>
+#include <Engine/Asset/AssetManager.h>
+#include <Engine/Game/Texture2D.h>
+#include "EditorApplication.h"
 
 namespace volucris
 {
@@ -13,14 +18,16 @@ namespace volucris
         : Widget()
         , m_viewport(std::make_shared<ViewportWidget>())
         , m_logWidget(std::make_shared<LogWidget>())
+        , m_contentBrowserWidget(std::make_shared<ContentBrowserWidget>())
     {
         addChild(m_viewport);
         addChild(m_logWidget);
+        addChild(m_contentBrowserWidget);
         m_logWidget->init();
         m_viewport->setUniverse(std::make_shared<Universe>());
     }
 
-    void MainWidget::onBuild()
+    void MainWidget::onBuild(bool)
 	{
         // 创建主窗口（包含DockSpace和菜单栏）
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -51,7 +58,8 @@ namespace volucris
         ImGuiID dockspace = ImGui::GetID("MainWindow");
         ImGui::DockSpace(dockspace);
 
-        if (ImGui::GetFrameCount() == 1 && !hasCustomLayout("MainWindow"))
+        bool init = ImGui::GetFrameCount() == 1 && !hasCustomLayout("MainWindow");
+        if (init)
         {
             ImGui::DockBuilderRemoveNode(dockspace); // 清除现有布局（如果有）
             ImGui::DockBuilderAddNode(dockspace, ImGuiDockNodeFlags_DockSpace); // 添加新的 DockSpace
@@ -83,24 +91,24 @@ namespace volucris
             ImGui::DockBuilderDockWindow("Preview", left_id);
             ImGui::DockBuilderDockWindow("Property", right_id);
             ImGui::DockBuilderDockWindow("Log", bottomId);
-            ImGui::DockBuilderDockWindow("Content", bottomId);
+            ImGui::PushID(0);
+            ImGui::DockBuilderDockWindow("Content Browser", bottomId);
+            ImGui::PopID();
 
             // 完成布局设置
             ImGui::DockBuilderFinish(dockspace);
         }
         //ImGui::SetNextWindowDockID(dockspace);
         static ImGuiWindowClass no_title_class;
-        no_title_class.DockNodeFlagsOverrideSet = 
-            ImGuiDockNodeFlags_NoTabBar;
+        no_title_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 
         // 对每个窗口
        ImGui::SetNextWindowClass(&no_title_class);
-        m_viewport->build();
+        m_viewport->build(init);
 
-        m_logWidget->build();
+        m_logWidget->build(init);
 
-        ImGui::Begin("Content");
-        ImGui::End();
+        m_contentBrowserWidget->build(init);
 
         //ImGui::SetNextWindowDockID(dockspace);
         ImGui::Begin("Property");
@@ -150,20 +158,37 @@ namespace volucris
 
 	EditorWindow::EditorWindow()
 		: Window()
+        , m_iconTexture(nullptr)
 	{
-		setTitle("Volucris Editor");
-		m_widget = std::make_shared<MainWidget>();
-		m_widget->setParent(this);
+		
 	}
+
+    RHITexture2D* EditorWindow::getEditorIconTexture() const
+    {
+        return m_iconTexture.get();
+    }
 
 	void EditorWindow::onRendererBuild(RHICommandList* cmdList)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		//io.IniFilename = "imgui_layout.ini";
 		//V_LOG_DEBUG(Editor, "loaded: {}", io.)
+        Texture2D t;
+        auto texture = AssetManager::getInstance().loadAsset<Texture2D>("/Engine/Content/Editor/Textures/T_Icons", GEditorWorld);
+        const auto& data = texture->getTextureData();
+        RHITextureDesc desc;
+        desc.size = data.size;
+        desc.sourceFormat = data.format;
+        desc.pixelFormat = Texture::EPixelFormat::R8G8B8A8;
+        desc.texClass = TextureType::Texture2D;
+        m_iconTexture = std::make_unique<RHITexture2D>(desc);
+        m_iconTexture->setContext(cmdList);
+        m_iconTexture->createGpuResource();
+        m_iconTexture->init(data.data);
 	}
 
     void EditorWindow::onRendererDestroy(RHICommandList* cmdList)
     {
+        m_iconTexture = nullptr;
     }
 }

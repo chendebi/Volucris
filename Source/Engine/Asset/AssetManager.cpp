@@ -3,6 +3,7 @@
 #include <Core/Volucris.h>
 #include <Asset/AssetWriter.h>
 #include <Asset/AssetReader.h>
+#include <Game/World.h>
 
 namespace volucris
 {
@@ -47,7 +48,7 @@ namespace volucris
 		writer.write();
 	}
 
-	std::shared_ptr<Package> AssetManager::load(const std::string& packageName)
+	std::shared_ptr<Package> AssetManager::load(const std::string& packageName, World* world)
 	{
 		{
 			auto it = m_packages.find(packageName);
@@ -57,6 +58,15 @@ namespace volucris
 		}
 		
 		AssetReader reader = AssetReader(packageName);
-		return reader.readPackage();
+		auto package = reader.readPackage();
+		if (package)
+		{
+			m_packages[packageName] = package;
+			if (world)
+			{
+				world->addPackage(package);
+			}
+		}
+		return package;
 	}
 }

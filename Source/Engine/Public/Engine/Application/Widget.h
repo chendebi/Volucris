@@ -27,9 +27,9 @@ namespace volucris
 
 		void setParent(Widget* parent);
 
-		void build();
+		void build(bool init=false);
 
-		void buildChildren();
+		void buildChildren(bool init = false);
 
 		Widget* getTopWidget() 
 		{
@@ -53,7 +53,7 @@ namespace volucris
 
 		void beforeRedererDestroy(RHICommandList* cmdList);
 
-		virtual void onBuild() {}
+		virtual void onBuild(bool init) {}
 
 		virtual void parentChanged(Widget* old, Widget* current) {}
 

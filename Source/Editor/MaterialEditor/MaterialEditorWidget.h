@@ -14,7 +14,7 @@ namespace volucris
 		MaterialEditorWidget();
 
 	protected:
-		void onBuild() override;
+		void onBuild(bool init) override;
 
 		void onWindowFocusChanged(FocusEvent* event) override;
 

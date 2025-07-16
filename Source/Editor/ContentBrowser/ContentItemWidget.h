@@ -5,6 +5,7 @@
 #include <Engine/Core/Size.h>
 #include <Engine/Core/Point.h>
 #include <glm/glm.hpp>
+#include <Engine/FileSystem/FileSystem.h>
 
 namespace volucris
 {
@@ -15,13 +16,22 @@ namespace volucris
 	public:
 		ContentItemWidget();
 
+		ContentItemWidget(const FileNode& node);
+
 		ContentItemWidget(RHITexture2D* texture, Point iconPos, Size iconSize);
 
-		void setIcon(RHITexture2D* texture, Point iconPos, Size iconSize);
+		void setTexture(RHITexture2D* texture);
+
+		void setIcon(Point iconPos, Size iconSize);
 
 		void setScale(float scale);
 
 		void build();
+
+		static glm::vec2 getItemSize(float scale = 1.0);
+
+	private:
+		void update();
 
 	private:
 		RHITexture2D* m_texture;
@@ -29,12 +39,15 @@ namespace volucris
 		glm::vec2 m_maxUV;
 		glm::vec2 m_size;
 		glm::vec2 m_iconSpace;
-		glm::vec2 m_iconSize;
+		glm::vec2 m_iconDrawSize;
 		float m_fontSize;
 		glm::vec2 m_fontRect;
 		glm::vec4 m_hoverColor;
 		glm::vec4 m_selectedColor;
 		bool m_selected;
+		FileNode m_node;
+		Point m_iconPos;
+		Size m_iconSize;
 	};
 }
 

@@ -11,7 +11,7 @@ namespace volucris
 	public:
 		Resource() : Object(), m_dirty(false){}
 
-		~Resource();
+		~Resource() {}
 
 		void markDirty(bool dirty=true) { m_dirty = dirty; }
 

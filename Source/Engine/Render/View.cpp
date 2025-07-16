@@ -26,6 +26,10 @@ namespace volucris
 		{ 0.5f, -0.5f, 1.0f},
 		{ 0.5f,  0.5f, 1.0f},
 		{-0.5f,  0.5f, 1.0f},
+		{ 1.0f,  0.0f, 0.0f},
+		{ 0.0f,  1.0f, 0.0f},
+		{ 0.0f,  0.0f, 1.0f},
+		{ 1.0f,  0.0f, 1.0f},
 	};
 
 	static uint32 indices[] = {
@@ -33,16 +37,22 @@ namespace volucris
 	};
 
 	static char* vss = R"(
-		#version 330 core
+		#version 430 core
 		layout(location=0) in vec3 v_pos;
+		layout(location=2) in vec3 v_color;
+
+		layout(location=0) out vec3 vertexColor;
 		void main() {
-		gl_Position=vec4(v_pos, 1.0);}
+			gl_Position=vec4(v_pos, 1.0);
+			vertexColor = v_color;
+		}
 	)";
 
 	static char* fss = R"(
-		#version 330 core
+		#version 430 core
+		layout (location=0) in vec3 vertexColor;
 		layout (location=0) out vec4 color;
-		void main() {  color = vec4(1.0, 0.0, 0.0, 1.0); }
+		void main() {  color = vec4(vertexColor, 1.0); }
 	)";
 
 	View::View()
@@ -83,6 +93,14 @@ namespace volucris
 				block.type = PrimitiveType::Vertex;
 				block.count = 3;
 				block.offset = 0;
+				info.blocks.push_back(block);
+			}
+			{
+				PrimitiveBlock block;
+				block.dataType = DataType::Float;
+				block.type = PrimitiveType::Color;
+				block.count = 3;
+				block.offset = 4 * sizeof(glm::vec3);
 				info.blocks.push_back(block);
 			}
 			info.segmentData.resize(sizeof(indices));
