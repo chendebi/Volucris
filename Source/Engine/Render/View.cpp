@@ -11,14 +11,14 @@
 #include <RHI/RHIShader.h>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
+#include <Render/StaticMeshProxy.h>
 
 constexpr int FrameCount = 2;
 
 namespace volucris
 {
 
-	static std::shared_ptr<RHIVertexArray> vao = nullptr;
-	static std::shared_ptr<RHIElementBuffer> ebo = nullptr;
+	static std::shared_ptr<StaticMeshProxy> mesh = nullptr;
 	static std::shared_ptr<RHIProgram> shader = nullptr;
 
 	static glm::vec3 vertices[] = {
@@ -67,35 +67,36 @@ namespace volucris
 		{
 			RHICmdList->unsetRenderTarget(target.get());
 		}
-		ebo = nullptr;
-		vao = nullptr;
+		mesh = nullptr;
 	}
 
 	void View::resize(int width, int height)
 	{
-		if (!vao)
+		if (!mesh)
 		{
-			auto vbo = std::make_shared<RHIVertexBuffer>(RHICmdList);
-			vbo->createGpuResource();
-			RHICmdList->setBuffer(vbo.get());
-			vbo->init((uint8*)vertices, sizeof(vertices));
-
-			RHIVertexBuffer::Description desc;
-			desc.location = 0;
-			desc.normalized = false;
-			desc.offset = 0;
-			desc.size = 3;
-			desc.type = DataType::Float;
-			desc.stride = 3 * sizeof(float);
-			vbo->setDescriptions({ desc });
-
-			vao = std::make_shared<RHIVertexArray>(RHICmdList);
-			vao->init(vbo);
-
-			ebo = std::make_shared<RHIElementBuffer>(RHICmdList);
-			ebo->createGpuResource();
-			v_check(RHICmdList->setBuffer(ebo.get()));
-			ebo->init((uint8*)indices, (uint32)sizeof(indices), ElementDataType::UInt);
+			PrimitiveInfo info;
+			info.data.resize(sizeof(vertices));
+			memcpy(info.data.data(), (uint8*)vertices, info.data.size());
+			{
+				PrimitiveBlock block;
+				block.dataType = DataType::Float;
+				block.type = PrimitiveType::Vertex;
+				block.count = 3;
+				block.offset = 0;
+				info.blocks.push_back(block);
+			}
+			info.segmentData.resize(sizeof(indices));
+			memcpy(info.segmentData.data(), (uint8*)indices, sizeof(indices));
+			{
+				PrimitiveSegment segment;
+				segment.type = ElementDataType::UInt;
+				segment.mode = ElementDrawMode::Traingles;
+				segment.count = 6;
+				segment.offset = 0;
+				info.segments.push_back(segment);
+			}
+			mesh = std::make_shared<StaticMeshProxy>();
+			mesh->init(info);
 
 			auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader);
 			vs->init(vss);
@@ -171,7 +172,7 @@ namespace volucris
 		state.color = { 0.0, 0.8, 1.0, 1.0 };
 		cmdList->clear(state);
 
-		RHICmdList->drawPrimitive(shader.get(), vao.get(), ebo.get());
+		RHICmdList->drawPrimitive(shader.get(), *(mesh->get(0)));
 
 		swapViewData(cmdList);
 	}

@@ -302,15 +302,12 @@ namespace volucris
 		}
 	}
 
-	void RHICommandList::drawPrimitive(RHIProgram* program, RHIVertexArray* vao, RHIElementBuffer* ebo)
+	void RHICommandList::drawPrimitive(RHIProgram* program, const DrawInfo& info)
 	{
 		setProgram(program);
-		setVertexArray(vao);
-		setBuffer(ebo);
-		auto mode = ebo->getDrawMode();
-		auto count = ebo->getCount();
-		auto type = ebo->getDataType();
-		glDrawElements(getGLElementDrawMode(mode), count, getGLElementType(type), 0);
-	}
+		setVertexArray(info.vao);
+		setBuffer(info.ebo);
 
+		glDrawElements(getGLElementDrawMode(info.segment.mode), info.segment.count, getGLElementType(info.segment.type), (void*)info.segment.offset);
+	}
 }

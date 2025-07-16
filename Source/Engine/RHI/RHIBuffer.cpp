@@ -65,6 +65,7 @@ namespace volucris
 	void RHIBuffer::init(const uint8* data, uint32 size)
 	{
 		m_buffer->size = size;
+		getContext()->setBuffer(this);
 		glBufferData(m_buffer->target, size, data, m_buffer->usage);
 		GL_CHECK()
 	}

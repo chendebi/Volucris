@@ -6,6 +6,8 @@
 
 namespace volucris
 {
+	class StaticMeshProxy;
+
 	class StaticMesh : public GameObject
 	{
 	public:
@@ -19,8 +21,11 @@ namespace volucris
 			ar& m_primitiveInfos;
 		}
 
+		std::shared_ptr<StaticMeshProxy> getProxy();
+
 	private:
 		std::vector<PrimitiveInfo> m_primitiveInfos;
+		std::weak_ptr<StaticMeshProxy> m_proxy;
 	};
 }
 

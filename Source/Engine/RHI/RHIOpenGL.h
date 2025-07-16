@@ -79,27 +79,27 @@ namespace volucris
 		return GL_NONE;
 	}
 
-	static GLenum getGLElementDrawMode(RHIElementBuffer::DrawMode mode)
+	static GLenum getGLElementDrawMode(ElementDrawMode mode)
 	{
 		switch (mode)
 		{
-		case volucris::RHIElementBuffer::Points:
+		case volucris::ElementDrawMode::Points:
 			return GL_POINTS;
-		case volucris::RHIElementBuffer::LineStrip:
+		case volucris::ElementDrawMode::LineStrip:
 			return GL_LINE_STRIP;
-		case volucris::RHIElementBuffer::LineLoop:
+		case volucris::ElementDrawMode::LineLoop:
 			return GL_LINE_LOOP;
-		case volucris::RHIElementBuffer::Lines:
+		case volucris::ElementDrawMode::Lines:
 			return GL_LINES;
-		case volucris::RHIElementBuffer::LineStripAdjacency:
+		case volucris::ElementDrawMode::LineStripAdjacency:
 			return GL_LINE_STRIP_ADJACENCY;
-		case volucris::RHIElementBuffer::LinesAdjacency:
+		case volucris::ElementDrawMode::LinesAdjacency:
 			return GL_LINES_ADJACENCY;
-		case volucris::RHIElementBuffer::TraingleStrip:
+		case volucris::ElementDrawMode::TraingleStrip:
 			return GL_TRIANGLE_STRIP;
-		case volucris::RHIElementBuffer::TraingleFan:
+		case volucris::ElementDrawMode::TraingleFan:
 			return GL_TRIANGLE_FAN;
-		case volucris::RHIElementBuffer::Traingles:
+		case volucris::ElementDrawMode::Traingles:
 			return GL_TRIANGLES;
 		default:
 			break;

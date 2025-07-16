@@ -15,6 +15,19 @@ namespace volucris
 		UShort,
 		UInt
 	};
+
+	enum class ElementDrawMode
+	{
+		Points,
+		LineStrip,
+		LineLoop,
+		Lines,
+		LineStripAdjacency,
+		LinesAdjacency,
+		TraingleStrip,
+		TraingleFan,
+		Traingles
+	};
 }
 
 #endif // !__volucris_datatype_h__

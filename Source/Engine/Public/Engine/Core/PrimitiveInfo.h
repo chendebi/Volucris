@@ -3,6 +3,7 @@
 
 #include <Engine/Core/DataType.h>
 #include <vector>
+#include <string>
 #include <Engine/Core/TypesHelp.h>
 
 namespace volucris
@@ -21,7 +22,7 @@ namespace volucris
 		PrimitiveType type;
 		DataType dataType;
 		size_t offset;
-		size_t size;
+		size_t count;
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
@@ -29,20 +30,22 @@ namespace volucris
 			ar& type;
 			ar& dataType;
 			ar& offset;
-			ar& size;
+			ar& count;
 		}
 	};
 
 	struct PrimitiveSegment
 	{
 		ElementDataType type;
+		ElementDrawMode mode;
 		size_t offset;
-		size_t size;
+		size_t count;
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
 			ar& type;
+			ar& mode;
 			ar& offset;
 			ar& size;
 		}

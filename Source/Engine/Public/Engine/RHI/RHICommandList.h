@@ -6,6 +6,7 @@
 #include <Engine/Core/Core.h>
 #include <Engine/RHI/RHIState.h>
 #include <Engine/RHI/RHIRenderTarget.h>
+#include <Engine/Core/PrimitiveInfo.h>
 
 namespace volucris
 {
@@ -64,7 +65,7 @@ namespace volucris
 
 		void unsetProgram(RHIProgram* program);
 
-		void drawPrimitive(RHIProgram* program, RHIVertexArray* vao, RHIElementBuffer* ebo);
+		void drawPrimitive(RHIProgram* program, const DrawInfo& info);
 
 		const RHIState& getState() const { return m_state; }
 

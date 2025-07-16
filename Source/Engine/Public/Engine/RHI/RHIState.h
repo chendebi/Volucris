@@ -5,6 +5,8 @@
 #include <Engine/Core/Rect.h>
 #include <Engine/Core/TypesHelp.h>
 #include <Engine/RHI/RHIBuffer.h>
+#include <Engine/Core/DataType.h>
+#include <Engine/Core/PrimitiveInfo.h>
 
 namespace volucris
 {
@@ -41,6 +43,13 @@ namespace volucris
 		RHIVertexArray* vertexArray = nullptr;
 		std::unordered_map<RHIBuffer::Type, RHIBuffer*> buffers = {};
 		RHIProgram* program = nullptr;
+	};
+
+	struct DrawInfo
+	{
+		RHIVertexArray* vao = nullptr;
+		RHIElementBuffer* ebo = nullptr;
+		PrimitiveSegment segment;
 	};
 }
 
