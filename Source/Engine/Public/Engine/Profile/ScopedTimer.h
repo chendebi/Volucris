@@ -1,7 +1,7 @@
 #ifndef __volucris_scoped_timer_h__
 #define __volucris_scoped_timer_h__
 
-#include <Engine/Profile/Timer.h>
+#include <Engine/Core/Timer.h>
 #include <string>
 
 namespace volucris

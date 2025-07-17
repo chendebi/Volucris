@@ -27,6 +27,8 @@ namespace volucris
 		float m_scale;
 		glm::vec2 m_itemSize;
 		std::vector<std::unique_ptr<ContentItemWidget>> m_items;
+		bool m_multiSelect;
+		ContentItemWidget* m_controlItem;
 	};
 }
 

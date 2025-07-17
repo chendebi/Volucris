@@ -6,13 +6,22 @@
 #include <Engine/Core/Point.h>
 #include <glm/glm.hpp>
 #include <Engine/FileSystem/FileSystem.h>
+#include <Engine/Core/Timer.h>
+#include <Engine/Core/Delegate.h>
 
 namespace volucris
 {
 	class RHITexture2D;
+	class ContentItemWidget;
+
+	DECLARE_EVENT_DELEGATE(OnClicked, void, ContentItemWidget*)
 
 	class ContentItemWidget
 	{
+	public:
+		OnClicked Clicked;
+		OnClicked DoubleClicked;
+
 	public:
 		ContentItemWidget();
 
@@ -28,7 +37,17 @@ namespace volucris
 
 		void build();
 
+		bool isClicked() const { return m_clicked; }
+
+		bool isSelected() const { return m_selected; }
+
 		static glm::vec2 getItemSize(float scale = 1.0);
+
+		const FileNode& getFileNode() const { return m_node; }
+
+		void setSelected(bool selected) { m_selected = selected; }
+
+		void setClicked(bool clicked) { m_clicked = clicked; }
 
 	private:
 		void update();
@@ -48,6 +67,9 @@ namespace volucris
 		FileNode m_node;
 		Point m_iconPos;
 		Size m_iconSize;
+		std::string m_text;
+		Timer m_timer;
+		bool m_clicked;
 	};
 }
 

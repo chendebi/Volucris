@@ -1,6 +1,9 @@
 #include <ContentBrowser/ContentItemWidget.h>
 #include <Engine/RHI/RHITexture.h>
 #include <imgui_internal.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace volucris
 {
@@ -57,11 +60,15 @@ namespace volucris
 		, m_maxUV()
 		, m_size(ItemSize)
 		, m_iconSpace()
-		, m_iconSize()
+		, m_iconDrawSize()
 		, m_hoverColor({ 0.9411, 0.850, 0.559 ,1.0})
 		, m_selectedColor({ 0.882, 0.725, 0.219 ,1.0 })
 		, m_selected(false)
 		, m_node()
+		, m_iconPos()
+		, m_iconSize()
+		, m_text()
+		, m_clicked(false)
 	{
 		setScale(1.0);
 	}
@@ -70,6 +77,7 @@ namespace volucris
 		: ContentItemWidget()
 	{
 		m_node = node;
+		m_text = fs::path(m_node.path).stem().generic_string();
 	}
 
 	ContentItemWidget::ContentItemWidget(RHITexture2D* texture, Point iconPos, Size iconSize)
@@ -129,12 +137,31 @@ namespace volucris
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 
 		ImGui::InvisibleButton("##xx", size);
-		bool clicked = ImGui::IsItemClicked();
+		bool click = ImGui::IsItemClicked();
 		bool hovered = ImGui::IsItemHovered();
-
-		if (clicked)
+		
+		if (click)
 		{
 			m_selected = true;
+			if (m_timer.isRunning())
+			{
+				m_timer.stop();
+				auto duration = m_timer.getDuration();
+				if (duration < 0.5)
+				{
+					DoubleClicked.invoke(this);
+				}
+				else
+				{
+					m_timer.start();
+					Clicked.invoke(this);
+				}
+			}
+			else
+			{
+				m_timer.start();
+				Clicked.invoke(this);
+			}
 		}
 
 		if (hovered)
@@ -169,7 +196,7 @@ namespace volucris
 
 		ImVec2 fontRectMin = { cursorPos.x + m_iconSpace.x, imgPos.y + m_iconDrawSize.y + m_iconSpace.y };
 		ImVec2 fontRectMax = { cursorPos.x + m_size.x - m_iconSpace.x, cursorPos.y + m_size.y};
-		DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, "Test");
+		DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, m_text.c_str());
 	}
 	glm::vec2 ContentItemWidget::getItemSize(float scale)
 	{

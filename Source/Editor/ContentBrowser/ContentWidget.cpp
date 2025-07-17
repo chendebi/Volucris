@@ -13,12 +13,15 @@ namespace volucris
 		: Widget()
 		, m_scale(1.0)
 		, m_itemSize(ContentItemWidget::getItemSize())
+		, m_multiSelect(false)
+		, m_controlItem(nullptr)
 	{
 		setCurrentFolder("/Engine/Content");
 	}
 
 	void ContentWidget::setCurrentFolder(const std::string& folder)
 	{
+		m_controlItem = nullptr;
 		RHITexture2D* iconTexture = nullptr;
 		if (auto window = dynamic_cast<EditorWindow*>(getTopWidget()))
 		{
@@ -34,6 +37,21 @@ namespace volucris
 				item->setIcon({ 0, 0 }, { 128,128 });
 				item->setScale(m_scale);
 				item->setTexture(iconTexture);
+				item->Clicked.bind([this](ContentItemWidget* clicked) {
+					if (!m_multiSelect)
+					{
+						for (auto& item : m_items)
+						{
+							if (item.get() != clicked)
+							{
+								item->setSelected(false);
+							}
+						}
+					}
+					});
+				item->DoubleClicked.bind([this](ContentItemWidget* clicked) {
+					m_controlItem = clicked;
+					});
 				m_items.emplace_back(std::move(item));
 			}
 		}
@@ -42,7 +60,7 @@ namespace volucris
 	void ContentWidget::onBuild(bool init)
 	{
 		ImGui::Begin("Content");
-
+		m_multiSelect = ImGui::GetIO().KeyCtrl;
 		int width = m_itemSize.x;
 		int space = 10 * m_scale;
 		auto size = ImGui::GetContentRegionAvail();
@@ -50,14 +68,35 @@ namespace volucris
 		num_columns = num_columns < 1 ? 1 : num_columns;
 		ImGui::Columns(num_columns, nullptr, false); // 创建列
 
+		ContentItemWidget* clickedItem = nullptr;
+		ContentItemWidget* selectItem = nullptr;
 		for (int i = 0; i < m_items.size(); ++i) {
 			ImGui::PushID(i);
 			m_items[i]->build();
+
+			if (m_items[i]->isClicked())
+			{
+				clickedItem = m_items[i].get();
+			}
+			else if (m_items[i]->isSelected())
+			{
+				selectItem = m_items[i].get();
+			}
+
 			ImGui::NextColumn();
 			ImGui::PopID();
 		}
 		ImGui::Columns(1); // 结束列
 		ImGui::End();
+
+		if (m_controlItem)
+		{
+			auto node = m_controlItem->getFileNode();
+			if (node.type == EFileType::Directory)
+			{
+				setCurrentFolder(node.path);
+			}
+		}
 	}
 
 	void ContentWidget::onRendererBuild(RHICommandList* cmdList)
