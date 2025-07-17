@@ -35,8 +35,8 @@ namespace volucris
 				return false;
 			}
 		}
-		point.path = fs::path(point.path + "/").lexically_normal().generic_string();
-		point.physicalPath = fs::path(point.physicalPath + "/").lexically_normal().generic_string();
+		point.path = fs::path(point.path).lexically_normal().generic_string();
+		point.physicalPath = fs::path(point.physicalPath).lexically_normal().generic_string();
 		m_impl->mountPoints.push_back(std::move(point));
 		return true;
 	}
@@ -81,10 +81,11 @@ namespace volucris
 	{
 		if (auto point = findMountPoint(virtualPath))
 		{
+			auto relpath = fs::relative(virtualPath, point->path).lexically_normal();
 			std::string relativePart = virtualPath.substr(point->path.length());
 
 			// 构建完整物理路径
-			fs::path fullPath = fs::path(point->physicalPath) / relativePart;
+			fs::path fullPath = fs::path(point->physicalPath) / relpath;
 			return fullPath.generic_string();
 		}
 		return "";
@@ -114,7 +115,7 @@ namespace volucris
 		{
 			if (mp.path.length() <= path.length() && path.compare(0, mp.path.length(), mp.path) == 0)
 			{
-				std::string relativePart = path.substr(mp.path.length());
+				auto relativePart = fs::relative(virtualPath, mp.path);
 				fs::path physicalPath = fs::path(mp.physicalPath) / relativePart;
 				for (const auto& entry : fs::directory_iterator(physicalPath))
 				{
@@ -142,15 +143,15 @@ namespace volucris
 		
 		fs::path path = physicalPath;
 
+		if (!fs::is_directory(path.parent_path()))
+		{
+			V_LOG_WARN(Engine, "can not create file because of parent path not is existed folder, {}", physicalPath);
+			return false;
+		}
+
 		if (fs::exists(path))
 		{
-			if (fs::is_directory(path))
-			{
-				return false;
-			}
-		}
-		else if (!fs::create_directories(path.parent_path()))
-		{ 
+			V_LOG_WARN(Engine, "can not create file because of path not is existed: {}", physicalPath);
 			return false;
 		}
 
@@ -225,6 +226,19 @@ namespace volucris
 			return fs::remove_all(physicalPath);
 		}
 		return true;
+	}
+
+	FileNode FileSystem::parentNode(const std::string& virtualPath)
+	{
+		auto path = fs::path(virtualPath).parent_path().generic_string();
+		if (auto point = findMountPoint(path))
+		{
+			FileNode node;
+			node.type = EFileType::Directory;
+			node.path = path;
+			return node;
+		}
+		return FileNode();
 	}
 
 	MountPoint* FileSystem::findMountPoint(const std::string& virtualPath)

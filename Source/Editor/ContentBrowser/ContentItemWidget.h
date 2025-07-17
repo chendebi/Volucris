@@ -49,6 +49,8 @@ namespace volucris
 
 		void setClicked(bool clicked) { m_clicked = clicked; }
 
+		void setDisplayName(const std::string& name) { m_text = name; }
+
 	private:
 		void update();
 

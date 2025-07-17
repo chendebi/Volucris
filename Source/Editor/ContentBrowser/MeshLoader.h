@@ -21,6 +21,7 @@ namespace volucris
 			uint32 assimpMatIndex;
 		};
 
+		std::string name;
 		std::shared_ptr<StaticMesh> mesh = nullptr;
 		std::vector<Slot> slots;
 	};
@@ -41,6 +42,8 @@ namespace volucris
 		MeshLoader(const std::string& filepath);
 
 		bool load();
+
+		
 
 	private:
 		MeshResource loadMeshFromNode(const aiScene* scene, aiNode* node);

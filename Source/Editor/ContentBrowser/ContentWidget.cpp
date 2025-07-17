@@ -6,6 +6,14 @@
 #include <Engine/Game/Texture2D.h>
 #include <imgui.h>
 #include <EditorEntry/EditorWindow.h>
+#include <Engine/Application/Event.h>
+#include <filesystem>
+#include <EditorCore/Editor.h>
+#include <EditorCore/ImageLoader.h>
+#include <Engine/Game/Package.h>
+#include "MeshLoader.h"
+
+namespace fs = std::filesystem;
 
 namespace volucris
 {
@@ -21,38 +29,56 @@ namespace volucris
 
 	void ContentWidget::setCurrentFolder(const std::string& folder)
 	{
+		m_folder = folder;
 		m_controlItem = nullptr;
 		RHITexture2D* iconTexture = nullptr;
 		if (auto window = dynamic_cast<EditorWindow*>(getTopWidget()))
 		{
 			iconTexture = window->getEditorIconTexture();
 		}
-		auto nodes = gFileSystem.getFileNodes(folder);
+
+		auto createNode = [this, iconTexture](const FileNode& node, const std::string& displayName = "")->std::unique_ptr<ContentItemWidget> {
+			auto item = std::make_unique<ContentItemWidget>(node);
+			item->setIcon({ 0, 0 }, { 128,128 });
+			item->setScale(m_scale);
+			item->setTexture(iconTexture);
+			if (!displayName.empty())
+			{
+				item->setDisplayName(displayName);
+			}
+			item->Clicked.bind([this](ContentItemWidget* clicked) {
+				if (!m_multiSelect)
+				{
+					for (auto& item : m_items)
+					{
+						if (item.get() != clicked)
+						{
+							item->setSelected(false);
+						}
+					}
+				}
+				});
+			item->DoubleClicked.bind([this](ContentItemWidget* clicked) {
+				m_controlItem = clicked;
+				});
+			return item;
+			};
+
 		m_items.clear();
-		for (auto node : nodes)
+		{
+			auto parentNode = gFileSystem.parentNode(folder);
+			if (!parentNode.path.empty())
+			{
+				m_items.emplace_back(createNode(parentNode, ".."));
+			}
+		}
+
+		auto nodes = gFileSystem.getFileNodes(folder);
+		for (const auto& node : nodes)
 		{
 			if (node.type == EFileType::Directory)
 			{
-				auto item = std::make_unique<ContentItemWidget>(node);
-				item->setIcon({ 0, 0 }, { 128,128 });
-				item->setScale(m_scale);
-				item->setTexture(iconTexture);
-				item->Clicked.bind([this](ContentItemWidget* clicked) {
-					if (!m_multiSelect)
-					{
-						for (auto& item : m_items)
-						{
-							if (item.get() != clicked)
-							{
-								item->setSelected(false);
-							}
-						}
-					}
-					});
-				item->DoubleClicked.bind([this](ContentItemWidget* clicked) {
-					m_controlItem = clicked;
-					});
-				m_items.emplace_back(std::move(item));
+				m_items.emplace_back(createNode(node));
 			}
 		}
 	}
@@ -115,5 +141,48 @@ namespace volucris
 		{
 			item->setTexture(nullptr);
 		}
+	}
+
+	bool ContentWidget::onDrop(DropEvent* event)
+	{
+		for (const auto& filepath : event->files)
+		{
+			V_LOG_INFO(Editor, "drop file: {}", filepath);
+			auto path = fs::path(filepath);
+			const auto ext = path.extension();
+			if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+			{
+				V_LOG_INFO(Editor, "convert image file");
+				ImageLoader loader = ImageLoader(filepath);
+				if (loader.load())
+				{
+					const auto cpath = fs::path(m_folder);
+					const auto name = path.stem().generic_string();
+					std::string packageName = (cpath / path.stem()).generic_string();
+					if (gFileSystem.fileExists(packageName))
+					{
+						for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
+						{
+							packageName = (cpath / fmt::format("_{}", i)).generic_string();
+						}
+					}
+					auto texture = std::make_shared<Texture2D>(loader.getTextureData());
+					auto package = std::make_shared<Package>(packageName);
+					AssetManager::getInstance().registry(package.get());
+					AssetManager::getInstance().save(package.get());
+					V_LOG_INFO(Editor, "convert image success, {}", packageName);
+				}
+			}
+			else if (ext == ".obj" || ext == ".fbx")
+			{
+				V_LOG_INFO(Editor, "convert mesh file");
+				MeshLoader loader = MeshLoader(filepath);
+				if (loader.load())
+				{
+
+				}
+			}
+		}
+		return true;
 	}
 }

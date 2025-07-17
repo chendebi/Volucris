@@ -58,7 +58,8 @@ namespace volucris
 			nodes.pop_back();
 			if (node->mNumMeshes > 0)
 			{
-				loadMeshFromNode(scene, node);
+				auto res = loadMeshFromNode(scene, node);
+				
 			}
 
 			for (auto idx = 1; idx < node->mNumChildren; ++idx)
@@ -73,6 +74,7 @@ namespace volucris
 	MeshResource MeshLoader::loadMeshFromNode(const aiScene* scene, aiNode* node)
 	{
 		MeshResource resource;
+		resource.name = node->mName.C_Str();
 		size_t vertexCount = 0;
 		size_t indexCount = 0;
 		bool buildUV0 = false;

@@ -74,6 +74,9 @@ namespace volucris
 		// 删除文件夹
 		bool deleteDirectory(const std::string& virtualPath);
 
+		// 获取父目录
+		FileNode parentNode(const std::string& virtualPath);
+
 	protected:
 		// 找到优先级最高的节点
 		MountPoint* findMountPoint(const std::string& virtualPath);

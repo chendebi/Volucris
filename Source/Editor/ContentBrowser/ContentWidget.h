@@ -23,11 +23,14 @@ namespace volucris
 
 		void onRendererDestroy(RHICommandList* cmdList) override;
 
+		bool onDrop(DropEvent* event) override;
+
 	private:
 		float m_scale;
 		glm::vec2 m_itemSize;
 		std::vector<std::unique_ptr<ContentItemWidget>> m_items;
 		bool m_multiSelect;
+		std::string m_folder;
 		ContentItemWidget* m_controlItem;
 	};
 }
