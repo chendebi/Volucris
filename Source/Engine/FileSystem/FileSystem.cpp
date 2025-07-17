@@ -5,6 +5,7 @@
 #include <Core/VectorHelp.h>
 #include <filesystem>
 #include <fstream>
+#include <boost/locale.hpp>
 
 namespace fs = std::filesystem;
 
@@ -109,23 +110,24 @@ namespace volucris
 
 	std::vector<FileNode> FileSystem::getFileNodes(const std::string& virtualPath, int filters)
 	{
-		auto path = fs::path(virtualPath + "/").lexically_normal().generic_string();
 		std::vector<FileNode> nodes;
 		for (auto& mp : m_impl->mountPoints)
 		{
-			if (mp.path.length() <= path.length() && path.compare(0, mp.path.length(), mp.path) == 0)
+			if (mp.path.length() <= virtualPath.length() && virtualPath.compare(0, mp.path.length(), mp.path) == 0)
 			{
 				auto relativePart = fs::relative(virtualPath, mp.path);
 				fs::path physicalPath = fs::path(mp.physicalPath) / relativePart;
-				for (const auto& entry : fs::directory_iterator(physicalPath))
+				// [CP] unix 不需要转为utf16
+				const auto path = boost::locale::conv::utf_to_utf<char16_t>(physicalPath.generic_string());
+				for (const auto& entry : fs::directory_iterator(path))
 				{
 					if (entry.is_directory() && (filters & (int)EFileType::Directory))
 					{
-						nodes.push_back({ EFileType::Directory, (fs::path(path) / entry.path().filename()).string() });
+						nodes.push_back({ EFileType::Directory, (fs::path(virtualPath) / entry.path().filename()).generic_u8string() });
 					}
 					else if (filters & (int)EFileType::File)
 					{
-						nodes.push_back({ EFileType::File, (fs::path(path) / entry.path().filename()).string() });
+						nodes.push_back({ EFileType::File, (fs::path(virtualPath) / entry.path().filename()).generic_u8string() });
 					}
 				}
 			}

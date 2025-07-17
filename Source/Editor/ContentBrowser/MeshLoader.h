@@ -43,7 +43,7 @@ namespace volucris
 
 		bool load();
 
-		
+		const std::vector<MeshResource>& getMeshes() const { return m_meshes; }
 
 	private:
 		MeshResource loadMeshFromNode(const aiScene* scene, aiNode* node);
@@ -51,6 +51,7 @@ namespace volucris
 	private:
 		class AssimpHelper;
 		std::string m_filepath;
+		std::vector<MeshResource> m_meshes;
 	};
 }
 

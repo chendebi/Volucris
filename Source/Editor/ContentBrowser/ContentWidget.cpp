@@ -179,7 +179,8 @@ namespace volucris
 				MeshLoader loader = MeshLoader(filepath);
 				if (loader.load())
 				{
-
+					const auto& meshes = loader.getMeshes();
+					
 				}
 			}
 		}

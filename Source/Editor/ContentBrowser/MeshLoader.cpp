@@ -59,7 +59,7 @@ namespace volucris
 			if (node->mNumMeshes > 0)
 			{
 				auto res = loadMeshFromNode(scene, node);
-				
+				m_meshes.push_back(std::move(res));
 			}
 
 			for (auto idx = 1; idx < node->mNumChildren; ++idx)
