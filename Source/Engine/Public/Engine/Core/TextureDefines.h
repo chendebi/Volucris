@@ -4,6 +4,10 @@
 #include <Engine/Core/TypesHelp.h>
 #include <vector>
 #include <Engine/Core/Size.h>
+#include <boost/serialization/binary_object.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/version.hpp>
+
 
 namespace volucris
 {

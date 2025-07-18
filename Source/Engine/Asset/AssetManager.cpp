@@ -4,6 +4,8 @@
 #include <Asset/AssetWriter.h>
 #include <Asset/AssetReader.h>
 #include <Game/World.h>
+#include <Game/Texture2D.h>
+#include <Game/StaticMesh.h>
 
 namespace volucris
 {
@@ -21,6 +23,22 @@ namespace volucris
 
 		auto packageName = package->getAssetData().path;
 		m_packages[packageName] = package->getShared<Package>();
+
+		/*if (package->m_assetData.className.empty())
+		{
+			auto object = package->getChildren()[0].get();
+			if (dynamic_cast<Texture2D*>(object))
+			{
+				package->m_assetData.className = "Texture2D";
+			}
+			else if (dynamic_cast<StaticMesh*>(object))
+			{
+				package->m_assetData.className = "StaticMesh";
+			}
+		}*/
+
+		AssetRegistered.invoke(package);
+
 		return true;
 	}
 
@@ -44,6 +62,25 @@ namespace volucris
 
 	void AssetManager::save(Package* package)
 	{
+		if (package->getChildren().size() != 1)
+		{
+			V_LOG_ERROR(Engine, "save package failed. not only 1 child");
+			return;
+		}
+
+		/*if (package->m_assetData.className.empty())
+		{
+			auto object = package->getChildren()[0].get();
+			if (dynamic_cast<Texture2D*>(object))
+			{
+				package->m_assetData.className = "Texture2D";
+			}
+			else if (dynamic_cast<StaticMesh*>(object))
+			{
+				package->m_assetData.className = "StaticMesh";
+			}
+		}*/
+
 		AssetWriter writer = AssetWriter(package->getShared<Package>());
 		writer.write();
 	}
@@ -68,5 +105,17 @@ namespace volucris
 			}
 		}
 		return package;
+	}
+
+	AssetData AssetManager::loadAssetData(const std::string& packageName) const
+	{
+		auto it = m_packages.find(packageName);
+		if (it != m_packages.end() && !it->second.expired()) {
+			auto packgae = it->second.lock();
+			return packgae->getAssetData();
+		}
+
+		AssetReader reader = AssetReader(packageName);
+		return reader.readAssetData();
 	}
 }

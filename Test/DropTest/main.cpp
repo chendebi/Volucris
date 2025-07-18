@@ -18,7 +18,7 @@ class DropTestWidget : public Widget
 	{
 	}
 
-	void onBuild() override
+	void onBuild(bool) override
 	{
 		ImGui::Begin("Drop Test");
 		ImGui::Text("Drag and drop files here.");

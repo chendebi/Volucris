@@ -20,7 +20,6 @@ namespace volucris
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
-			volatile int break_here = 0; // 断点行
 			ar & boost::serialization::base_object<GameObject>(*this);
 			ar & m_data;
 		}

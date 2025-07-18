@@ -9,13 +9,16 @@
 
 namespace volucris
 {
-	DECLARE_EVENT_MUTI_DELEGATE(PackageRegistered, void, const std::string&)
+	DECLARE_EVENT_MUTI_DELEGATE(OnAssetRegistered, void, const Package*)
 
 	class World;
 	class Package;
 
 	class AssetManager
 	{
+	public:
+		OnAssetRegistered AssetRegistered;
+
 	public:
 		~AssetManager() = default;
 
@@ -59,6 +62,8 @@ namespace volucris
 			}
 			return nullptr;
 		}
+
+		AssetData loadAssetData(const std::string& packageName) const;
 
 	private:
 		AssetManager();

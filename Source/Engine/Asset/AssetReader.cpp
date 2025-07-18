@@ -43,6 +43,9 @@ namespace volucris
 			return nullptr;
 		}
 
+		AssetData assetData;
+		ia >> assetData;
+
 		std::shared_ptr<Package> package = nullptr;
 		ia >> package;
 
@@ -51,6 +54,9 @@ namespace volucris
 			V_LOG_ERROR(Engine, "Failed to read package from asset file: {}", physicalPath);
 			return nullptr;
 		}
+
+		package->m_assetData = assetData;
+
 		return package;
 	}
 
@@ -59,14 +65,14 @@ namespace volucris
 		if (m_path.empty())
 		{
 			V_LOG_ERROR(Engine, "AssetReader path is empty.");
-			return AssetData();
+			return {};
 		}
 		auto physicalPath = gFileSystem.virtualToPhysical(m_path);
 		std::ifstream fin(physicalPath, std::ios::binary);
 		if (!fin.is_open())
 		{
 			V_LOG_ERROR(Engine, "Failed to open asset file: {}", physicalPath);
-			return AssetData();
+			return {};
 		}
 		boost::archive::binary_iarchive ia(fin);
 		if (!isValidAssetFile(ia))
@@ -77,6 +83,14 @@ namespace volucris
 
 		AssetData assetData;
 		ia >> assetData;
+
+		if (assetData.path != m_path)
+		{
+			V_LOG_ERROR(Engine, "Invalid asset file, package name not valid.");
+			V_LOG_ERROR(Engine, "package name: {}, current: {}", assetData.path, m_path);
+			return AssetData();
+		}
+
 		return assetData;
 	}
 }

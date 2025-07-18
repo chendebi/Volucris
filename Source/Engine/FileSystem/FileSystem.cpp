@@ -36,8 +36,8 @@ namespace volucris
 				return false;
 			}
 		}
-		point.path = fs::path(point.path).lexically_normal().generic_string();
-		point.physicalPath = fs::path(point.physicalPath).lexically_normal().generic_string();
+		point.path = fs::path(point.path).lexically_normal().generic_u8string();
+		point.physicalPath = fs::path(point.physicalPath).lexically_normal().generic_u8string();
 		m_impl->mountPoints.push_back(std::move(point));
 		return true;
 	}
@@ -87,14 +87,14 @@ namespace volucris
 
 			// 构建完整物理路径
 			fs::path fullPath = fs::path(point->physicalPath) / relpath;
-			return fullPath.generic_string();
+			return fullPath.generic_u8string();
 		}
 		return "";
 	}
 
 	std::string FileSystem::physicalToVirtual(const std::string& physicalPath)
 	{
-		auto path = fs::path(physicalPath).generic_string();
+		auto path = fs::path(physicalPath).generic_u8string();
 		for (const auto& mp : m_impl->mountPoints)
 		{
 			if (mp.physicalPath.length() <= path.length() &&
@@ -102,7 +102,7 @@ namespace volucris
 			{
 				std::string relativePart = path.substr(mp.physicalPath.length());
 				fs::path fullPath = fs::path(mp.path) / relativePart;
-				return fullPath.generic_string();
+				return fullPath.generic_u8string();
 			}
 		}
 		return "";
@@ -118,7 +118,7 @@ namespace volucris
 				auto relativePart = fs::relative(virtualPath, mp.path);
 				fs::path physicalPath = fs::path(mp.physicalPath) / relativePart;
 				// [CP] unix 不需要转为utf16
-				const auto path = boost::locale::conv::utf_to_utf<char16_t>(physicalPath.generic_string());
+				const auto path = boost::locale::conv::utf_to_utf<char16_t>(physicalPath.generic_u8string());
 				for (const auto& entry : fs::directory_iterator(path))
 				{
 					if (entry.is_directory() && (filters & (int)EFileType::Directory))
@@ -232,7 +232,7 @@ namespace volucris
 
 	FileNode FileSystem::parentNode(const std::string& virtualPath)
 	{
-		auto path = fs::path(virtualPath).parent_path().generic_string();
+		auto path = fs::path(virtualPath).parent_path().generic_u8string();
 		if (auto point = findMountPoint(path))
 		{
 			FileNode node;

@@ -38,12 +38,14 @@ namespace volucris
 		
 		auto physicalPath = gFileSystem.virtualToPhysical(assetData.path);
 
-		std::ofstream fout(physicalPath, std::ios::trunc);
+		std::ofstream fout(physicalPath, std::ios::binary | std::ios::trunc);
 		boost::archive::binary_oarchive oa(fout);
 
 		AssetFileHeader header = AssetFileHeader(true);
 		// 写入magic key和版本信息
 		oa << header;
+
+		oa << m_package->getAssetData();
 
 		oa << m_package;
 

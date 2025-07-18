@@ -12,6 +12,19 @@
 #include <Engine/Game/Texture2D.h>
 #include "EditorApplication.h"
 
+#include <stb_image/stb_image_write.h>
+#include <Engine/FileSystem/FileSystem.h>
+#include <fstream>
+#include <EditorCore/ImageLoader.h>
+
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <filesystem>
+#include <Engine/Core/Assert.h>
+#include <iostream>
+
+namespace fs = std::filesystem;
+
 namespace volucris
 {
     MainWidget::MainWidget()
@@ -171,20 +184,20 @@ namespace volucris
 	void EditorWindow::onRendererBuild(RHICommandList* cmdList)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		//io.IniFilename = "imgui_layout.ini";
-		//V_LOG_DEBUG(Editor, "loaded: {}", io.)
-        Texture2D t;
-        auto texture = AssetManager::getInstance().loadAsset<Texture2D>("/Engine/Content/Editor/Textures/T_Icons", GEditorWorld);
-        const auto& data = texture->getTextureData();
-        RHITextureDesc desc;
-        desc.size = data.size;
-        desc.sourceFormat = data.format;
-        desc.pixelFormat = Texture::EPixelFormat::R8G8B8A8;
-        desc.texClass = TextureType::Texture2D;
-        m_iconTexture = std::make_unique<RHITexture2D>(desc);
-        m_iconTexture->setContext(cmdList);
-        m_iconTexture->createGpuResource();
-        m_iconTexture->init(data.data);
+
+        if (auto texture = AssetManager::getInstance().loadAsset<Texture2D>("/Engine/Content/Editor/Textures/T_Icons", GEditorWorld))
+        {
+            const auto& data = texture->getTextureData();
+            RHITextureDesc desc;
+            desc.size = data.size;
+            desc.sourceFormat = data.format;
+            desc.pixelFormat = Texture::EPixelFormat::R8G8B8A8;
+            desc.texClass = TextureType::Texture2D;
+            m_iconTexture = std::make_unique<RHITexture2D>(desc);
+            m_iconTexture->setContext(cmdList);
+            m_iconTexture->createGpuResource();
+            m_iconTexture->init(data.data);
+        }
 	}
 
     void EditorWindow::onRendererDestroy(RHICommandList* cmdList)

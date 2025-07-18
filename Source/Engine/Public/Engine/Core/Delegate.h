@@ -187,7 +187,7 @@ namespace volucris
 			return objectCallable.handle;
 		}
 
-		void invoke(Args&&... args)
+		void invoke(Args... args)
 		{
 			for (auto & m_callable : m_callables)
 			{

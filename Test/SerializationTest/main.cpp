@@ -7,153 +7,84 @@
 #include <boost/serialization/base_object.hpp>
 #include <memory> // 添加智能指针支持
 #include <boost/serialization/shared_ptr.hpp>
+#include <random>
+#include <boost/serialization/vector.hpp>
+#include <Engine/Core/TextureDefines.h>
+#include <Engine/Core/Assert.h>
 
 VOLUCRIS_STATIC_LOG(Serialization, Trace)
 
 using namespace volucris;
 
-class Furniture
+
+struct TestData
 {
-public:
-	Furniture() = default;
-
-	Furniture(const std::string& name) : m_name(name) {}
-
-	virtual ~Furniture() = default;
-
-	void setName(const std::string& name)
-	{
-		m_name = name;
-	}
-
-	std::string getName() const
-	{
-		return m_name;
-	}
+	std::vector<uint8> data;
 
 	template <class Archive>
 	void serialize(Archive& ar, const unsigned int version)
 	{
-		ar& m_name;  // Serialize the device name
+		ar& data;
 	}
-
-private:
-	std::string m_name;
 };
-
-class Electronics : public Furniture
-{
-public:
-	Electronics() = default;
-
-	Electronics(const std::string& brand) : Furniture(), m_brand(brand) {}
-
-	template <class Archive>
-	void serialize(Archive& ar, const unsigned int version)
-	{
-		ar& boost::serialization::base_object<Furniture>(*this);
-		ar& m_brand;  // Serialize the device name
-	}
-
-	void setBrand(const std::string& brand)
-	{
-		m_brand = brand;
-	}
-
-	std::string getBrand() const
-	{
-		return m_brand;
-	}
-
-private:
-	std::string m_brand;;
-};
-
-class Wooden : public Furniture
-{
-public:
-	enum WoodType
-	{
-		Unknown,
-		Oak,
-		Pine,
-		Birch,
-		Cherry
-	};
-
-	Wooden() : Furniture(), m_type(Unknown) {}
-
-	Wooden(WoodType type) : Furniture(), m_type(type) {}
-
-	template <class Archive>
-	void serialize(Archive& ar, const unsigned int version)
-	{
-		ar& boost::serialization::base_object<Furniture>(*this);
-		ar& m_type;  // Serialize the device name
-	}
-
-private:
-	WoodType m_type;
-};
-
-class Phone : public Electronics
-{
-public:
-	Phone() : Electronics(), m_device("Unknown") {}
-
-	Phone(const std::string& brand, const std::string& device) : Electronics(brand), m_device(device) {}
-
-	// Serialization function
-	template <class Archive>
-	void serialize(Archive& ar, const unsigned int version)
-	{
-		ar& boost::serialization::base_object<Electronics>(*this);
-		ar& m_device;  // Serialize the device name
-	}
-
-	void setDevice(const std::string& device)
-	{
-		m_device = device;
-	}
-
-	std::string getDevice() const
-	{
-		return m_device;
-	}
-
-private:
-	std::string m_device;
-};
-
-BOOST_CLASS_EXPORT(Furniture);
-BOOST_CLASS_EXPORT(Electronics);
-BOOST_CLASS_EXPORT(Wooden);
-BOOST_CLASS_EXPORT(Phone);
 
 int main()
 {
-	std::ofstream ofs("s.dat", std::ios::trunc);
-	boost::archive::binary_oarchive oa(ofs);
+    std::random_device rd;
 
-	std::shared_ptr<Furniture> pPhone = std::make_shared<Phone>("Apple", "iPhone 14");
-	pPhone->setName("My iPhone");
+    // 2. 初始化随机数引擎（使用 Mersenne Twister 算法）
+    std::mt19937_64 engine(rd()); // 使用 64 位版本以获得更好的随机性
 
-	oa << pPhone;  // Serialize the phone object
-	ofs.close();
+    // 3. 创建均匀分布（范围：0 到 uint32_t 的最大值）
+    std::uniform_int_distribution<uint32_t> dist(0, std::numeric_limits<uint32_t>::max());
 
-	std::ifstream ifs("s.dat");
-	boost::archive::binary_iarchive ia(ifs);
-	std::shared_ptr<Furniture> furniture = nullptr;
-	ia >> furniture;  // Deserialize into a Furniture pointer
-	ifs.close();
+    std::vector<int> data;
+    // 生成 10 个随机 uint32_t 示例
+    size_t count = 11;
+    for (int i = 0; i < count; ++i) {
+        //uint32_t random_value = dist(engine);
+        data.push_back(i);
+    }
 
-	if(auto phonePtr = dynamic_cast<Phone*>(furniture.get()))
-	{
-		V_LOG_INFO(Serialization, "Deserialized Phone: Name = {}, Brand = {}, Device = {}",
-			phonePtr->getName(), phonePtr->getBrand(), phonePtr->getDevice());
-	}
-	else
-	{
-		V_LOG_ERROR(Serialization, "Deserialization failed or object is not a Phone.");
-	}
+    //Texture::TextureData t;
+    //t.data.resize(data.size() * sizeof(uint32));
+   // memcpy(t.data.data(), data.data(), t.data.size());
+
+    {
+        std::ofstream fout("D:\\Projects\\Volucris\\Binaries\\test1.data", std::ios::binary | std::ios::trunc);
+        boost::archive::binary_oarchive oa(fout);
+        oa << data;
+
+        {
+            auto array = boost::serialization::make_array<const int, size_t>(
+                static_cast<const int*>(&data[0]),
+                count
+            );
+            std::vector<uint8> data;
+            data.resize(44);
+            std::memcpy(data.data(), array.address(), 44);
+            std::ofstream fout2("D:\\Projects\\Volucris\\Binaries\\test2.data", std::ios::binary | std::ios::trunc);
+            fout2.write((const char*)data.data(), 44);
+        }
+
+        {
+            std::vector<uint8> data;
+            data.resize(44);
+
+            std::ifstream fin("D:\\Projects\\Volucris\\Binaries\\test2.data", std::ios::binary);
+            fin.read((char*)data.data(), 44);
+        }
+    }
+
+    {
+        std::ifstream fin("D:\\Projects\\Volucris\\Binaries\\test1.data", std::ios::binary);
+        boost::archive::binary_iarchive ia(fin);
+        std::vector<int> rt;
+        ia >> rt;
+
+        for (auto i = 0; i < data.size(); ++i)
+        {
+            v_check(rt[i] == data[i]);
+        }
+    }
 }

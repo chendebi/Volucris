@@ -4,6 +4,8 @@
 #include <string>
 #include <Engine/Core/GUID.h>
 #include <vector>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/version.hpp>
 
 namespace volucris
 {
@@ -26,5 +28,7 @@ namespace volucris
 		}
 	};
 }
+
+BOOST_CLASS_VERSION(volucris::AssetData, 1);
 
 #endif // !__volucris_asset_data_h__

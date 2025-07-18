@@ -12,11 +12,18 @@
 #include <EditorCore/ImageLoader.h>
 #include <Engine/Game/Package.h>
 #include "MeshLoader.h"
+#include <stb_image/stb_image_write.h>
 
 namespace fs = std::filesystem;
 
 namespace volucris
 {
+	struct Icon
+	{
+		Point pos;
+		Size size;
+	};
+
 	ContentWidget::ContentWidget()
 		: Widget()
 		, m_scale(1.0)
@@ -24,7 +31,7 @@ namespace volucris
 		, m_multiSelect(false)
 		, m_controlItem(nullptr)
 	{
-		setCurrentFolder("/Engine/Content");
+		setCurrentFolder("/Engine/Content/Editor");
 	}
 
 	void ContentWidget::setCurrentFolder(const std::string& folder)
@@ -37,9 +44,9 @@ namespace volucris
 			iconTexture = window->getEditorIconTexture();
 		}
 
-		auto createNode = [this, iconTexture](const FileNode& node, const std::string& displayName = "")->std::unique_ptr<ContentItemWidget> {
+		auto createNode = [this, iconTexture](const FileNode& node, const Icon& icon, const std::string& displayName = "")->std::unique_ptr<ContentItemWidget> {
 			auto item = std::make_unique<ContentItemWidget>(node);
-			item->setIcon({ 0, 0 }, { 128,128 });
+			item->setIcon(icon.pos, icon.size);
 			item->setScale(m_scale);
 			item->setTexture(iconTexture);
 			if (!displayName.empty())
@@ -64,12 +71,13 @@ namespace volucris
 			return item;
 			};
 
+		const Icon folderIcon = { { 0, 0 }, { 128,128 } };
 		m_items.clear();
 		{
 			auto parentNode = gFileSystem.parentNode(folder);
 			if (!parentNode.path.empty())
 			{
-				m_items.emplace_back(createNode(parentNode, ".."));
+				m_items.emplace_back(createNode(parentNode, folderIcon, ".."));
 			}
 		}
 
@@ -78,7 +86,25 @@ namespace volucris
 		{
 			if (node.type == EFileType::Directory)
 			{
-				m_items.emplace_back(createNode(node));
+				m_items.emplace_back(createNode(node, folderIcon));
+			}
+		}
+
+		const Icon textureIcon = { { 1, 0 }, { 128,128 } };
+		for (const auto& node : nodes)
+		{
+			if (node.type == EFileType::File)
+			{
+				//auto tex = AssetManager::getInstance().load(node.path);
+				auto assetData = AssetManager::getInstance().loadAssetData(node.path);
+				if (!assetData.path.empty())
+				{
+					if (assetData.className == "Texture2D")
+					{
+
+					}
+				}
+				m_items.emplace_back(createNode(node, textureIcon));
 			}
 		}
 	}
@@ -163,13 +189,20 @@ namespace volucris
 					{
 						for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
 						{
-							packageName = (cpath / fmt::format("_{}", i)).generic_string();
+							packageName = (cpath / fmt::format("{}_{}", name, i)).generic_string();
+							if (!gFileSystem.fileExists(packageName))
+							{
+								break;
+							}
 						}
 					}
-					auto texture = std::make_shared<Texture2D>(loader.getTextureData());
 					auto package = std::make_shared<Package>(packageName);
+					auto texture = std::make_shared<Texture2D>(loader.getTextureData());
+					texture->setParent(package.get());
 					AssetManager::getInstance().registry(package.get());
+					GEditorWorld->addPackage(package);
 					AssetManager::getInstance().save(package.get());
+
 					V_LOG_INFO(Editor, "convert image success, {}", packageName);
 				}
 			}
@@ -185,5 +218,13 @@ namespace volucris
 			}
 		}
 		return true;
+	}
+
+	void ContentWidget::onAssetRegistered(Package* package)
+	{
+		if (package->getAssetData().path.compare(0, m_folder.length(), m_folder) == 0)
+		{
+			
+		}
 	}
 }

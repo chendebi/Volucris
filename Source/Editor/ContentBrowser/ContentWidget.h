@@ -8,6 +8,7 @@ namespace volucris
 {
 	class ContentItemWidget;
 	class RHITexture2D;
+	class Package;
 
 	class ContentWidget : public Widget
 	{
@@ -24,6 +25,8 @@ namespace volucris
 		void onRendererDestroy(RHICommandList* cmdList) override;
 
 		bool onDrop(DropEvent* event) override;
+
+		void onAssetRegistered(Package* package);
 
 	private:
 		float m_scale;

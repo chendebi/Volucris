@@ -17,12 +17,16 @@ namespace volucris
 
 		~Package() override;
 
+		void setAssetClassName(const std::string& name)
+		{
+			m_assetData.className = name;
+		}
+
 		const AssetData& getAssetData() const { return m_assetData; }
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
-			ar& m_assetData;
 			std::vector<std::shared_ptr<GameObject>> objects;
 			if (Archive::is_loading::value)
 			{
@@ -48,6 +52,7 @@ namespace volucris
 
 	private:
 		friend class AssetManager;
+		friend class AssetReader;
 		AssetData m_assetData; // 包含的资源数据
 	};
 }
