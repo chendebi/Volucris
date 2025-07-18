@@ -116,18 +116,28 @@ namespace volucris
 			if (mp.path.length() <= virtualPath.length() && virtualPath.compare(0, mp.path.length(), mp.path) == 0)
 			{
 				auto relativePart = fs::relative(virtualPath, mp.path);
-				fs::path physicalPath = fs::path(mp.physicalPath) / relativePart;
+				fs::path physicalPath = (fs::path(mp.physicalPath) / relativePart);
 				// [CP] unix 不需要转为utf16
-				const auto path = boost::locale::conv::utf_to_utf<char16_t>(physicalPath.generic_u8string());
-				for (const auto& entry : fs::directory_iterator(path))
+				const auto path = boost::locale::conv::utf_to_utf<char16_t>(physicalPath.c_str());
+				for (const auto& entry : fs::directory_iterator(fs::path(path)))
 				{
-					if (entry.is_directory() && (filters & (int)EFileType::Directory))
+					if (entry.is_directory())
 					{
-						nodes.push_back({ EFileType::Directory, (fs::path(virtualPath) / entry.path().filename()).generic_u8string() });
+						if (filters & (int)EFileType::Directory)
+						{
+							nodes.push_back({ EFileType::Directory, (fs::path(virtualPath) / entry.path().filename()).generic_u8string() });
+						}
 					}
-					else if (filters & (int)EFileType::File)
+					else
 					{
-						nodes.push_back({ EFileType::File, (fs::path(virtualPath) / entry.path().filename()).generic_u8string() });
+						if (filters & (int)EFileType::Asset && entry.path().extension() == ".asset")
+						{
+							nodes.push_back({ EFileType::Asset, (fs::path(virtualPath) / entry.path().stem()).generic_u8string() });
+						}
+						else if (filters & (int)EFileType::NotAsset)
+						{
+							nodes.push_back({ EFileType::NotAsset, (fs::path(virtualPath) / entry.path().stem()).generic_u8string() });
+						}
 					}
 				}
 			}

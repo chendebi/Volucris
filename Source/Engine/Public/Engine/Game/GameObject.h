@@ -59,6 +59,8 @@ namespace volucris
 			return m_displayName;
 		}
 
+		virtual std::string getClassName() const { return ""; }
+
 	protected:
 		void addDependence(const std::string& path);
 

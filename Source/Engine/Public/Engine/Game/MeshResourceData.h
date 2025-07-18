@@ -5,6 +5,7 @@
 #include <vector>
 #include <Engine/Core/TypesHelp.h>
 #include <Engine/Core/PrimitiveInfo.h>
+#include <Engine/Core/GlmHelp.h>
 
 namespace volucris
 {
@@ -78,6 +79,19 @@ namespace volucris
 		void reserveSubMeshData(size_t size)
 		{
 			m_submeshData.reserve(size);
+		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& m_vertices;
+			ar& m_normals;
+			ar& m_uv0;
+			ar& m_uv1;
+			ar& m_color;
+			ar& m_secondColor;
+			ar& m_submeshData;
+			ar& m_segments;
 		}
 	};
 }

@@ -1,6 +1,10 @@
 #include "Game/StaticMesh.h"
 #include <Render/StaticMeshProxy.h>
-
+// 必须包含的存档类型
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 namespace volucris
 {
 	StaticMesh::StaticMesh()

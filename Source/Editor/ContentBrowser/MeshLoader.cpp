@@ -62,7 +62,7 @@ namespace volucris
 				m_meshes.push_back(std::move(res));
 			}
 
-			for (auto idx = 1; idx < node->mNumChildren; ++idx)
+			for (auto idx = 0; idx < node->mNumChildren; ++idx)
 			{
 				nodes.push_back(node->mChildren[idx]);
 			}

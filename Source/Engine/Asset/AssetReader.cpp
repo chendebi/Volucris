@@ -29,7 +29,8 @@ namespace volucris
 			V_LOG_ERROR(Engine, "AssetReader path is empty.");
 			return nullptr;
 		}
-		auto physicalPath = gFileSystem.virtualToPhysical(m_path);
+		const auto& filepath = fmt::format("{}.asset", m_path);
+		auto physicalPath = gFileSystem.virtualToPhysical(filepath);
 		std::ifstream fin(physicalPath, std::ios::binary);
 		if (!fin.is_open())
 		{

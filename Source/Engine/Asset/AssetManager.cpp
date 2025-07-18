@@ -24,19 +24,6 @@ namespace volucris
 		auto packageName = package->getAssetData().path;
 		m_packages[packageName] = package->getShared<Package>();
 
-		/*if (package->m_assetData.className.empty())
-		{
-			auto object = package->getChildren()[0].get();
-			if (dynamic_cast<Texture2D*>(object))
-			{
-				package->m_assetData.className = "Texture2D";
-			}
-			else if (dynamic_cast<StaticMesh*>(object))
-			{
-				package->m_assetData.className = "StaticMesh";
-			}
-		}*/
-
 		AssetRegistered.invoke(package);
 
 		return true;
@@ -67,19 +54,6 @@ namespace volucris
 			V_LOG_ERROR(Engine, "save package failed. not only 1 child");
 			return;
 		}
-
-		/*if (package->m_assetData.className.empty())
-		{
-			auto object = package->getChildren()[0].get();
-			if (dynamic_cast<Texture2D*>(object))
-			{
-				package->m_assetData.className = "Texture2D";
-			}
-			else if (dynamic_cast<StaticMesh*>(object))
-			{
-				package->m_assetData.className = "StaticMesh";
-			}
-		}*/
 
 		AssetWriter writer = AssetWriter(package->getShared<Package>());
 		writer.write();

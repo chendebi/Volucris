@@ -6,11 +6,13 @@
 
 namespace volucris
 {
-	enum class EFileType 
+	enum class EFileType
 	{
 		Unknown,
 		Directory = 0x01,
-		File = 0x02
+		Asset = 0x02,
+		NotAsset = 0x04,
+		AllFile = Asset | NotAsset,
 	};
 
 	struct FileNode
@@ -60,7 +62,7 @@ namespace volucris
 		std::string physicalToVirtual (const std::string& physicalPath);
 
 		// 查找某个路径下的所有节点
-		std::vector<FileNode> getFileNodes(const std::string& virtualPath, int filters=(int)EFileType::Directory | (int)EFileType::File);
+		std::vector<FileNode> getFileNodes(const std::string& virtualPath, int filters=(int)EFileType::Directory | (int)EFileType::Asset);
 
 		// 创建文件
 		bool createFile(const std::string& virtualPath, const void* initialData = nullptr, size_t size = 0);

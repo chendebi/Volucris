@@ -3,6 +3,7 @@
 
 #include <Engine/Application/Widget.h>
 #include <glm/glm.hpp>
+#include <Engine/FileSystem/FileSystem.h>
 
 namespace volucris
 {
@@ -29,12 +30,26 @@ namespace volucris
 		void onAssetRegistered(Package* package);
 
 	private:
+		struct Icon
+		{
+			Point pos;
+			Size size;
+		};
+
+		std::unique_ptr<ContentItemWidget> createItem(const FileNode& node, const Icon& icon, const std::string& name = "");
+
+		std::unique_ptr<ContentItemWidget> createFolderItem(const std::string& path, const std::string& name = "");
+
+		std::unique_ptr<ContentItemWidget> createTextureItem(const std::string& path, const std::string& name = "");
+
+	private:
 		float m_scale;
 		glm::vec2 m_itemSize;
 		std::vector<std::unique_ptr<ContentItemWidget>> m_items;
 		bool m_multiSelect;
 		std::string m_folder;
 		ContentItemWidget* m_controlItem;
+		RHITexture2D*  m_iconTexture;
 	};
 }
 

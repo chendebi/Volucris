@@ -12,17 +12,28 @@
 #include <EditorCore/ImageLoader.h>
 #include <Engine/Game/Package.h>
 #include "MeshLoader.h"
-#include <stb_image/stb_image_write.h>
+#include <Engine/Game/StaticMesh.h>
 
 namespace fs = std::filesystem;
 
 namespace volucris
 {
-	struct Icon
+	static std::string getDefaultPackageName(const fs::path& dirpath, const std::string& name)
 	{
-		Point pos;
-		Size size;
-	};
+		std::string packageName = (dirpath / name).generic_u8string();
+		if (gFileSystem.fileExists(packageName) || AssetManager::getInstance().isPackageRegistered(packageName))
+		{
+			for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
+			{
+				packageName = (dirpath / fmt::format("{}_{}", name, i)).generic_u8string();
+				if (!gFileSystem.fileExists(packageName) || AssetManager::getInstance().isPackageRegistered(packageName))
+				{
+					break;
+				}
+			}
+		}
+		return packageName;
+	}
 
 	ContentWidget::ContentWidget()
 		: Widget()
@@ -31,45 +42,15 @@ namespace volucris
 		, m_multiSelect(false)
 		, m_controlItem(nullptr)
 	{
-		setCurrentFolder("/Engine/Content/Editor");
+		setCurrentFolder(u8"/Engine/Content/Editor");
 	}
 
 	void ContentWidget::setCurrentFolder(const std::string& folder)
 	{
 		m_folder = folder;
 		m_controlItem = nullptr;
-		RHITexture2D* iconTexture = nullptr;
-		if (auto window = dynamic_cast<EditorWindow*>(getTopWidget()))
-		{
-			iconTexture = window->getEditorIconTexture();
-		}
+		
 
-		auto createNode = [this, iconTexture](const FileNode& node, const Icon& icon, const std::string& displayName = "")->std::unique_ptr<ContentItemWidget> {
-			auto item = std::make_unique<ContentItemWidget>(node);
-			item->setIcon(icon.pos, icon.size);
-			item->setScale(m_scale);
-			item->setTexture(iconTexture);
-			if (!displayName.empty())
-			{
-				item->setDisplayName(displayName);
-			}
-			item->Clicked.bind([this](ContentItemWidget* clicked) {
-				if (!m_multiSelect)
-				{
-					for (auto& item : m_items)
-					{
-						if (item.get() != clicked)
-						{
-							item->setSelected(false);
-						}
-					}
-				}
-				});
-			item->DoubleClicked.bind([this](ContentItemWidget* clicked) {
-				m_controlItem = clicked;
-				});
-			return item;
-			};
 
 		const Icon folderIcon = { { 0, 0 }, { 128,128 } };
 		m_items.clear();
@@ -77,7 +58,7 @@ namespace volucris
 			auto parentNode = gFileSystem.parentNode(folder);
 			if (!parentNode.path.empty())
 			{
-				m_items.emplace_back(createNode(parentNode, folderIcon, ".."));
+				m_items.emplace_back(createFolderItem(parentNode.path, ".."));
 			}
 		}
 
@@ -86,14 +67,14 @@ namespace volucris
 		{
 			if (node.type == EFileType::Directory)
 			{
-				m_items.emplace_back(createNode(node, folderIcon));
+				m_items.emplace_back(createFolderItem(node.path));
 			}
 		}
 
 		const Icon textureIcon = { { 1, 0 }, { 128,128 } };
 		for (const auto& node : nodes)
 		{
-			if (node.type == EFileType::File)
+			if (node.type != EFileType::Directory)
 			{
 				//auto tex = AssetManager::getInstance().load(node.path);
 				auto assetData = AssetManager::getInstance().loadAssetData(node.path);
@@ -101,10 +82,9 @@ namespace volucris
 				{
 					if (assetData.className == "Texture2D")
 					{
-
+						m_items.emplace_back(createTextureItem(node.path));
 					}
 				}
-				m_items.emplace_back(createNode(node, textureIcon));
 			}
 		}
 	}
@@ -139,6 +119,19 @@ namespace volucris
 			ImGui::PopID();
 		}
 		ImGui::Columns(1); // 结束列
+
+		if (ImGui::BeginPopupContextWindow())
+		{
+			if (ImGui::MenuItem("Create Folder")) 
+			{
+
+			}
+			if (ImGui::MenuItem("选项2")) { /* 处理选项2点击 */ }
+			ImGui::Separator();
+			if (ImGui::MenuItem("关闭")) { /* 处理关闭操作 */ }
+			ImGui::EndPopup();
+		}
+
 		ImGui::End();
 
 		if (m_controlItem)
@@ -171,6 +164,7 @@ namespace volucris
 
 	bool ContentWidget::onDrop(DropEvent* event)
 	{
+		const auto cpath = fs::path(m_folder);
 		for (const auto& filepath : event->files)
 		{
 			V_LOG_INFO(Editor, "drop file: {}", filepath);
@@ -182,23 +176,11 @@ namespace volucris
 				ImageLoader loader = ImageLoader(filepath);
 				if (loader.load())
 				{
-					const auto cpath = fs::path(m_folder);
-					const auto name = path.stem().generic_string();
-					std::string packageName = (cpath / path.stem()).generic_string();
-					if (gFileSystem.fileExists(packageName))
-					{
-						for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
-						{
-							packageName = (cpath / fmt::format("{}_{}", name, i)).generic_string();
-							if (!gFileSystem.fileExists(packageName))
-							{
-								break;
-							}
-						}
-					}
+					const auto name = path.stem().generic_u8string();
+					const auto packageName = getDefaultPackageName(cpath, name);
 					auto package = std::make_shared<Package>(packageName);
 					auto texture = std::make_shared<Texture2D>(loader.getTextureData());
-					texture->setParent(package.get());
+					package->setObject(texture.get());
 					AssetManager::getInstance().registry(package.get());
 					GEditorWorld->addPackage(package);
 					AssetManager::getInstance().save(package.get());
@@ -212,8 +194,19 @@ namespace volucris
 				MeshLoader loader = MeshLoader(filepath);
 				if (loader.load())
 				{
-					const auto& meshes = loader.getMeshes();
-					
+					const auto& resources = loader.getMeshes();
+					for (const auto& res : resources)
+					{
+						StaticMesh mesh;
+						const auto packageName = getDefaultPackageName(cpath, res.name);
+						auto package = std::make_shared<Package>(packageName);
+						package->setObject(res.mesh.get());
+						AssetManager::getInstance().registry(package.get());
+						GEditorWorld->addPackage(package);
+						AssetManager::getInstance().save(package.get());
+
+						V_LOG_INFO(Editor, "convert mesh success, {}", packageName);
+					}
 				}
 			}
 		}
@@ -226,5 +219,57 @@ namespace volucris
 		{
 			
 		}
+	}
+
+	std::unique_ptr<ContentItemWidget> ContentWidget::createItem(const FileNode& node, const Icon& icon, const std::string& name)
+	{
+		RHITexture2D* iconTexture = nullptr;
+		if (auto window = dynamic_cast<EditorWindow*>(getTopWidget()))
+		{
+			iconTexture = window->getEditorIconTexture();
+		}
+
+		auto item = std::make_unique<ContentItemWidget>(node);
+		item->setIcon(icon.pos, icon.size);
+		item->setScale(m_scale);
+		item->setTexture(iconTexture);
+		if (!name.empty())
+		{
+			item->setDisplayName(name);
+		}
+		item->Clicked.bind([this](ContentItemWidget* clicked) {
+			if (!m_multiSelect)
+			{
+				for (auto& item : m_items)
+				{
+					if (item.get() != clicked)
+					{
+						item->setSelected(false);
+					}
+				}
+			}
+			});
+		item->DoubleClicked.bind([this](ContentItemWidget* clicked) {
+			m_controlItem = clicked;
+			});
+		return item;
+	}
+
+	std::unique_ptr<ContentItemWidget> ContentWidget::createFolderItem(const std::string& path, const std::string& name)
+	{
+		FileNode node;
+		node.path = path;
+		node.type = EFileType::Directory;
+		Icon icon = { {0,0}, {128,128} };
+		return createItem(node, icon, name);
+	}
+
+	std::unique_ptr<ContentItemWidget> ContentWidget::createTextureItem(const std::string& path, const std::string& name)
+	{
+		FileNode node;
+		node.path = path;
+		node.type = EFileType::Asset;
+		Icon icon = { {1,0}, {128,128} };
+		return createItem(node, icon, name);
 	}
 }

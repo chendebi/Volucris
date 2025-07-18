@@ -47,7 +47,7 @@ namespace volucris
 			ar& type;
 			ar& mode;
 			ar& offset;
-			ar& size;
+			ar& count;
 		}
 	};
 

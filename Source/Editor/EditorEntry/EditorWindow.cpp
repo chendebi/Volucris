@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <Engine/Core/Assert.h>
 #include <iostream>
+#include <Engine/Game/StaticMesh.h>
 
 namespace fs = std::filesystem;
 
@@ -198,6 +199,8 @@ namespace volucris
             m_iconTexture->createGpuResource();
             m_iconTexture->init(data.data);
         }
+
+        auto mesh = AssetManager::getInstance().loadAsset<StaticMesh>("/Engine/Content/Editor/Cube", GEditorWorld);
 	}
 
     void EditorWindow::onRendererDestroy(RHICommandList* cmdList)

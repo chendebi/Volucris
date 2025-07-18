@@ -25,6 +25,8 @@ namespace volucris
 		}
 
 		const Texture::TextureData& getTextureData() const { return m_data; }
+
+		std::string getClassName() const override { return "Texture2D"; }
 		
 	private:
 		Texture::TextureData m_data;

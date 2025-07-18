@@ -26,8 +26,8 @@ int main(int argc, char* argv[])
 	//TracyGpuContext; // GPU上下文初始化
 #endif
 
-	gFileSystem.mount("/Engine/Content", fmt::format("{}/Content", VOLUCRIS_ENGINE_ROOT));
-	gFileSystem.mount("/Engine/Config", fmt::format("{}/Binaries/Config", VOLUCRIS_ENGINE_ROOT));
+	gFileSystem.mount(u8"/Engine/Content", fmt::format(u8"{}/Content", VOLUCRIS_ENGINE_ROOT));
+	gFileSystem.mount(u8"/Engine/Config", fmt::format(u8"{}/Binaries/Config", VOLUCRIS_ENGINE_ROOT));
 
 	if (!initialize())
 	{

@@ -22,6 +22,17 @@ namespace volucris
 			m_assetData.className = name;
 		}
 
+		void setObject(GameObject* object)
+		{
+			if (object == this)
+			{
+				return;
+			}
+
+			object->setParent(this);
+			m_assetData.className = object->getClassName();
+		}
+
 		const AssetData& getAssetData() const { return m_assetData; }
 
 		template <class Archive>
