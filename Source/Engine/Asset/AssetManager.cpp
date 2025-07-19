@@ -16,14 +16,32 @@ namespace volucris
 
 	bool AssetManager::registry(Package* package)
 	{
-		if (m_assetDatas.find(package->getAssetData().path) != m_assetDatas.end()) {
+		if (m_assetDatas.find(package->getAssetData().path) != m_assetDatas.end()) 
+		{
 			V_LOG_WARN(Engine, "Package {} is already registered.", package->getAssetData().path);
 			return false; // 如果包已经注册，则返回false
 		}
 
-		auto packageName = package->getAssetData().path;
-		m_packages[packageName] = package->getShared<Package>();
+		const auto& children = package->getChildren();
+		if (children.empty())
+		{
+			return false;
+		}
 
+		const auto object = children[0];
+		auto className = object->getClassName();
+		if (className.empty())
+		{
+			return false;
+		}
+
+		auto assetData = package->getAssetData();
+		assetData.className = std::move(className);
+		assetData.guid = GUID::generate();
+		auto packageName = assetData.path;
+		package->m_assetData = assetData;
+		m_assets[packageName] = object;
+		m_assetDatas[packageName] = assetData;
 		AssetRegistered.invoke(package);
 
 		return true;
@@ -59,36 +77,38 @@ namespace volucris
 		writer.write();
 	}
 
-	std::shared_ptr<Package> AssetManager::load(const std::string& packageName, World* world)
+	std::shared_ptr<GameObject> AssetManager::load(const std::string& packageName, World* world)
 	{
+		std::shared_ptr<GameObject> object = nullptr;
+		
+		auto it = m_assets.find(packageName);
+		if (it != m_assets.end() && !it->second.expired()) 
 		{
-			auto it = m_packages.find(packageName);
-			if (it != m_packages.end() && !it->second.expired()) {
-				return it->second.lock(); // 如果包已注册且未过期，则返回
-			}
+			object = it->second.lock(); // 如果包已注册且未过期，则返回
 		}
 		
-		AssetReader reader = AssetReader(packageName);
-		auto package = reader.readPackage();
-		if (package)
+		if (!object)
 		{
-			m_packages[packageName] = package;
-			if (world)
+			AssetReader reader = AssetReader(packageName);
+			auto package = reader.readPackage();
+			if (package)
 			{
-				world->addPackage(package);
+				object = package->getChildren()[0];
+				object->setParent(nullptr);
+				m_assets[packageName] = object;
 			}
 		}
-		return package;
+
+		if (object && world)
+		{
+			world->addObject(object);
+		}
+
+		return object;
 	}
 
 	AssetData AssetManager::loadAssetData(const std::string& packageName) const
 	{
-		auto it = m_packages.find(packageName);
-		if (it != m_packages.end() && !it->second.expired()) {
-			auto packgae = it->second.lock();
-			return packgae->getAssetData();
-		}
-
 		AssetReader reader = AssetReader(packageName);
 		return reader.readAssetData();
 	}

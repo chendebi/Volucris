@@ -36,29 +36,19 @@ namespace volucris
 
 		bool isPackageRegistered(const std::string& packageName) const
 		{
-			return m_packages.find(packageName) != m_packages.end();
+			return m_assets.find(packageName) != m_assets.end();
 		}
 
 		void save(Package* package);
 
-		std::shared_ptr<Package> load(const std::string& packageName, World* world = nullptr);
+		std::shared_ptr<GameObject> load(const std::string& packageName, World* world = nullptr);
 
 		template<typename T>
 		std::shared_ptr<T> loadAsset(const std::string& packageName, World* world = nullptr)
 		{
-			if (auto package = load(packageName, world))
+			if (auto asset = load(packageName, world))
 			{
-				for (const auto& child : package->getChildren())
-				{
-					if (auto asset = std::dynamic_pointer_cast<T>(child))
-					{
-						if (!world)
-						{
-							asset->setParent(nullptr);
-						}
-						return asset;
-					}
-				}
+				return std::dynamic_pointer_cast<T>(asset);
 			}
 			return nullptr;
 		}
@@ -74,7 +64,7 @@ namespace volucris
 		AssetManager& operator=(AssetManager&&) = delete;
 		
 	private:
-		std::map<std::string, std::weak_ptr<Package>> m_packages;
+		std::map<std::string, std::weak_ptr<GameObject>> m_assets;
 		std::map<std::string, AssetData> m_assetDatas;
 	};
 }

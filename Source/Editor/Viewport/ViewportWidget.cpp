@@ -10,7 +10,7 @@
 #include <Engine/RHI/RHITexture.h>
 #include <EditorCore/editor.h>
 #include <Engine/Application/Application.h>
-#include <Engine/Game/Universe.h>
+#include <Engine/Game/GameWorld.h>
 #include <Engine/Application/Event.h>
 #include <Engine/RHI/RHIPixelBuffer.h>
 
@@ -62,15 +62,15 @@ namespace volucris
 		, m_viewTexture(nullptr)
 		, m_uploaders()
 		, m_textures()
-		, m_universe(nullptr)
+		, m_world(nullptr)
 		, m_ready(false)
 	{
 	}
 
-	void ViewportWidget::setUniverse(const std::shared_ptr<Universe>& universe)
+	void ViewportWidget::setWorld(const std::shared_ptr<GameWorld>& world)
 	{
 		releaseView();
-		m_universe = universe;
+		m_world = world;
 		createView();
 	}
 
@@ -253,9 +253,9 @@ namespace volucris
 	void ViewportWidget::createView()
 	{
 		auto context = getContext();
-		if (!m_view && m_universe && context)
+		if (!m_view && m_world && context)
 		{
-			auto view = std::make_unique<View>(m_universe->getScene());
+			auto view = std::make_unique<View>(m_world->getScene());
 			m_view = view.get();
 			CreateViewTask task = CreateViewTask(std::move(view), m_size);
 			if (gApp->isRunning())

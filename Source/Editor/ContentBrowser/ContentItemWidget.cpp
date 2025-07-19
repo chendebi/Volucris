@@ -69,6 +69,7 @@ namespace volucris
 		, m_iconSize()
 		, m_text()
 		, m_clicked(false)
+		, m_editing(false)
 	{
 		setScale(1.0);
 	}
@@ -77,7 +78,7 @@ namespace volucris
 		: ContentItemWidget()
 	{
 		m_node = node;
-		m_text = fs::path(m_node.path).stem().generic_string();
+		setDisplayName(fs::path(m_node.path).stem().generic_string());
 	}
 
 	ContentItemWidget::ContentItemWidget(RHITexture2D* texture, Point iconPos, Size iconSize)
@@ -133,8 +134,13 @@ namespace volucris
 		if (window->SkipItems)
 			return;
 
-		const ImVec2 size(m_size.x, m_size.y);
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+		ImVec2 iconRectMin = { cursorPos.x + m_iconSpace.x, cursorPos.y + m_iconSpace.y };
+		ImVec2 iconRectMax = ImVec2(iconRectMin.x + m_iconDrawSize.x, iconRectMin.y + m_iconDrawSize.y);
+		ImVec2 fontRectMin = { cursorPos.x + m_iconSpace.x, iconRectMax.y + m_iconSpace.y };
+		ImVec2 fontRectMax = { cursorPos.x + m_size.x - m_iconSpace.x, cursorPos.y + m_size.y };
+
+		const ImVec2 size = ImVec2(m_size.x, m_size.y);
 
 		ImGui::InvisibleButton("##xx", size);
 		bool click = ImGui::IsItemClicked();
@@ -163,6 +169,19 @@ namespace volucris
 				Clicked.invoke(this);
 			}
 		}
+		else if (ImGui::BeginPopupContextItem())
+		{
+			m_selected = true;
+			Clicked.invoke(this);
+			if (ImGui::MenuItem("Rename"))
+			{
+				m_editing = true;
+			}
+			if (ImGui::MenuItem("Delete")) { /* 处理选项2点击 */ }
+			ImGui::Separator();
+			if (ImGui::MenuItem("关闭")) { /* 处理关闭操作 */ }
+			ImGui::EndPopup();
+		}
 
 		if (hovered)
 		{
@@ -179,27 +198,52 @@ namespace volucris
 			);
 		}
 
-		ImVec2 imgPos = { cursorPos.x + m_iconSpace.x, cursorPos.y + m_iconSpace.y };
-
 		if (m_texture)
 		{
 			auto id = m_texture->getId();
 			ImTextureID texID = (ImTextureID)(intptr_t)id;
 
 			window->DrawList->AddImage(texID,
-				imgPos,
-				ImVec2(imgPos.x + m_iconDrawSize.x, imgPos.y + m_iconDrawSize.y),
+				iconRectMin,
+				iconRectMax,
 				{ m_minUV.x, m_minUV.y },
 				{ m_maxUV.x, m_maxUV.y }
 			);
 		}
 
-		ImVec2 fontRectMin = { cursorPos.x + m_iconSpace.x, imgPos.y + m_iconDrawSize.y + m_iconSpace.y };
-		ImVec2 fontRectMax = { cursorPos.x + m_size.x - m_iconSpace.x, cursorPos.y + m_size.y};
-		DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, m_text.c_str());
+		if (m_editing)
+		{
+			ImGui::SetNextWindowPos(fontRectMin);
+			ImGui::SetNextWindowSize({fontRectMax.x, fontRectMax.y - fontRectMin.y});
+			ImGui::BeginChild("input_container", ImVec2(200, 30),
+				false,
+				ImGuiWindowFlags_NoBackground |
+				ImGuiWindowFlags_NoDecoration);
+			ImGui::SetNextItemWidth(fontRectMax.x);
+			ImGui::SetKeyboardFocusHere();
+			if (ImGui::InputText("##NameEdit", m_text, 64, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if (!ImGui::IsItemActive()) {
+					ImGui::ActivateItemByID(ImGui::GetItemID());
+				}
+				m_editing = false;
+			}
+			ImGui::EndChild();
+		}
+		else
+		{
+			DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, m_text);
+		}
 	}
 	glm::vec2 ContentItemWidget::getItemSize(float scale)
 	{
 		return ItemSize * scale;
+	}
+
+	void ContentItemWidget::setDisplayName(const std::string& name)
+	{
+		const auto size = name.length() < 64 ? name.length() : 63;
+		memcpy(m_text, name.c_str(), size);
+		m_text[size] = '\0';
 	}
 }

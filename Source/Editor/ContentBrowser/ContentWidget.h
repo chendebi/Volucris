@@ -40,7 +40,9 @@ namespace volucris
 
 		std::unique_ptr<ContentItemWidget> createFolderItem(const std::string& path, const std::string& name = "");
 
-		std::unique_ptr<ContentItemWidget> createTextureItem(const std::string& path, const std::string& name = "");
+		std::unique_ptr<ContentItemWidget> createTextureItem(const std::string& path);
+
+		std::unique_ptr<ContentItemWidget> createStaticMeshItem(const std::string& path);
 
 	private:
 		float m_scale;

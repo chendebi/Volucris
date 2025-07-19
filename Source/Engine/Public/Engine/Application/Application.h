@@ -11,7 +11,7 @@
 namespace volucris
 {
 	class Window;
-	class Universe;
+	class GameWorld;
 
 	DECLARE_EVENT_MUTI_DELEGATE(OnLogAdded, void, const std::string&)
 
@@ -47,9 +47,9 @@ namespace volucris
 
 		int getWindowCount() const { return m_windows.size(); }
 
-		void addUniverse(const std::shared_ptr<Universe>& universe);
+		void addGame(const std::shared_ptr<GameWorld>& universe);
 
-		void removeUniverse(const std::shared_ptr<Universe>& universe);
+		void removeGame(const std::shared_ptr<GameWorld>& universe);
 
 		int exec();
 
@@ -57,15 +57,13 @@ namespace volucris
 
 		void quit();
 
-		void cacheLog(std::string log);
-
 	private:
 		static Application* s_instance;
 		Window* m_focusedWindow;
 		std::shared_ptr<Window> m_mainWindow;
 		std::vector<std::shared_ptr<Window>> m_windows;
 		CircleQueue<std::function<void()>> m_queue;
-		std::vector<std::shared_ptr<Universe>> m_universes;
+		std::vector<std::shared_ptr<GameWorld>> m_games;
 		bool m_running;
 	};
 }

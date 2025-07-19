@@ -35,6 +35,23 @@ namespace volucris
 		return packageName;
 	}
 
+	static std::string getDefaultFolderName(const fs::path& dirpath, const std::string& name)
+	{
+		std::string folderName = (dirpath / name).generic_u8string();
+		if (gFileSystem.directoryExists(folderName) )
+		{
+			for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
+			{
+				folderName = (dirpath / fmt::format("{}_{}", name, i)).generic_u8string();
+				if (!gFileSystem.directoryExists(folderName))
+				{
+					break;
+				}
+			}
+		}
+		return folderName;
+	}
+
 	ContentWidget::ContentWidget()
 		: Widget()
 		, m_scale(1.0)
@@ -76,13 +93,16 @@ namespace volucris
 		{
 			if (node.type != EFileType::Directory)
 			{
-				//auto tex = AssetManager::getInstance().load(node.path);
 				auto assetData = AssetManager::getInstance().loadAssetData(node.path);
 				if (!assetData.path.empty())
 				{
 					if (assetData.className == "Texture2D")
 					{
 						m_items.emplace_back(createTextureItem(node.path));
+					}
+					else if (assetData.className == "StaticMesh")
+					{
+						m_items.emplace_back(createStaticMeshItem(node.path));
 					}
 				}
 			}
@@ -120,11 +140,19 @@ namespace volucris
 		}
 		ImGui::Columns(1); // 结束列
 
-		if (ImGui::BeginPopupContextWindow())
+		bool createFolder = false;
+		if (ImGui::BeginPopupContextWindow("ContentContext", 
+			ImGuiPopupFlags_NoOpenOverItems |
+			ImGuiPopupFlags_MouseButtonRight))
 		{
+			for (auto& item : m_items)
+			{
+				item->setSelected(false);
+			}
+
 			if (ImGui::MenuItem("Create Folder")) 
 			{
-
+				createFolder = true;
 			}
 			if (ImGui::MenuItem("选项2")) { /* 处理选项2点击 */ }
 			ImGui::Separator();
@@ -141,6 +169,15 @@ namespace volucris
 			{
 				setCurrentFolder(node.path);
 			}
+		}
+
+		if (createFolder)
+		{
+			auto crtPath = fs::path(m_folder);
+			auto folderName = getDefaultFolderName(crtPath, "New Folder");
+			const auto path = crtPath / folderName;
+			auto item = createFolderItem(path.generic_u8string());
+			m_items.push_back(std::move(item));
 		}
 	}
 
@@ -181,10 +218,11 @@ namespace volucris
 					auto package = std::make_shared<Package>(packageName);
 					auto texture = std::make_shared<Texture2D>(loader.getTextureData());
 					package->setObject(texture.get());
-					AssetManager::getInstance().registry(package.get());
-					GEditorWorld->addPackage(package);
-					AssetManager::getInstance().save(package.get());
-
+					if (AssetManager::getInstance().registry(package.get()))
+					{
+						AssetManager::getInstance().save(package.get());
+						GEditorWorld->addObject(texture);
+					}
 					V_LOG_INFO(Editor, "convert image success, {}", packageName);
 				}
 			}
@@ -201,9 +239,11 @@ namespace volucris
 						const auto packageName = getDefaultPackageName(cpath, res.name);
 						auto package = std::make_shared<Package>(packageName);
 						package->setObject(res.mesh.get());
-						AssetManager::getInstance().registry(package.get());
-						GEditorWorld->addPackage(package);
-						AssetManager::getInstance().save(package.get());
+						if (AssetManager::getInstance().registry(package.get()))
+						{
+							AssetManager::getInstance().save(package.get());
+							GEditorWorld->addObject(res.mesh);
+						}
 
 						V_LOG_INFO(Editor, "convert mesh success, {}", packageName);
 					}
@@ -264,12 +304,21 @@ namespace volucris
 		return createItem(node, icon, name);
 	}
 
-	std::unique_ptr<ContentItemWidget> ContentWidget::createTextureItem(const std::string& path, const std::string& name)
+	std::unique_ptr<ContentItemWidget> ContentWidget::createStaticMeshItem(const std::string& path)
+	{
+		FileNode node;
+		node.path = path;
+		node.type = EFileType::Asset;
+		Icon icon = { {2,0}, {128,128} };
+		return createItem(node, icon);
+	}
+
+	std::unique_ptr<ContentItemWidget> ContentWidget::createTextureItem(const std::string& path)
 	{
 		FileNode node;
 		node.path = path;
 		node.type = EFileType::Asset;
 		Icon icon = { {1,0}, {128,128} };
-		return createItem(node, icon, name);
+		return createItem(node, icon);
 	}
 }

@@ -17,20 +17,7 @@ constexpr int FrameCount = 2;
 
 namespace volucris
 {
-
-	static std::shared_ptr<StaticMeshProxy> mesh = nullptr;
 	static std::shared_ptr<RHIProgram> shader = nullptr;
-
-	static glm::vec3 vertices[] = {
-		{-0.5f, -0.5f, 1.0f},
-		{ 0.5f, -0.5f, 1.0f},
-		{ 0.5f,  0.5f, 1.0f},
-		{-0.5f,  0.5f, 1.0f},
-		{ 1.0f,  0.0f, 0.0f},
-		{ 0.0f,  1.0f, 0.0f},
-		{ 0.0f,  0.0f, 1.0f},
-		{ 1.0f,  0.0f, 1.0f},
-	};
 
 	static uint32 indices[] = {
 		0, 1, 2, 0, 2, 3
@@ -61,6 +48,7 @@ namespace volucris
 		, m_targetData()
 		, m_current(0)
 		, m_scene(nullptr)
+		, m_mesh(nullptr)
 	{
 	}
 
@@ -77,45 +65,12 @@ namespace volucris
 		{
 			RHICmdList->unsetRenderTarget(target.get());
 		}
-		mesh = nullptr;
 	}
 
 	void View::resize(int width, int height)
 	{
-		if (!mesh)
+		if (!shader)
 		{
-			PrimitiveInfo info;
-			info.data.resize(sizeof(vertices));
-			memcpy(info.data.data(), (uint8*)vertices, info.data.size());
-			{
-				PrimitiveBlock block;
-				block.dataType = DataType::Float;
-				block.type = PrimitiveType::Vertex;
-				block.count = 3;
-				block.offset = 0;
-				info.blocks.push_back(block);
-			}
-			{
-				PrimitiveBlock block;
-				block.dataType = DataType::Float;
-				block.type = PrimitiveType::Color;
-				block.count = 3;
-				block.offset = 4 * sizeof(glm::vec3);
-				info.blocks.push_back(block);
-			}
-			info.segmentData.resize(sizeof(indices));
-			memcpy(info.segmentData.data(), (uint8*)indices, sizeof(indices));
-			{
-				PrimitiveSegment segment;
-				segment.type = ElementDataType::UInt;
-				segment.mode = ElementDrawMode::Traingles;
-				segment.count = 6;
-				segment.offset = 0;
-				info.segments.push_back(segment);
-			}
-			mesh = std::make_shared<StaticMeshProxy>();
-			mesh->init(info);
-
 			auto vs = std::make_shared<RHIShader>(RHIShader::VertexShader);
 			vs->init(vss);
 
@@ -190,7 +145,10 @@ namespace volucris
 		state.color = { 0.0, 0.8, 1.0, 1.0 };
 		cmdList->clear(state);
 
-		RHICmdList->drawPrimitive(shader.get(), *(mesh->get(0)));
+		if (m_mesh)
+		{
+			RHICmdList->drawPrimitive(shader.get(), *(m_mesh->get(0)));
+		}
 
 		swapViewData(cmdList);
 	}

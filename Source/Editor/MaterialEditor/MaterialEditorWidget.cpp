@@ -5,7 +5,7 @@
 #include <Engine/FileSystem/FileSystem.h>
 #include <EditorCore/editor.h>
 #include <Viewport/ViewportWidget.h>
-#include <Engine/Game/Universe.h>
+#include <Engine/Game/GameWorld.h>
 #include <Engine/Application/Application.h>
 #include <Engine/Application/Event.h>
 
@@ -13,10 +13,10 @@ namespace volucris
 {
     MaterialEditorWidget::MaterialEditorWidget()
         : m_viewport(std::make_shared<ViewportWidget>())
-        , m_universe(std::make_shared<Universe>())
+        , m_world(std::make_shared<GameWorld>())
     {
         addChild(m_viewport);
-        m_viewport->setUniverse(m_universe);
+        m_viewport->setWorld(m_world);
     }
 
     void MaterialEditorWidget::onBuild(bool init)
@@ -74,11 +74,11 @@ namespace volucris
     {
         if (event->focused)
         {
-            gApp->addUniverse(m_universe);
+            gApp->addGame(m_world);
         }
         else
         {
-            gApp->removeUniverse(m_universe);
+            gApp->removeGame(m_world);
         }
     }
 

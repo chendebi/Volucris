@@ -14,13 +14,14 @@ namespace volucris
 	class RHITexture2D;
 	class ContentItemWidget;
 
-	DECLARE_EVENT_DELEGATE(OnClicked, void, ContentItemWidget*)
+	DECLARE_EVENT_DELEGATE(ItemEvent, void, ContentItemWidget*)
 
 	class ContentItemWidget
 	{
 	public:
-		OnClicked Clicked;
-		OnClicked DoubleClicked;
+		ItemEvent Clicked;
+		ItemEvent DoubleClicked;
+		ItemEvent ContextMenuTriggered;
 
 	public:
 		ContentItemWidget();
@@ -49,7 +50,9 @@ namespace volucris
 
 		void setClicked(bool clicked) { m_clicked = clicked; }
 
-		void setDisplayName(const std::string& name) { m_text = name; }
+		void setDisplayName(const std::string& name);
+
+		void enableNameEdit(bool editing) { m_editing = editing; }
 
 	private:
 		void update();
@@ -69,9 +72,10 @@ namespace volucris
 		FileNode m_node;
 		Point m_iconPos;
 		Size m_iconSize;
-		std::string m_text;
+		char m_text[64];
 		Timer m_timer;
 		bool m_clicked;
+		bool m_editing;
 	};
 }
 

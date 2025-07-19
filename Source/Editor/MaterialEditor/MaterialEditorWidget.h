@@ -5,7 +5,7 @@
 
 namespace volucris
 {
-	class Universe;
+	class GameWorld;
 	class ViewportWidget;
 
 	class MaterialEditorWidget : public Widget
@@ -20,7 +20,7 @@ namespace volucris
 
 	private:
 		std::shared_ptr<ViewportWidget> m_viewport;
-		std::shared_ptr<Universe> m_universe;
+		std::shared_ptr<GameWorld> m_world;
 	};
 }
 

@@ -7,7 +7,7 @@
 namespace volucris
 {
 	class View;
-	class Universe;
+	class GameWorld;
 	class Window;
 	class RHITexture2D;
 	class RHICommandList;
@@ -18,7 +18,7 @@ namespace volucris
 	public:
 		ViewportWidget();
 
-		void setUniverse(const std::shared_ptr<Universe>& universe);
+		void setWorld(const std::shared_ptr<GameWorld>& world);
 
 		void setViewData(Texture::TextureData data);
 
@@ -52,7 +52,7 @@ namespace volucris
 		bool m_ready;
 
 	private:
-		std::shared_ptr<Universe> m_universe;
+		std::shared_ptr<GameWorld> m_world;
 	};
 }
 

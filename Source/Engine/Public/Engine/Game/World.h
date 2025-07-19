@@ -16,13 +16,13 @@ namespace volucris
 
 		~World() override;
 
-		void addPackage(const std::shared_ptr<Package>& package)
+		void addObject(const std::shared_ptr<GameObject>& object)
 		{
-			m_packages.push_back(package);
+			m_objects.push_back(object);
 		}
 
 	private:
-		std::vector<std::shared_ptr<Package>> m_packages;
+		std::vector<std::shared_ptr<GameObject>> m_objects;
 	};
 }
 

@@ -4,13 +4,13 @@
 #include <imgui_internal.h>
 #include <MaterialEditor/MaterialEditorWidget.h>
 #include <Viewport/ViewportWidget.h>
-#include <Engine/Game/Universe.h>
 #include <EditorEntry/LogWidget.h>
 #include <ContentBrowser/ContentBrowserWidget.h>
 #include <Engine/RHI/RHITexture.h>
 #include <Engine/Asset/AssetManager.h>
 #include <Engine/Game/Texture2D.h>
 #include "EditorApplication.h"
+#include <Engine/Game/GameWorld.h>
 
 #include <stb_image/stb_image_write.h>
 #include <Engine/FileSystem/FileSystem.h>
@@ -38,7 +38,7 @@ namespace volucris
         addChild(m_logWidget);
         addChild(m_contentBrowserWidget);
         m_logWidget->init();
-        m_viewport->setUniverse(std::make_shared<Universe>());
+        m_viewport->setWorld(std::make_shared<GameWorld>());
     }
 
     void MainWidget::onBuild(bool)
@@ -199,8 +199,6 @@ namespace volucris
             m_iconTexture->createGpuResource();
             m_iconTexture->init(data.data);
         }
-
-        auto mesh = AssetManager::getInstance().loadAsset<StaticMesh>("/Engine/Content/Editor/Cube", GEditorWorld);
 	}
 
     void EditorWindow::onRendererDestroy(RHICommandList* cmdList)
