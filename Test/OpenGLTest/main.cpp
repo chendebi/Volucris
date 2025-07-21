@@ -3,6 +3,7 @@
 #include <Engine/Core/Logging.h>
 #include <Engine/Core/TypesHelp.h>
 #include <Engine/Core/Assert.h>
+#include <vector>
 
 VOLUCRIS_STATIC_LOG(OpenGLTest, Trace)
 
@@ -39,52 +40,19 @@ GLFWwindow* init()
 	return window;
 }
 
-static uint32 pbo1, pbo2, vbo, ebo;
-
-uint32 createBuffer(GLenum type, size_t size)
-{
-	uint32 buffer = 0;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(type, buffer);
-	glBufferData(type, size, nullptr, GL_STATIC_DRAW);
-	return buffer;
-}
-
-void debugBuffers()
-{
-	V_LOG_INFO(OpenGLTest, "----------------")
-	V_LOG_INFO(OpenGLTest, "PBO 1: {}", pbo1)
-	V_LOG_INFO(OpenGLTest, "PBO 1: {}", pbo2)
-	V_LOG_INFO(OpenGLTest, "vbo: {}", vbo)
-	V_LOG_INFO(OpenGLTest, "ebo: {}", ebo)
-}
-
 int main()
 {
 	auto window = init();
 
-	pbo1 = createBuffer(GL_PIXEL_PACK_BUFFER, 8 * 8 * 3);
-	pbo2 = createBuffer(GL_PIXEL_UNPACK_BUFFER, 8 * 8 * 3);
-	vbo = createBuffer(GL_ARRAY_BUFFER, 128);
-	ebo = createBuffer(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint32));
+	std::vector<uint8> data;
+	data.resize(128 * 128 * 3);
 
-	debugBuffers();
+	uint32 id = 0;
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
 
-	glDeleteBuffers(1, &pbo1);
-	glDeleteBuffers(1, &pbo2);
-
-	pbo1 = createBuffer(GL_PIXEL_PACK_BUFFER, 128 * 8 * 3);
-	pbo2 = createBuffer(GL_PIXEL_UNPACK_BUFFER, 128 * 8 * 3);
-
-	debugBuffers();
-
-	GLint id = 0;
-	GLint vbo_id = 0;
-	glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &id);
-	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &vbo_id);
-	//v_check(vao_id == vao->getId());
-	//v_check(vbo_id == vao->getId());
-	v_check(id == ebo)
+	GL_CHECK();
 
 	while (!glfwWindowShouldClose(window))
 	{

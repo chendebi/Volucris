@@ -57,6 +57,8 @@ namespace volucris
 
 		void unsetBuffer(RHIBuffer* buffer);
 
+		void makesureBufferUnset(RHIBuffer::Type type);
+
 		void setVertexArray(RHIVertexArray* array);
 
 		void unsetVertexArray(RHIVertexArray* array);

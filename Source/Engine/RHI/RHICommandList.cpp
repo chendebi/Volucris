@@ -260,6 +260,16 @@ namespace volucris
 		}
 	}
 
+	void RHICommandList::makesureBufferUnset(RHIBuffer::Type type)
+	{
+		auto it = m_state.buffers.find(type);
+		if (it != m_state.buffers.end() && m_state.buffers[type] != nullptr)
+		{
+			m_state.buffers[type] = nullptr;
+			glBindBuffer(getGLTarget(type), 0);
+		}
+	}
+
 	void RHICommandList::setVertexArray(RHIVertexArray* array)
 	{
 		if (m_state.vertexArray == array)
