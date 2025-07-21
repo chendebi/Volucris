@@ -173,6 +173,7 @@ namespace volucris
 	EditorWindow::EditorWindow()
 		: Window()
         , m_iconTexture(nullptr)
+        , m_quadMesh(nullptr)
 	{
 		
 	}
@@ -180,6 +181,11 @@ namespace volucris
     RHITexture2D* EditorWindow::getEditorIconTexture() const
     {
         return m_iconTexture.get();
+    }
+
+    StaticMesh* EditorWindow::getQuadMesh() const
+    {
+        return m_quadMesh.get();
     }
 
 	void EditorWindow::onRendererBuild(RHICommandList* cmdList)

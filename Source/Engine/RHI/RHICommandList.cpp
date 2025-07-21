@@ -319,5 +319,6 @@ namespace volucris
 		setBuffer(info.ebo);
 
 		glDrawElements(getGLElementDrawMode(info.segment.mode), info.segment.count, getGLElementType(info.segment.type), (void*)info.segment.offset);
+		GL_CHECK()
 	}
 }

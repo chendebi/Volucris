@@ -9,6 +9,7 @@ namespace volucris
 	class LogWidget;
 	class ContentBrowserWidget;
 	class RHITexture2D;
+	class StaticMesh;
 
 	class MainWidget : public Widget
 	{
@@ -34,12 +35,15 @@ namespace volucris
 
 		RHITexture2D* getEditorIconTexture() const;
 
+		StaticMesh* getQuadMesh() const;
+
 		void onRendererBuild(RHICommandList* cmdList) override;
 
 		void onRendererDestroy(RHICommandList* cmdList) override;
 
 	private:
 		std::unique_ptr<RHITexture2D> m_iconTexture;
+		std::unique_ptr<StaticMesh> m_quadMesh;
 	};
 }
 

@@ -16,6 +16,7 @@
 #include <Engine/Asset/AssetManager.h>
 #include <Engine/Game/StaticMesh.h>
 #include <EditorEntry/EditorApplication.h>
+#include <EditorEntry/EditorWindow.h>
 
 namespace volucris
 {
@@ -260,9 +261,15 @@ namespace volucris
 		{
 			auto view = std::make_unique<View>(m_world->getScene());
 			m_view = view.get();
-			if (auto mesh = AssetManager::getInstance().loadAsset<StaticMesh>("/Engine/Content/Editor/Cube", GEditorWorld))
+			//if (auto mesh = AssetManager::getInstance().loadAsset<StaticMesh>("/Engine/Content/Editor/Cube", GEditorWorld))
 			{
-				m_view->setTestStaticMesh(mesh->getProxy());
+				if (auto window = dynamic_cast<EditorWindow*>(getTopWidget()))
+				{
+					if (auto mesh = window->getQuadMesh())
+					{
+						m_view->setTestStaticMesh(mesh->getProxy());
+					}
+				}
 			}
 			CreateViewTask task = CreateViewTask(std::move(view), m_size);
 			if (gApp->isRunning())
