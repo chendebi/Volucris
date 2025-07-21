@@ -47,7 +47,6 @@ namespace volucris
 		Size m_size;
 		int m_current;
 		std::shared_ptr<RHITexture2D> m_viewTexture;
-		std::vector<std::shared_ptr<RHITexture2D>> m_textures;
 		std::vector<std::shared_ptr<RHIWritePixelBuffer>> m_uploaders;
 		bool m_ready;
 

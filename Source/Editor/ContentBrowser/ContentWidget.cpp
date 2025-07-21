@@ -202,6 +202,14 @@ namespace volucris
 	bool ContentWidget::onDrop(DropEvent* event)
 	{
 		const auto cpath = fs::path(m_folder);
+		struct ShaderFiles
+		{
+			std::string name;
+			std::string vertShaderPath;
+			std::string fragShaderPath;
+		};
+
+		std::vector<ShaderFiles> shaderSources;
 		for (const auto& filepath : event->files)
 		{
 			V_LOG_INFO(Editor, "drop file: {}", filepath);
@@ -248,6 +256,51 @@ namespace volucris
 					}
 				}
 			}
+			else if (ext == ".vert")
+			{
+				auto name = path.stem().generic_u8string();
+				ShaderFiles* f = nullptr;
+				for (auto& ef : shaderSources)
+				{
+					if (ef.name == name && ef.vertShaderPath.empty())
+					{
+						f = &ef;
+					}
+				}
+				if (!f)
+				{
+					shaderSources.push_back({name, filepath, ""});
+				}
+				else
+				{
+					f->vertShaderPath = filepath;
+				}
+			}
+			else if (ext == ".frag")
+			{
+				auto name = path.stem().generic_u8string();
+				ShaderFiles* f = nullptr;
+				for (auto& ef : shaderSources)
+				{
+					if (ef.name == name && ef.fragShaderPath.empty())
+					{
+						f = &ef;
+					}
+				}
+				if (!f)
+				{
+					shaderSources.push_back({ name, "", filepath });
+				}
+				else
+				{
+					f->fragShaderPath = filepath;
+				}
+			}
+		}
+
+		for (const auto& f : shaderSources)
+		{
+
 		}
 		return true;
 	}

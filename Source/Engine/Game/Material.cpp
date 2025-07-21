@@ -16,6 +16,18 @@ namespace volucris
 	{
 	}
 
+	MaterialFloatParameter& Material::addParameter(const std::string& name, float value)
+	{
+		m_floatParameters.push_back({ name, value });
+		return *m_floatParameters.rbegin();
+	}
+
+	MaterialVector4Parameter& Material::addParameter(const std::string& name, glm::vec4 value)
+	{
+		m_vec4Parameters.push_back({ name, value });
+		return *m_vec4Parameters.rbegin();
+	}
+
 	bool Material::setFloatParameter(const std::string& name, float value)
 	{
 		for (auto& param : m_floatParameters)
@@ -45,4 +57,4 @@ namespace volucris
 
 }
 
-BOOST_CLASS_EXPORT(volucris::Material)
+BOOST_CLASS_EXPORT_IMPLEMENT(volucris::Material)

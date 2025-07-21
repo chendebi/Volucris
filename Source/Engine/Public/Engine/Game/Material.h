@@ -6,6 +6,8 @@
 
 namespace volucris
 {
+	class MaterialProxy;
+
 	class Material : public GameObject
 	{
 	public:
@@ -16,9 +18,16 @@ namespace volucris
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
+			ar& boost::serialization::base_object<GameObject>(*this);
 			ar& m_vss;
 			ar& m_fss;
+			ar& m_floatParameters;
+			ar& m_vec4Parameters;
 		}
+
+		MaterialFloatParameter& addParameter(const std::string& name, float value);
+
+		MaterialVector4Parameter& addParameter(const std::string& name, glm::vec4 value);
 
 		bool setFloatParameter(const std::string& name, float value);
 
@@ -31,5 +40,7 @@ namespace volucris
 		std::vector<MaterialVector4Parameter> m_vec4Parameters;
 	};
 }
+
+BOOST_CLASS_EXPORT_KEY(volucris::Material)
 
 #endif // !__volucris_material_h__

@@ -23,21 +23,21 @@ namespace volucris
 
 	RHIReadPixelBuffer::RHIReadPixelBuffer(RHIBuffer::Usage usage)
 		: RHIBuffer(RHIBuffer::PixelPackBuffer, usage)
+		, m_texture(nullptr)
 	{
 	}
 
-	void RHIReadPixelBuffer::startRead(Rect rect, RHIRenderTarget* renderTarget, int index)
+	void RHIReadPixelBuffer::startRead(Rect rect)
 	{
-		auto texture = dynamic_cast<RHITexture2D*>(renderTarget->getAttachedColor(index));
-		if (!texture)
+		if (!m_texture)
 		{
 			return;
 		}
 		auto ctx = getContext();
 		ctx->setBuffer(this);
-		ctx->setTexture2D(texture);
+		ctx->setTexture2D(m_texture.get());
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
+		glReadPixels(rect.x, rect.y, rect.width, rect.height, getGLReadFormat(m_texture->getPixelFormat()), GL_UNSIGNED_BYTE, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 		GL_CHECK();
 	}
@@ -80,34 +80,42 @@ namespace volucris
 
 	RHIWritePixelBuffer::RHIWritePixelBuffer(RHIBuffer::Usage usage)
 		: RHIBuffer(RHIBuffer::PixelUnpackBuffer, usage)
+		, m_texture(nullptr)
 	{
 
 	}
 
-	bool RHIWritePixelBuffer::writeTo(RHITexture2D* texture)
+	bool RHIWritePixelBuffer::writeToTexture()
 	{
+		if (!m_texture)
+		{
+			return false;
+		}
 		auto ctx = getContext();
 		ctx->setBuffer(this);
-		ctx->setTexture2D(texture);
+		ctx->setTexture2D(m_texture.get());
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->getSize().width, texture->getSize().height,
-			getGLReadFormat(texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_texture->getSize().width, m_texture->getSize().height,
+			getGLReadFormat(m_texture->getPixelFormat()), GL_UNSIGNED_BYTE, nullptr);
 		GL_CHECK();
 		return true;
 	}
 
 	void RHIWritePixelBuffer::startWrite(std::vector<uint8> data)
 	{
-		getContext()->setBuffer(this);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-		v_check(ptr)
-		if (ptr)
+		if (m_texture)
 		{
-			memcpy(ptr, data.data(), data.size());
+			getContext()->setBuffer(this);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+			v_check(ptr)
+			if (ptr)
+			{
+				memcpy(ptr, data.data(), data.size());
+			}
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+			GL_CHECK()
 		}
-		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		GL_CHECK();
 	}
 }

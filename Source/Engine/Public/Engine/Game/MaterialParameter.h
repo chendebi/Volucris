@@ -5,40 +5,21 @@
 #include <glm/glm.hpp>
 #include <Engine/Render/MaterialParameterInfo.h>
 #include <glm/ext.hpp>
+#include <Engine/Core/GlmHelp.h>
 
 namespace volucris
 {
-	struct MaterialParameter
-	{
-	public:
-		MaterialParameter() : m_name() {}
-
-		MaterialParameter(const std::string& name)
-			: m_name(name)
-		{
-
-		}
-
-		const std::string& getName() const
-		{
-			return m_name;
-		}
-
-	protected:
-		std::string m_name;
-	};
-
-	struct MaterialFloatParameter : public MaterialParameter
+	struct MaterialFloatParameter
 	{
 	public:
 		MaterialFloatParameter()
-			: MaterialParameter()
+			: m_name()
 			, m_value(0.0)
 		{
 		}
 
 		MaterialFloatParameter(const std::string& name, float value = 0.0)
-			: MaterialParameter(name), m_value(value)
+			: m_name(name), m_value(value)
 		{
 		}
 
@@ -48,6 +29,15 @@ namespace volucris
 
 		float getValue() const {
 			return m_value;
+		}
+
+		const std::string& getName() const { return m_name; }
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& m_name;
+			ar& m_value;
 		}
 
 		MaterialParameterInfo getParameterInfo() const
@@ -60,21 +50,22 @@ namespace volucris
 		}
 
 	private:
+		std::string m_name;
 		float m_value;
 	};
 
-	struct MaterialVector4Parameter : public MaterialParameter
+	struct MaterialVector4Parameter
 	{
 	public:
 
 		MaterialVector4Parameter()
-			: MaterialParameter()
+			: m_name()
 			, m_value(0.0)
 		{
 		}
 
 		MaterialVector4Parameter(const std::string& name, glm::vec4 value = {0.0,0.0,0.0,1.0})
-			: MaterialParameter(name), m_value(value)
+			: m_name(name), m_value(value)
 		{
 		}
 
@@ -82,8 +73,17 @@ namespace volucris
 			m_value = value;
 		}
 
+		const std::string& getName() const { return m_name; }
+
 		const glm::vec4& getValue() const {
 			return m_value;
+		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& m_name;
+			ar& m_value;
 		}
 
 		MaterialParameterInfo getParameterInfo() const
@@ -96,6 +96,7 @@ namespace volucris
 		}
 
 	private:
+		std::string m_name;
 		glm::vec4 m_value;
 	};
 }

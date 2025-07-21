@@ -65,7 +65,6 @@ namespace volucris
 		, m_current(0)
 		, m_viewTexture(nullptr)
 		, m_uploaders()
-		, m_textures()
 		, m_world(nullptr)
 		, m_ready(false)
 	{
@@ -184,19 +183,19 @@ namespace volucris
 		desc.texClass = TextureType::Texture2D;
 		for (int i = 0; i < 2; ++i)
 		{
-			auto uploader = std::make_shared<RHIWritePixelBuffer>(RHIBuffer::StreamWrite);
-			uploader->setContext(cmdList);
-			uploader->createGpuResource();
-			cmdList->setBuffer(uploader.get());
-			uploader->init(nullptr, (uint32)size);
-			m_uploaders.push_back(std::move(uploader));
-
 			auto texture = std::make_shared<RHITexture2D>(desc);
 			texture->setContext(cmdList);
 			texture->createGpuResource();
 			cmdList->setTexture2D(texture.get());
 			texture->init();
-			m_textures.push_back(std::move(texture));
+
+			auto uploader = std::make_shared<RHIWritePixelBuffer>(RHIBuffer::StreamWrite);
+			uploader->setContext(cmdList);
+			uploader->createGpuResource();
+			cmdList->setBuffer(uploader.get());
+			uploader->init(nullptr, (uint32)size);
+			uploader->bindTexture(texture);
+			m_uploaders.push_back(std::move(uploader));
 		}
 
 		m_current = 0;
@@ -209,15 +208,6 @@ namespace volucris
 			cmdList->unsetBuffer(uploader.get());
 		}
 
-		for (auto& texture : m_textures)
-		{
-			if (texture != m_viewTexture)
-			{
-				cmdList->unsetTexture2D(texture.get());
-			}
-		}
-
-		m_textures.clear();
 		m_uploaders.clear();
 	}
 
@@ -250,8 +240,8 @@ namespace volucris
 
 		m_current = (m_current + 1) % m_uploaders.size();
 		currentUploader = m_uploaders[m_current];
-		currentUploader->writeTo(m_textures[m_current].get());
-		m_viewTexture = m_textures[m_current];
+		currentUploader->writeToTexture();
+		m_viewTexture = currentUploader->getTexture();
 	}
 
 	void ViewportWidget::createView()
@@ -261,15 +251,9 @@ namespace volucris
 		{
 			auto view = std::make_unique<View>(m_world->getScene());
 			m_view = view.get();
-			//if (auto mesh = AssetManager::getInstance().loadAsset<StaticMesh>("/Engine/Content/Editor/Cube", GEditorWorld))
+			if (auto mesh = AssetManager::getInstance().loadAsset<StaticMesh>("/Engine/Content/Editor/Cube", GEditorWorld))
 			{
-				if (auto window = dynamic_cast<EditorWindow*>(getTopWidget()))
-				{
-					if (auto mesh = window->getQuadMesh())
-					{
-						m_view->setTestStaticMesh(mesh->getProxy());
-					}
-				}
+				m_view->setTestStaticMesh(mesh->getProxy());
 			}
 			CreateViewTask task = CreateViewTask(std::move(view), m_size);
 			if (gApp->isRunning())

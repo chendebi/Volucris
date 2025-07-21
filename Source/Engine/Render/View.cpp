@@ -30,7 +30,7 @@ namespace volucris
 
 		layout(location=0) out vec3 vertexColor;
 		void main() {
-			gl_Position=vec4(v_pos, 1.0);
+			gl_Position=vec4(v_pos * 10.f, 1.0);
 			vertexColor = v_color;
 		}
 	)";
@@ -126,6 +126,7 @@ namespace volucris
 			auto reader = std::make_unique<RHIReadPixelBuffer>(RHIBuffer::StreamRead);
 			reader->setContext(RHICmdList);
 			reader->createGpuResource();
+			reader->bindTexture(texture);
 			v_check(RHICmdList->setBuffer(reader.get()))
 			reader->init(nullptr, (uint32)size);
 			m_targetReaders.emplace_back(std::move(reader));
@@ -162,7 +163,7 @@ namespace volucris
 		rect.setSize(m_targets[m_current]->getSize());
 
 		int next = (m_current + 1) % FrameCount;
-		m_targetReaders[next]->startRead(rect, m_targets[m_current].get(), 0);
+		m_targetReaders[next]->startRead(rect);
 
 		m_targetReaders[m_current]->readColorTo(m_targetData.data);
 		m_current = next;

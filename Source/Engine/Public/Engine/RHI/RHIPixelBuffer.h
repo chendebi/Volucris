@@ -13,11 +13,19 @@ namespace volucris
 	public:
 		RHIReadPixelBuffer(RHIBuffer::Usage usage = StaticDraw);
 
-		void startRead(Rect rect, RHIRenderTarget* renderTarget, int index = 0);
+		void bindTexture(const std::shared_ptr<RHITexture2D>& texture)
+		{
+			m_texture = texture;
+		}
+
+		void startRead(Rect rect);
 
 		std::vector<uint8> readColor();
 
 		bool readColorTo(std::vector<uint8>& data);
+
+	private:
+		std::shared_ptr<RHITexture2D> m_texture;
 	};
 
 	class RHIWritePixelBuffer : public RHIBuffer
@@ -25,9 +33,19 @@ namespace volucris
 	public:
 		RHIWritePixelBuffer(RHIBuffer::Usage usage = StaticDraw);
 
+		void bindTexture(const std::shared_ptr<RHITexture2D>& texture)
+		{
+			m_texture = texture;
+		}
+
+		std::shared_ptr<RHITexture2D> getTexture() const { return m_texture; }
+
 		void startWrite(std::vector<uint8> data);
 
-		bool writeTo(RHITexture2D* texture);
+		bool writeToTexture();
+
+	private:
+		std::shared_ptr<RHITexture2D> m_texture;
 	};
 }
 
