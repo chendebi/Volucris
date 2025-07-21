@@ -30,7 +30,7 @@ namespace volucris
 
 		layout(location=0) out vec3 vertexColor;
 		void main() {
-			gl_Position=vec4(v_pos, 1.0);
+			gl_Position=vec4(v_pos * 10.f, 1.0);
 			vertexColor = v_color;
 		}
 	)";
@@ -147,7 +147,10 @@ namespace volucris
 
 		if (m_mesh)
 		{
-			RHICmdList->drawPrimitive(shader.get(), *(m_mesh->get(0)));
+			for (const auto& info : m_mesh->getDrawInfos())
+			{
+				RHICmdList->drawPrimitive(shader.get(), info);
+			}
 		}
 
 		swapViewData(cmdList);

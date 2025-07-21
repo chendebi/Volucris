@@ -235,7 +235,6 @@ namespace volucris
 					const auto& resources = loader.getMeshes();
 					for (const auto& res : resources)
 					{
-						StaticMesh mesh;
 						const auto packageName = getDefaultPackageName(cpath, res.name);
 						auto package = std::make_shared<Package>(packageName);
 						package->setObject(res.mesh.get());

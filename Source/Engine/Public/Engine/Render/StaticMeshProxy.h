@@ -22,6 +22,8 @@ namespace volucris
 			return &m_drawInfos[index];
 		}
 
+		const std::vector<DrawInfo> getDrawInfos() const { return m_drawInfos; }
+
 	private:
 		std::shared_ptr<RHIVertexArray> m_vao;
 		std::shared_ptr<RHIElementBuffer> m_ebo;

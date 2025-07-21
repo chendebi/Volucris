@@ -9,38 +9,6 @@
 
 namespace volucris
 {
-	struct SmallSubMesh
-	{
-		std::vector<uint8> indices;
-		ElementDrawMode drawMode = ElementDrawMode::Traingles;
-
-		size_t getIndexDataSize() const
-		{
-			return indices.size();
-		}
-	};
-
-	struct MediumSubMesh
-	{
-		std::vector<uint16> indices;
-		ElementDrawMode drawMode = ElementDrawMode::Traingles;
-
-		size_t getIndexDataSize() const
-		{
-			return sizeof(uint16) * indices.size();
-		}
-	};
-
-	struct LargeSubMesh
-	{
-		std::vector<uint32> indices;
-		ElementDrawMode drawMode = ElementDrawMode::Traingles;
-
-		size_t getIndexDataSize() const
-		{
-			return sizeof(uint32) * indices.size();
-		}
-	};
 
 	class MeshData
 	{
@@ -50,9 +18,6 @@ namespace volucris
 		std::vector<glm::vec3> m_uv1;
 		std::vector<glm::vec4> m_color;
 		std::vector<glm::vec4> m_secondColor;
-
-		std::vector<uint8> m_submeshData;
-		std::vector<PrimitiveSegment> m_segments;
 
 	public:
 		void setVertices(std::vector<glm::vec3> vertices)
@@ -70,16 +35,7 @@ namespace volucris
 			m_color = std::move(colors);
 		}
 
-		void addSubMesh(SmallSubMesh mesh);
-
-		void addSubMesh(MediumSubMesh mesh);
-
-		void addSubMesh(LargeSubMesh mesh);
-
-		void reserveSubMeshData(size_t size)
-		{
-			m_submeshData.reserve(size);
-		}
+		PrimitiveInfo build();
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
@@ -90,8 +46,6 @@ namespace volucris
 			ar& m_uv1;
 			ar& m_color;
 			ar& m_secondColor;
-			ar& m_submeshData;
-			ar& m_segments;
 		}
 	};
 }

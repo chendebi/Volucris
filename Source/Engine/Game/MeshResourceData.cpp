@@ -2,42 +2,62 @@
 
 namespace volucris
 {
-	void MeshData::addSubMesh(SmallSubMesh mesh)
+	PrimitiveInfo MeshData::build()
 	{
-		PrimitiveSegment segment;
-		segment.offset = m_submeshData.size();
-		segment.mode = mesh.drawMode;
-		segment.count = mesh.indices.size();
-		segment.type = ElementDataType::UByte;
-		const auto appendSize = mesh.getIndexDataSize();
-		m_submeshData.resize(appendSize);
-		memcpy(m_submeshData.data() + segment.offset, mesh.indices.data(), appendSize);
-		m_segments.push_back(segment);
-	}
+		if (m_vertices.empty())
+		{
+			return {};
+		}
+		PrimitiveInfo info;
+		size_t size = 0;
+		size += m_vertices.size() * sizeof(glm::vec3);
+		size += m_normals.size() * sizeof(glm::vec3);
+		size += m_uv0.size() * sizeof(glm::vec3);
+		size += m_uv1.size() * sizeof(glm::vec3);
+		size += m_color.size() * sizeof(glm::vec4);
+		size += m_secondColor.size() * sizeof(glm::vec4);
 
-	void MeshData::addSubMesh(MediumSubMesh mesh)
-	{
-		PrimitiveSegment segment;
-		segment.offset = m_submeshData.size();
-		segment.mode = mesh.drawMode;
-		segment.count = mesh.indices.size();
-		segment.type = ElementDataType::UShort;
-		const auto appendSize = mesh.getIndexDataSize();
-		m_submeshData.resize(segment.offset + appendSize);
-		memcpy(m_submeshData.data() + segment.offset, mesh.indices.data(), appendSize);
-		m_segments.push_back(segment);
-	}
+		info.data.resize(size);
+		size_t offset = 0;
 
-	void MeshData::addSubMesh(LargeSubMesh mesh)
-	{
-		PrimitiveSegment segment;
-		segment.offset = m_submeshData.size();
-		segment.mode = mesh.drawMode;
-		segment.count = mesh.indices.size();
-		segment.type = ElementDataType::UInt;
-		const auto appendSize = mesh.getIndexDataSize();
-		m_submeshData.resize(segment.offset + appendSize);
-		memcpy(m_submeshData.data() + segment.offset, mesh.indices.data(), appendSize);
-		m_segments.push_back(segment);
+		auto addBlock = [&](PrimitiveType type, const std::vector<glm::vec3>& data)
+			{
+				if (data.empty())
+				{
+					return;
+				}
+				PrimitiveBlock block;
+				block.type = type;
+				block.dataType = DataType::Float;
+				block.offset = offset;
+				block.count = 3;
+				const auto size = data.size() * sizeof(glm::vec3);
+				memcpy(info.data.data() + offset, data.data(), size);
+				offset += size;
+				info.blocks.push_back(block);
+			};
+
+		auto addVec4Block = [&](PrimitiveType type, const std::vector<glm::vec4>& data)
+			{
+				if (data.empty())
+				{
+					return;
+				}
+				PrimitiveBlock block;
+				block.type = type;
+				block.dataType = DataType::Float;
+				block.offset = offset;
+				block.count = 4;
+				const auto size = data.size() * sizeof(glm::vec4);
+				memcpy(info.data.data() + offset, data.data(), size);
+				offset += size;
+				info.blocks.push_back(block);
+			};
+
+		addBlock(PrimitiveType::Vertex, m_vertices);
+		addBlock(PrimitiveType::Normal, m_normals);
+		addVec4Block(PrimitiveType::Color, m_color);
+		addVec4Block(PrimitiveType::SecondColor, m_secondColor);
+		return info;
 	}
 }

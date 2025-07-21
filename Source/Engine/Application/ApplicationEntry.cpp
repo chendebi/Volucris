@@ -4,6 +4,7 @@
 #include <Application/Window.h>
 #include <FileSystem/FileSystem.h>
 #include <tracy/Tracy.hpp>
+#include <Game/MeshElements.h>
 
 using namespace volucris;
 
@@ -20,11 +21,15 @@ bool initialize()
 	return true;
 }
 
+
+
 int main(int argc, char* argv[])
 {
 #ifdef TRACY_ENABLE
 	//TracyGpuContext; // GPU上下文初始化
 #endif
+
+	LargeMeshElements e;
 
 	gFileSystem.mount(u8"/Engine/Content", fmt::format(u8"{}/Content", VOLUCRIS_ENGINE_ROOT));
 	gFileSystem.mount(u8"/Engine/Config", fmt::format(u8"{}/Binaries/Config", VOLUCRIS_ENGINE_ROOT));

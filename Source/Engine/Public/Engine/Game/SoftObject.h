@@ -9,7 +9,7 @@ namespace volucris
 	class SoftObject
 	{
 	public:
-		SoftObject(std::string path)
+		SoftObject(std::string path = "")
 			: m_path(std::move(path))
 			, m_object(nullptr)
 		{
@@ -29,6 +29,12 @@ namespace volucris
 		T* operator->() const
 		{
 			return m_object.get();
+		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& m_path;
 		}
 
 	private:

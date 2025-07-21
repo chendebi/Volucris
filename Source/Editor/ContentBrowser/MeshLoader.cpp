@@ -74,9 +74,10 @@ namespace volucris
 	MeshResource MeshLoader::loadMeshFromNode(const aiScene* scene, aiNode* node)
 	{
 		MeshResource resource;
+		auto mesh = std::make_shared<StaticMesh>();
+		resource.mesh = mesh;
 		resource.name = node->mName.C_Str();
 		size_t vertexCount = 0;
-		size_t indexCount = 0;
 		bool buildUV0 = false;
 		bool buildUV1 = false;
 
@@ -94,7 +95,6 @@ namespace volucris
 		{
 			auto mesh = scene->mMeshes[node->mMeshes[idx]];
 			vertexCount += mesh->mNumVertices;
-			indexCount += mesh->mNumFaces * 3;
 
 			if (idx == 0)
 			{
@@ -114,7 +114,6 @@ namespace volucris
 		if (buildUV0) { uv0.reserve(vertexCount); }
 		if (buildUV1) { uv1.reserve(vertexCount); }
 
-		data.reserveSubMeshData(indexCount * sizeof(uint32));
 
 		glm::vec3 minPos, maxPos;
 		minPos = maxPos = assimpVec3ToGlmVec3(scene->mMeshes[node->mMeshes[0]]->mVertices[0]);
@@ -170,17 +169,17 @@ namespace volucris
 			}
 
 			{
+				std::unique_ptr<LargeMeshElements> elements = std::make_unique<LargeMeshElements>();
 				auto count = mesh->mNumFaces * 3;
-				LargeSubMesh submesh;
-				submesh.indices.reserve(count);
+				elements->reserve(count);
 				for (auto k = 0; k < mesh->mNumFaces; ++k)
 				{
-					auto face = mesh->mFaces[k];
-					submesh.indices.push_back(indexOffset + face.mIndices[0]);
-					submesh.indices.push_back(indexOffset + face.mIndices[1]);
-					submesh.indices.push_back(indexOffset + face.mIndices[2]);
+					auto& face = mesh->mFaces[k];
+					elements->create() = indexOffset + face.mIndices[0];
+					elements->create() = indexOffset + face.mIndices[1];
+					elements->create() = indexOffset + face.mIndices[2];
 				}
-				data.addSubMesh(submesh);
+				resource.mesh->addSubMesh(std::move(elements));
 			}
 
 			// 材质
@@ -192,9 +191,7 @@ namespace volucris
 		data.setVertices(std::move(vertices));
 		data.setNormals(std::move(normals));
 		
-		auto mesh = std::make_shared<StaticMesh>();
-		mesh->setMeshData(std::move(data));
-		resource.mesh = mesh;
+		resource.mesh->setMeshData(std::move(data));
 		return resource;
 	}
 
