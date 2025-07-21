@@ -1,5 +1,6 @@
 #include "MaterialLoader.h"
 #include <filesystem>
+#include <EditorCore/Editor.h>
 
 namespace fs = std::filesystem;
 
@@ -39,6 +40,14 @@ namespace volucris
 		}
 		m_fsp = filepath;
 		return true;
+	}
+
+	bool MaterialLoader::load()
+	{
+		V_LOG_DEBUG(Editor, "load material");
+		V_LOG_DEBUG(Editor, "{}", m_vsp)
+		V_LOG_DEBUG(Editor, "{}", m_fsp)
+		return false;
 	}
 
 	void MaterialLoader::init(const std::string& filepath)

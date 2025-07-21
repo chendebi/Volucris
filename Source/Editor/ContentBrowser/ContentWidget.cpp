@@ -13,6 +13,7 @@
 #include <Engine/Game/Package.h>
 #include "MeshLoader.h"
 #include <Engine/Game/StaticMesh.h>
+#include "MaterialLoader.h"
 
 namespace fs = std::filesystem;
 
@@ -202,14 +203,8 @@ namespace volucris
 	bool ContentWidget::onDrop(DropEvent* event)
 	{
 		const auto cpath = fs::path(m_folder);
-		struct ShaderFiles
-		{
-			std::string name;
-			std::string vertShaderPath;
-			std::string fragShaderPath;
-		};
 
-		std::vector<ShaderFiles> shaderSources;
+		std::vector<MaterialLoader> matLoaders;
 		for (const auto& filepath : event->files)
 		{
 			V_LOG_INFO(Editor, "drop file: {}", filepath);
@@ -258,49 +253,45 @@ namespace volucris
 			}
 			else if (ext == ".vert")
 			{
-				auto name = path.stem().generic_u8string();
-				ShaderFiles* f = nullptr;
-				for (auto& ef : shaderSources)
+				bool added = false;
+				for (auto& loader : matLoaders)
 				{
-					if (ef.name == name && ef.vertShaderPath.empty())
+					added = loader.setVertexSource(filepath);
+					if (added)
 					{
-						f = &ef;
+						break;
 					}
 				}
-				if (!f)
+				if (!added)
 				{
-					shaderSources.push_back({name, filepath, ""});
-				}
-				else
-				{
-					f->vertShaderPath = filepath;
+					MaterialLoader loader;
+					loader.setVertexSource(filepath);
+					matLoaders.push_back(std::move(loader));
 				}
 			}
 			else if (ext == ".frag")
 			{
-				auto name = path.stem().generic_u8string();
-				ShaderFiles* f = nullptr;
-				for (auto& ef : shaderSources)
+				bool added = false;
+				for (auto& loader : matLoaders)
 				{
-					if (ef.name == name && ef.fragShaderPath.empty())
+					added = loader.setFragmentSource(filepath);
+					if (added)
 					{
-						f = &ef;
+						break;
 					}
 				}
-				if (!f)
+				if (!added)
 				{
-					shaderSources.push_back({ name, "", filepath });
-				}
-				else
-				{
-					f->fragShaderPath = filepath;
+					MaterialLoader loader;
+					loader.setFragmentSource(filepath);
+					matLoaders.push_back(std::move(loader));
 				}
 			}
 		}
 
-		for (const auto& f : shaderSources)
+		for (auto& loader : matLoaders)
 		{
-
+			loader.load();
 		}
 		return true;
 	}

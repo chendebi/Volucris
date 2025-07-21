@@ -14,6 +14,8 @@ namespace volucris
 
 		bool setFragmentSource(const std::string& filepath);
 
+		bool load();
+
 	private:
 		void init(const std::string& filepath);
 
