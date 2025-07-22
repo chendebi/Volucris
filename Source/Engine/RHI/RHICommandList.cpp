@@ -314,7 +314,6 @@ namespace volucris
 
 	void RHICommandList::drawPrimitive(RHIProgram* program, const DrawInfo& info)
 	{
-		setProgram(program);
 		setVertexArray(info.vao);
 		setBuffer(info.ebo);
 

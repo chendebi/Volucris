@@ -31,6 +31,8 @@ namespace volucris
 
 		std::string getClassName() const override { return "Material"; }
 
+		std::shared_ptr<MaterialProxy> getProxy();
+
 	protected:
 		MaterialFloatParameter& addParameter(const std::string& name, float value);
 
@@ -47,6 +49,7 @@ namespace volucris
 		std::string m_fss;
 		std::vector<MaterialFloatParameter> m_floatParameters;
 		std::vector<MaterialVector4Parameter> m_vec4Parameters;
+		std::weak_ptr<MaterialProxy> m_proxy;
 	};
 }
 
