@@ -13,7 +13,7 @@
 #include <Engine/Game/Package.h>
 #include "MeshLoader.h"
 #include <Engine/Game/StaticMesh.h>
-#include "MaterialLoader.h"
+#include "MaterialEditor/MaterialLoader.h"
 
 namespace fs = std::filesystem;
 
@@ -104,6 +104,10 @@ namespace volucris
 					else if (assetData.className == "StaticMesh")
 					{
 						m_items.emplace_back(createStaticMeshItem(node.path));
+					}
+					else if (assetData.className == "Material")
+					{
+						m_items.emplace_back(createTextureItem(node.path));
 					}
 				}
 			}
@@ -291,7 +295,18 @@ namespace volucris
 
 		for (auto& loader : matLoaders)
 		{
-			loader.load();
+			if (loader.load())
+			{
+				auto mat = loader.getMaterial();
+				const auto packageName = getDefaultPackageName(cpath, loader.getAssetName());
+				auto package = std::make_shared<Package>(packageName);
+				package->setObject(mat.get());
+				if (AssetManager::getInstance().registry(package.get()))
+				{
+					AssetManager::getInstance().save(package.get());
+					GEditorWorld->addObject(mat);
+				}
+			}
 		}
 		return true;
 	}

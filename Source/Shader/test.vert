@@ -2,6 +2,7 @@
 
 layout(location=0) in vec3 v_pos;
 
+uniform vec4 u_color;
 
 void main()
 {

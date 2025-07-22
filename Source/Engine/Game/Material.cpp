@@ -9,10 +9,10 @@ namespace volucris
 	{
 	}
 
-	Material::Material(const std::string& vss, const std::string fss)
+	Material::Material(std::string vss, std::string fss)
 		: GameObject()
-		, m_vss(vss)
-		, m_fss(fss)
+		, m_vss(std::move(vss))
+		, m_fss(std::move(fss))
 	{
 	}
 
