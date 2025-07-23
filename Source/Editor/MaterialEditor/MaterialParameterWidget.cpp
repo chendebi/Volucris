@@ -84,9 +84,8 @@ namespace volucris
 					idx++;
 				}
 			}
-
-			ImGui::End();
 		}
+		ImGui::End();
 
 		if (m_material->isDirty())
 		{

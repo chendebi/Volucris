@@ -9,6 +9,7 @@
 #include <Engine/Application/Application.h>
 #include <Engine/Application/Event.h>
 #include <MaterialEditor/MaterialParameterWidget.h>
+#include <MaterialEditor/MaterialTemplate.h>
 
 namespace volucris
 {
@@ -26,11 +27,13 @@ namespace volucris
     void MaterialEditorWidget::setMaterial(const std::shared_ptr<MaterialTemplate>& material)
     {
         m_material = material;
+        m_viewport->setTestMaterial(material);
         m_parameterWidget->setMaterial(material);
     }
 
     void MaterialEditorWidget::onBuild(bool)
-	{// 创建主窗口（包含DockSpace和菜单栏）
+	{
+        // 创建主窗口（包含DockSpace和菜单栏）
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->WorkPos);
         ImGui::SetNextWindowSize(viewport->WorkSize);
