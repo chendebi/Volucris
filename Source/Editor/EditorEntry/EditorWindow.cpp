@@ -112,7 +112,7 @@ namespace volucris
             // 完成布局设置
             ImGui::DockBuilderFinish(dockspace);
         }
-        //ImGui::SetNextWindowDockID(dockspace);
+
         static ImGuiWindowClass no_title_class;
         no_title_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
 
@@ -124,7 +124,6 @@ namespace volucris
 
         m_contentBrowserWidget->build(init);
 
-        //ImGui::SetNextWindowDockID(dockspace);
         ImGui::Begin("Property");
         ImGui::End();
 
@@ -191,7 +190,8 @@ namespace volucris
 	void EditorWindow::onRendererBuild(RHICommandList* cmdList)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-
+        m_iniFileName = gFileSystem.virtualToPhysical(fmt::format("/Engine/Config/{}", getTitle().c_str()));
+        io.IniFilename = m_iniFileName.c_str();
         if (auto texture = AssetManager::getInstance().loadAsset<Texture2D>("/Engine/Content/Editor/Textures/T_Icons", GEditorWorld))
         {
             const auto& data = texture->getTextureData();

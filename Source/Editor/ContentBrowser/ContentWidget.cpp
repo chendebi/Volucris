@@ -23,12 +23,14 @@ namespace volucris
 	static std::string getDefaultPackageName(const fs::path& dirpath, const std::string& name)
 	{
 		std::string packageName = (dirpath / name).generic_u8string();
-		if (gFileSystem.fileExists(packageName) || AssetManager::getInstance().isPackageRegistered(packageName))
+		std::string assetName = fmt::format("{}.asset", packageName);
+		if (gFileSystem.fileExists(assetName) || AssetManager::getInstance().isPackageRegistered(packageName))
 		{
 			for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
 			{
 				packageName = (dirpath / fmt::format("{}_{}", name, i)).generic_u8string();
-				if (!gFileSystem.fileExists(packageName) || AssetManager::getInstance().isPackageRegistered(packageName))
+				assetName = fmt::format("{}.asset", packageName);
+				if (!gFileSystem.fileExists(assetName) && !AssetManager::getInstance().isPackageRegistered(packageName))
 				{
 					break;
 				}
@@ -355,15 +357,7 @@ namespace volucris
 			});
 		item->DoubleClicked.bind([this](ContentItemWidget* clicked) {
 			m_controlItem = clicked;
-			if (m_controlItem->getAssetData().className == "Material")
-			{
-				gApp->pushCommand([]() {
-					auto window = std::make_shared<EditorWindow>();
-					auto widget = std::make_shared<MaterialEditorWidget>();
-					window->addChild(widget);
-					gApp->addWindow(window);
-					});
-			}
+			((EditorApplication*)gApp)->openEditor(m_controlItem->getAssetData());
 			});
 		return item;
 	}

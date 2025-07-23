@@ -44,6 +44,7 @@ namespace volucris
 	private:
 		std::unique_ptr<RHITexture2D> m_iconTexture;
 		std::unique_ptr<StaticMesh> m_quadMesh;
+		std::string m_iniFileName;
 	};
 }
 
