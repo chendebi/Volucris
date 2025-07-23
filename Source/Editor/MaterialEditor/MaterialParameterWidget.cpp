@@ -64,13 +64,13 @@ namespace volucris
 					switch (type)
 					{
 					case volucris::MaterialParamterType::Float:
-						if (ImGui::DragFloat("##", std::get_if<float>(&info.value)))
+						if (ImGui::DragFloat("##", std::get_if<float>(&info.value), 0.1f))
 						{
 							m_material->setFloatParameter(info.name, std::get<float>(info.value));
 						}
 						break;
 					case volucris::MaterialParamterType::Vector4:
-						if (ImGui::DragFloat4("##", glm::value_ptr(std::get<glm::vec4>(info.value))))
+						if (ImGui::DragFloat4("##", glm::value_ptr(std::get<glm::vec4>(info.value)), 0.1f))
 						{
 							m_material->setVector4Parameter(info.name, std::get<glm::vec4>(info.value));
 						}

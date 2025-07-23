@@ -41,6 +41,7 @@ namespace volucris
 
 			auto widget = std::make_shared<MaterialEditorWidget>();
 			window->addChild(widget);
+			m_materialEditorWindow = window;
 
 			widget->setMaterial(AssetManager::getInstance().loadAsset<MaterialTemplate>(assetData.path));
 
