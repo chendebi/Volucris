@@ -410,6 +410,10 @@ namespace volucris
 				}
 				item->setFileNode(node);
 			}
+			else
+			{
+				
+			}
 			});
 		return item;
 	}

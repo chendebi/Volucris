@@ -176,7 +176,7 @@ namespace volucris
 				Clicked.invoke(this);
 			}
 		}
-		else if (ImGui::BeginPopupContextItem())
+		else if (m_selectable && ImGui::BeginPopupContextItem())
 		{
 			m_selected = true;
 			Clicked.invoke(this);
