@@ -23,6 +23,7 @@
 #include <Engine/Core/Assert.h>
 #include <iostream>
 #include <Engine/Game/StaticMesh.h>
+#include <Engine/Game/StaticMeshComponent.h>
 
 namespace fs = std::filesystem;
 
@@ -38,7 +39,14 @@ namespace volucris
         addChild(m_logWidget);
         addChild(m_contentBrowserWidget);
         m_logWidget->init();
-        m_viewport->setWorld(std::make_shared<GameWorld>());
+
+        auto world = std::make_shared<GameWorld>();
+        auto entity = std::make_shared<Entity>();
+        auto comp = std::make_shared<StaticMeshComponent>();
+        entity->attach(comp);
+        world->getPersistentRegion()->addEntity(entity);
+
+        m_viewport->setWorld(world);
     }
 
     void MainWidget::onBuild(bool)

@@ -19,6 +19,7 @@ namespace volucris
 		std::shared_ptr<T> tryLoad()
 		{
 			m_object = AssetManager::getInstance().loadAsset<T>(m_path);
+			return m_object;
 		}
 
 		std::shared_ptr<T> object()
@@ -31,11 +32,23 @@ namespace volucris
 			return m_object.get();
 		}
 
+		bool operator==(T* obj) const
+		{
+			return m_object.get() == obj;
+		}
+
+		explicit operator bool() const
+		{
+			return m_object != nullptr;
+		}
+
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
 			ar& m_path;
 		}
+
+		bool isValid() const { return !m_path.empty(); }
 
 	private:
 		std::string m_path;
