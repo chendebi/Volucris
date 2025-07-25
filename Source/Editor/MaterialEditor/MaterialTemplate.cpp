@@ -6,9 +6,45 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <charconv>
 
 namespace volucris
 {
+	static float stringToFloat(std::string_view str)
+	{
+		if (str.empty()) { return 0.0f; }
+		float value = 0.0f;
+		auto result = std::from_chars(str.data(), str.data() + str.size(), value);
+		return value;
+	}
+
+	static glm::vec4 stringToVec4(std::string_view str)
+	{
+		glm::vec4 value = { 0,0,0,1 };
+		if (str.length() <= 9) {
+			return value;
+		}
+
+		auto startPos = str.find("(");
+		if (startPos == std::string::npos) return value;
+		auto endPos = str.find(")");
+		if (endPos == std::string::npos) return value;
+		++startPos;
+		const auto& content = str.substr(startPos, endPos - startPos);
+
+		startPos = 0;
+		float* values = glm::value_ptr(value);
+		auto idx = 0;
+		while ((endPos = content.find(",", startPos)) != std::string::npos && idx < 4)
+		{
+			values[idx] = stringToFloat(content.substr(startPos, endPos - startPos));
+			startPos = endPos + 1;
+			++idx;
+		}
+
+		return value;
+	}
+
 	MaterialTemplate::MaterialTemplate()
 		: Material()
 		, m_uniforms()
@@ -113,19 +149,20 @@ namespace volucris
 			{
 				info.name = uniform.name;
 				info.type = MaterialParamterType::Float;
-				info.value = 0.0f;
+				info.value = stringToFloat(uniform.property.value);
 				parameters.push_back(info);
 			}
 			else if (uniform.type == "vec4")
 			{
 				info.name = uniform.name;
 				info.type = MaterialParamterType::Vector4;
-				info.value = glm::vec4(0.0, 0.0, 0.0, 1.0);
+				info.value = stringToVec4(uniform.property.value);
 				parameters.push_back(info);
 			}
 		}
 		setParameters(std::move(parameters));
 	}
+
 }
 
 BOOST_CLASS_EXPORT_IMPLEMENT(volucris::MaterialTemplate)

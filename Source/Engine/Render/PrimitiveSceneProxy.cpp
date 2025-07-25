@@ -19,6 +19,7 @@ namespace volucris
 		auto ebo = m_meshProxy->getElementBuffer();
 		for (auto idx = 0; idx < segments.size(); ++idx)
 		{
+			if (!m_materials[idx]) continue;
 			PrimitiveDrawInfo info;
 			info.vao = vao;
 			info.ebo = ebo;
