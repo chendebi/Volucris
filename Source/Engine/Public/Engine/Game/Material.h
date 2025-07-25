@@ -6,6 +6,9 @@
 
 namespace volucris
 {
+	class MaterialProxy;
+	class MaterialInstanceProxy;
+
 	class Material : public GameObject
 	{
 	public:
@@ -27,6 +30,7 @@ namespace volucris
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
+			ar& boost::serialization::base_object<GameObject>(*this);
 			ar& m_vss;
 			ar& m_fss;
 			ar& m_parameters;
@@ -34,11 +38,27 @@ namespace volucris
 
 		std::string getClassName() const { return "Material"; }
 
+		const std::vector<MaterialParameterInfo>& getParameterInfos() const { return m_parameters; }
+
+		std::shared_ptr<MaterialProxy> getBaseProxy();
+
+		std::shared_ptr<MaterialInstanceProxy> getMaterialProxy();
+
+		std::shared_ptr<MaterialInstanceProxy> tryGetMaterialProxy() const;
+
+	protected:
+
+		virtual std::shared_ptr<MaterialInstanceProxy> createMaterialProxy();
+
 	private:
 		std::string m_vss;
 		std::string m_fss;
 		std::vector<MaterialParameterInfo> m_parameters;
+		std::weak_ptr<MaterialProxy> m_proxy;
+		std::weak_ptr<MaterialInstanceProxy> m_matProxy;
 	};
-}
+}  
+
+BOOST_CLASS_EXPORT_KEY(volucris::Material)
 
 #endif // !__volucris_material_h__

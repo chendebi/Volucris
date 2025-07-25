@@ -5,7 +5,15 @@
 
 namespace volucris
 {
-	class MaterialProxy;
+	class MaterialInstanceProxy;
+
+	struct PrimitiveDrawInfo
+	{
+		RHIVertexArray* vao;
+		RHIElementBuffer* ebo;
+		PrimitiveSegment mesh;
+		MaterialInstanceProxy* material;
+	};
 
 	class PrimitiveSceneProxy
 	{
@@ -19,15 +27,16 @@ namespace volucris
 			m_meshProxy = mesh;
 		}
 
-		void setMaterials(const std::vector<std::shared_ptr<MaterialProxy>>& materials)
+		void setMaterials(const std::vector<std::shared_ptr<MaterialInstanceProxy>>& materials)
 		{
 			m_materials = materials;
 		}
 
+		std::vector<PrimitiveDrawInfo> getPrimitiveDrawInfos() const;
+
 	private:
 		std::shared_ptr<StaticMeshProxy> m_meshProxy;
-		std::vector<std::shared_ptr<MaterialProxy>> m_materials;
-		//std::shared_ptr<Mater>
+		std::vector<std::shared_ptr<MaterialInstanceProxy>> m_materials;
 	};
 }
 

@@ -43,6 +43,8 @@ namespace volucris
         auto world = std::make_shared<GameWorld>();
         auto entity = std::make_shared<Entity>();
         auto comp = std::make_shared<StaticMeshComponent>();
+        comp->setStaticMesh(SoftObject<StaticMesh>("/Engine/Content/Editor/Cube"));
+        comp->setMaterial(0, SoftObject<Material>("/Engine/Content/Editor/test"));
         entity->attach(comp);
         world->getPersistentRegion()->addEntity(entity);
 

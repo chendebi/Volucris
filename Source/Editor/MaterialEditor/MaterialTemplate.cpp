@@ -1,6 +1,7 @@
 #include "MaterialTemplate.h"
 #include "GLSLParser.h"
 #include "EditorCore/Editor.h"
+#include <Engine/Core/GlmHelp.h>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -104,18 +105,26 @@ namespace volucris
 
 	void MaterialTemplate::updateUniforms()
 	{
-		clearParameters();
+		std::vector<MaterialParameterInfo> parameters;
 		for (const auto& uniform : m_uniforms)
 		{
+			MaterialParameterInfo info;
 			if (uniform.type == "float")
 			{
-				addParameter(uniform.name, 0.0f);
+				info.name = uniform.name;
+				info.type = MaterialParamterType::Float;
+				info.value = 0.0f;
+				parameters.push_back(info);
 			}
 			else if (uniform.type == "vec4")
 			{
-				addParameter(uniform.name, glm::vec4(0.0, 0.0, 0.0, 1.0));
+				info.name = uniform.name;
+				info.type = MaterialParamterType::Vector4;
+				info.value = glm::vec4(0.0, 0.0, 0.0, 1.0);
+				parameters.push_back(info);
 			}
 		}
+		setParameters(std::move(parameters));
 	}
 }
 

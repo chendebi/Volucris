@@ -1,5 +1,6 @@
 #include "Game/GameWorld.h"
 #include <Render/Scene.h>
+#include <Game/MaterialInstance.h>
 
 namespace volucris
 {
@@ -50,7 +51,6 @@ namespace volucris
 	{
 		auto proxy = region.get();
 		m_regions.push_back(std::move(region));
-		//proxy->set
 		return proxy;
 	}
 

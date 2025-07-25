@@ -18,6 +18,8 @@ namespace volucris
 
 		void removePrimitives(const std::vector<std::shared_ptr<PrimitiveSceneProxy>>& primitives);
 
+		const std::vector<std::shared_ptr<PrimitiveSceneProxy>>& getPrimitives() const { return m_primitives; }
+
 	private:
 		GameWorld* m_world;
 		std::vector<std::shared_ptr<PrimitiveSceneProxy>> m_primitives;

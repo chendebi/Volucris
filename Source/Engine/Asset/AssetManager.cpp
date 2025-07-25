@@ -96,6 +96,10 @@ namespace volucris
 				object = package->getAssetObject();
 				m_assets[packageName] = object;
 			}
+			else
+			{
+				V_LOG_WARN(Engine, "load asset failed. {}", packageName);
+			}
 		}
 
 		if (object && world)

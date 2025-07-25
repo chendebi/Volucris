@@ -67,7 +67,6 @@ namespace volucris
 		, m_uploaders()
 		, m_world(nullptr)
 		, m_ready(false)
-		, m_material(nullptr)
 	{
 	}
 
@@ -245,16 +244,6 @@ namespace volucris
 		m_viewTexture = currentUploader->getTexture();
 	}
 
-	void ViewportWidget::setTestMaterial(const std::shared_ptr<Material>& material)
-	{
-		m_material = material;
-		if (m_view)
-		{
-			Renderer::getInstance().push([proxy = material->getProxy(), view = m_view]() {
-				view->setTestMaterial(proxy);
-				});
-		}
-	}
 
 	void ViewportWidget::createView()
 	{

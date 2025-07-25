@@ -312,12 +312,12 @@ namespace volucris
 		}
 	}
 
-	void RHICommandList::drawPrimitive(RHIProgram* program, const DrawInfo& info)
+	void RHICommandList::drawPrimitive(RHIVertexArray* vao, RHIElementBuffer* ebo, const PrimitiveSegment& mesh)
 	{
-		setVertexArray(info.vao);
-		setBuffer(info.ebo);
+		setVertexArray(vao);
+		setBuffer(ebo);
 
-		glDrawElements(getGLElementDrawMode(info.segment.mode), info.segment.count, getGLElementType(info.segment.type), (void*)info.segment.offset);
+		glDrawElements(getGLElementDrawMode(mesh.mode), mesh.count, getGLElementType(mesh.type), (void*)mesh.offset);
 		GL_CHECK()
 	}
 }

@@ -1,7 +1,6 @@
 #ifndef __volucris_material_instance_h__
 #define __volucris_material_instance_h__
 
-#include <Engine/Game/GameObject.h>
 #include <Engine/Game/MaterialParameter.h>
 #include <Engine/Render/MaterialParameterInfo.h>
 #include <Engine/Game/Material.h>
@@ -11,19 +10,32 @@ namespace volucris
 {
 	class MaterialProxy;
 
-	class MaterialInstance : public GameObject
+	struct MaterialUpdateData
+	{
+		std::shared_ptr<MaterialInstanceProxy> proxy = nullptr;
+		std::vector<MaterialParameterUpdateInfo> infos;
+
+		bool isValid() const
+		{
+			return proxy && !infos.empty();
+		}
+	};
+
+	class MaterialInstance : public Material
 	{
 	public:
 		MaterialInstance();
 
-		MaterialInstance(std::string vss, std::string fss);
+		MaterialInstance(const SoftObject<Material>& material);
 
 		void setMaterial(const SoftObject<Material>& material);
+
+		const SoftObject<Material>& getMaterial() const { return m_material;  }
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
-			ar& boost::serialization::base_object<GameObject>(*this);
+			ar& boost::serialization::base_object<Material>(*this);
 			ar& m_material;
 			ar& m_floatParameters;
 			ar& m_vec4Parameters;
@@ -43,22 +55,18 @@ namespace volucris
 
 		std::vector<MaterialParameterInfo> getParameters();
 
+		void markDirty(bool dirty) { m_dirty = dirty; }
+
 		bool isDirty() const { return m_dirty; }
 
-		void update();
+		MaterialUpdateData getUpdateData();
 
 	protected:
-		MaterialFloatParameter& addParameter(const std::string& name, float value);
-
-		MaterialVector4Parameter& addParameter(const std::string& name, glm::vec4 value);
-
 		std::vector<MaterialParameterUpdateInfo> getUpdateParameterInfos();
 
-		void clearParameters()
-		{
-			m_floatParameters.clear();
-			m_vec4Parameters.clear();
-		}
+		std::vector<MaterialParameterUpdateInfo> getAllUpdateParameterInfos();
+
+		std::shared_ptr<MaterialInstanceProxy> createMaterialProxy() override;
 
 	private:
 		SoftObject<Material> m_material;
