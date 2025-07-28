@@ -58,7 +58,7 @@ namespace volucris
 		, m_uniforms()
 		, m_uniformBlocks()
 	{
-		
+		setMaterialSource(vss, fss);
 	}
 
 	void MaterialTemplate::setMaterialSource(const std::string& vss, const std::string& fss)

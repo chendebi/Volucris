@@ -144,7 +144,7 @@ namespace volucris
 		MaterialParameterTemplate()
 			: m_name()
 			, m_value()
-			, m_dirty(false)
+			, m_dirty(true)
 			, m_id(0)
 		{
 
@@ -153,7 +153,7 @@ namespace volucris
 		MaterialParameterTemplate(const std::string& name, const T& value=T())
 			: m_name(name)
 			, m_value(value)
-			, m_dirty(false)
+			, m_dirty(true)
 			, m_id(0)
 		{
 

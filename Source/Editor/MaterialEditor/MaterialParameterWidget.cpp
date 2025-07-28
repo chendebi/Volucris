@@ -102,6 +102,24 @@ namespace volucris
 				}
 			}
 		}
+
+		if (ImGui::CollapsingHeader("Property", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("Parent:");
+			ImGui::SameLine();
+			AssetData asset;
+			asset.className = "Material";
+			asset.path = m_material->getMaterial().getPath();
+			AssetItemWidget assetWidget("");
+			assetWidget.setAssetData(asset);
+			assetWidget.build();
+			if (assetWidget.isSelected())
+			{
+				m_material->setMaterial(assetWidget.getAssetData().path);
+				setMaterial(m_material);
+			}
+		}
+
 		ImGui::End();
 	}
 }

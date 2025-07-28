@@ -42,6 +42,7 @@ namespace volucris
 
 		m_floatParameters.clear();
 		m_vec4Parameters.clear();
+		m_texture2dParameters.clear();
 
 		if (!m_material)
 		{
@@ -90,6 +91,14 @@ namespace volucris
 					break;
 				}
 			}
+		}
+		m_dirty = true;
+		
+		if (auto proxy = tryGetMaterialProxy())
+		{
+			Renderer::getInstance().push([proxy, baseProxy= m_material->getBaseProxy()]() {
+				proxy->setMaterial(baseProxy);
+				});
 		}
 	}
 
