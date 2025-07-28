@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include "MaterialTemplate.h"
 #include <Engine/Game/MaterialInstance.h>
+#include <Common/AssetItemWidget.h>
   
 namespace volucris
 {
@@ -80,24 +81,16 @@ namespace volucris
 						break;
 					case volucris::MaterialParamterType::Texture2D:
 					{
-						SoftObject<Texture2D> texture = std::get<SoftObject<Texture2D>>(info.value);
-						if (ImGui::BeginCombo("##options", texture.getPath().c_str())) {
-							m_textureAssets = AssetManager::getInstance().getAssets<Texture2D>();
-							for (auto i = 0; i < m_textureAssets.size(); ++i)
-							{
-								auto& asset = m_textureAssets[i];
-								bool isSelected = texture == asset.path;
-								if (ImGui::Selectable(asset.path.c_str(), isSelected))
-								{
-									texture = SoftObject<Texture2D>(asset.path);
-									m_material->setTexture2DParameter(info.name, texture);
-								}
-								if (isSelected)
-								{
-									ImGui::SetItemDefaultFocus();
-								}
-							}
-							ImGui::EndCombo();
+						AssetData asset;
+						asset.className = "Texture2D";
+						asset.path = std::get<SoftObject<Texture2D>>(info.value).getPath();
+						AssetItemWidget assetWidget(info.name);
+						assetWidget.setAssetData(asset);
+						assetWidget.build();
+						if (assetWidget.isSelected())
+						{
+							paramter.desc.value = assetWidget.getAssetData().path;
+							m_material->setTexture2DParameter(info.name, assetWidget.getAssetData().path);
 						}
 					}
 						break;

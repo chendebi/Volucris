@@ -17,17 +17,19 @@ namespace volucris
 	public:
 		AssetItemWidget(const std::string& name);
 
-		void setClassName(const std::string& className);
+		void setAssetData(const AssetData& className);
 
 		void onBuild(bool) override;
 	
-		const AssetData& getAssetData() const;
+		const AssetData& getAssetData() const { return m_assetData; }
+
+		bool isSelected() const { return m_selected; }
 
 	private:
+		bool m_selected;
 		std::string m_name;
-		std::string m_className;
 		AssetData m_assetData;
-		int m_height;
+		std::vector<AssetData> m_assetDatas;
 	};
 }
 
