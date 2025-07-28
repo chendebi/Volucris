@@ -7,6 +7,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <Application/Application.h>
+#include <Core/Volucris.h>
 
 namespace volucris
 {
@@ -54,7 +55,7 @@ namespace volucris
 		}
 		else
 		{
-			const auto& infos = m_material->getParameterInfos();
+			const auto& infos = m_material->getParameters();
 			for (auto idx = 0; idx < infos.size(); ++idx)
 			{
 				const auto& info = infos[idx];
@@ -76,6 +77,13 @@ namespace volucris
 				}
 					break;
 				case volucris::MaterialParamterType::Mat4:
+					break;
+				case volucris::MaterialParamterType::Texture2D:
+				{
+					auto parameter = MaterialTexture2DParameter(info.name, std::get<SoftObject<Texture2D>>(info.value));
+					parameter.setId(idx);
+					m_texture2dParameters.push_back(parameter);
+				}
 					break;
 				default:
 					break;
@@ -146,6 +154,13 @@ namespace volucris
 			parameters.push_back(parameter.getUpdateInfo());
 			parameter.markDirty(false);
 		}
+
+		for (auto& parameter : m_texture2dParameters)
+		{
+			parameters.push_back(parameter.getUpdateInfo());
+			parameter.markDirty(false);
+		}
+
 		return parameters;
 	}
 
@@ -190,6 +205,25 @@ namespace volucris
 			if (param.getName() == name)
 			{
 				param.setValue(value);
+				m_dirty = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool MaterialInstance::setTexture2DParameter(const std::string& name, const SoftObject<Texture2D>& value)
+	{
+		for (auto& param : m_texture2dParameters)
+		{
+			if (param.getName() == name)
+			{
+				auto texture = value;
+				if (!texture.tryLoad())
+				{
+					V_LOG_WARN(Engine, "Failed to load texture for material instance parameter: " + name);
+				}
+				param.setValue(texture);
 				m_dirty = true;
 				return true;
 			}
