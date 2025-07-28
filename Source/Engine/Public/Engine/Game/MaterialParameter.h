@@ -171,6 +171,8 @@ namespace volucris
 
 		bool isDirty() const { return m_dirty; }
 
+		const T& getValue() const { return m_value; }
+
 		const std::string getName() const { return m_name; }
 
 		template <class Archive>

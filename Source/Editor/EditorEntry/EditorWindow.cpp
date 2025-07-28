@@ -25,6 +25,7 @@
 #include <Engine/Game/StaticMesh.h>
 #include <Engine/Game/StaticMeshComponent.h>
 #include <Engine/Game/MaterialInstance.h>
+#include <Common/AssetItemWidget.h>
 
 namespace fs = std::filesystem;
 
@@ -140,6 +141,10 @@ namespace volucris
         m_contentBrowserWidget->build(init);
 
         ImGui::Begin("Property");
+
+        static AssetItemWidget widget("test");
+        widget.build();
+
         ImGui::End();
 
         // 结束主窗口

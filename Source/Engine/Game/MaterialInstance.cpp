@@ -52,6 +52,7 @@ namespace volucris
 		{
 			m_floatParameters = inst->m_floatParameters;
 			m_vec4Parameters = inst->m_vec4Parameters;
+			m_texture2dParameters = inst->m_texture2dParameters;
 		}
 		else
 		{
@@ -92,18 +93,35 @@ namespace volucris
 		}
 	}
 
-	std::vector<MaterialParameterInfo> MaterialInstance::getParameters()
+	std::vector<MaterialParameter> MaterialInstance::getInstanceParameters() const
 	{
-		std::vector<MaterialParameterInfo> parameters;
-		parameters.reserve(m_floatParameters.size() + m_vec4Parameters.size());
+		std::vector<MaterialParameter> parameters;
+		parameters.reserve(m_floatParameters.size() + m_vec4Parameters.size() + m_texture2dParameters.size());
 		for (const auto& parameter : m_floatParameters)
 		{
-			parameters.push_back(parameter.getParameterInfo());
+			MaterialParameter param;
+			param.name = parameter.getName();
+			param.type = MaterialParamterType::Float;
+			param.value = parameter.getValue();
+			parameters.push_back(param);
 		}
 
 		for (const auto& parameter : m_vec4Parameters)
 		{
-			parameters.push_back(parameter.getParameterInfo());
+			MaterialParameter param;
+			param.name = parameter.getName();
+			param.type = MaterialParamterType::Vector4;
+			param.value = parameter.getValue();
+			parameters.push_back(param);
+		}
+
+		for (const auto& parameter : m_texture2dParameters)
+		{
+			MaterialParameter param;
+			param.name = parameter.getName();
+			param.type = MaterialParamterType::Texture2D;
+			param.value = parameter.getValue();
+			parameters.push_back(param);
 		}
 		return parameters;
 	}
@@ -137,6 +155,16 @@ namespace volucris
 				parameter.markDirty(false);
 			}
 		}
+
+		for (auto& parameter : m_texture2dParameters)
+		{
+			if (parameter.isDirty())
+			{
+				parameters.push_back(parameter.getUpdateInfo());
+				parameter.markDirty(false);
+			}
+		}
+
 		return parameters;
 	}
 

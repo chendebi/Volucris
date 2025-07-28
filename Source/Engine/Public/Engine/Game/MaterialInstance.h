@@ -58,7 +58,7 @@ namespace volucris
 
 		const std::vector<MaterialTexture2DParameter>& getTexture2DParamters() const { return m_texture2dParameters; }
 
-		std::vector<MaterialParameterInfo> getParameters();
+		std::vector<MaterialParameter> getInstanceParameters() const;
 
 		void markDirty(bool dirty) { m_dirty = dirty; }
 

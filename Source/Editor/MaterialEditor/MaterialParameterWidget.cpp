@@ -15,13 +15,13 @@ namespace volucris
 	{
 		m_material = material;
 		m_parameters.clear();
-		for (const auto& parameter : material->getParameters())
+		for (const auto& parameter : material->getInstanceParameters())
 		{
 			UniformProperty property;
 			std::dynamic_pointer_cast<MaterialTemplate>(material->getMaterial().object())->findProperty(parameter.name, property);
 			auto it = m_parameters.find(property.group);
 			Parameter param;
-			param.info = parameter;
+			param.desc = parameter;
 			param.property = std::move(property);
 			if (param.property.displayName.empty())
 			{
@@ -54,14 +54,14 @@ namespace volucris
 			{
 				for (auto& paramter : parameters)
 				{
-					auto& info = paramter.info;
+					auto& info = paramter.desc;
 					auto& property = paramter.property;
 
 					ImGui::Text(paramter.name.c_str());
 					ImGui::SameLine();
 
 					ImGui::PushID(idx);
-					auto type = paramter.info.type;
+					auto type = paramter.desc.type;
 					switch (type)
 					{
 					case volucris::MaterialParamterType::Float:
@@ -77,6 +77,29 @@ namespace volucris
 						}
 						break;
 					case volucris::MaterialParamterType::Mat4:
+						break;
+					case volucris::MaterialParamterType::Texture2D:
+					{
+						SoftObject<Texture2D> texture = std::get<SoftObject<Texture2D>>(info.value);
+						if (ImGui::BeginCombo("##options", texture.getPath().c_str())) {
+							m_textureAssets = AssetManager::getInstance().getAssets<Texture2D>();
+							for (auto i = 0; i < m_textureAssets.size(); ++i)
+							{
+								auto& asset = m_textureAssets[i];
+								bool isSelected = texture == asset.path;
+								if (ImGui::Selectable(asset.path.c_str(), isSelected))
+								{
+									texture = SoftObject<Texture2D>(asset.path);
+									m_material->setTexture2DParameter(info.name, texture);
+								}
+								if (isSelected)
+								{
+									ImGui::SetItemDefaultFocus();
+								}
+							}
+							ImGui::EndCombo();
+						}
+					}
 						break;
 					default:
 						break;
