@@ -103,7 +103,10 @@ namespace volucris
 
 		for (const auto& assetInfo : assetInfos)
 		{
-			m_items.push_back(createAssetItem(assetInfo));
+			if (auto item = createAssetItem(assetInfo))
+			{
+				m_items.push_back(std::move(item));
+			}
 		}
 		m_folderDirty = false;
 	}

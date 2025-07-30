@@ -91,6 +91,7 @@ namespace volucris
 			item.command = std::make_unique<DeleteAssetCommand>(this);
 			group.items.push_back(std::move(item));
 		}
+		addMenuContextGroup(std::move(group));
 	}
 
 	void MaterialContext::addMaterialMenuContexts()
