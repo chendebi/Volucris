@@ -416,5 +416,6 @@ namespace volucris
 		auto context = std::make_unique<MaterialInstanceContext>(this, item.get());
 		context->setAssetInfo(info);
 		item->setContext(std::move(context));
+		return item;
 	}
 }
