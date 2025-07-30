@@ -78,18 +78,18 @@ namespace volucris
 
 	void AssetContext::addAssetMenuContexts()
 	{
-		auto group = getMenuContextGroup(0);
+		MenuContextGroup group;
 		{
 			MenuContextItem item;
 			item.name = "Rename";
 			item.command = std::make_unique<RenameCommand>(this);
-			group->items.push_back(std::move(item));
+			group.items.push_back(std::move(item));
 		}
 		{
 			MenuContextItem item;
 			item.name = "Delete";
 			item.command = std::make_unique<DeleteAssetCommand>(this);
-			group->items.push_back(std::move(item));
+			group.items.push_back(std::move(item));
 		}
 	}
 
