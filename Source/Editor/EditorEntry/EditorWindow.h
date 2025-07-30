@@ -33,7 +33,7 @@ namespace volucris
 	public:
 		EditorWindow();
 
-		RHITexture2D* getEditorIconTexture() const;
+		std::shared_ptr<RHITexture2D> getEditorIconTexture() const;
 
 		StaticMesh* getQuadMesh() const;
 
@@ -42,7 +42,7 @@ namespace volucris
 		void onRendererDestroy(RHICommandList* cmdList) override;
 
 	private:
-		std::unique_ptr<RHITexture2D> m_iconTexture;
+		std::shared_ptr<RHITexture2D> m_iconTexture;
 		std::unique_ptr<StaticMesh> m_quadMesh;
 		std::string m_iniFileName;
 	};

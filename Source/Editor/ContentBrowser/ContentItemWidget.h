@@ -14,47 +14,15 @@
 
 namespace volucris
 {
-	class RHITexture2D;
+	class ItemContext;
 	class ContentItemWidget;
-
-	DECLARE_EVENT_DELEGATE(ItemEvent, void, ContentItemWidget*)
-	DECLARE_EVENT_DELEGATE(ItemNodeEvent, void, ContentItemWidget*, const FileNode&)
-	DECLARE_EVENT_DELEGATE(MaterialAssetEvent, void, SoftObject<MaterialTemplate>)
 
 	class ContentItemWidget
 	{
 	public:
-		ItemEvent Clicked;
-		ItemEvent DoubleClicked;
-		ItemEvent ContextMenuTriggered;
-		ItemNodeEvent NodeNameChanged;
-
-		MaterialAssetEvent ReloadMaterial;
-
-		MaterialAssetEvent CreateInstance;
-
-	public:
 		ContentItemWidget();
 
-		ContentItemWidget(const FileNode& node);
-
-		ContentItemWidget(RHITexture2D* texture, Point iconPos, Size iconSize);
-
-		void setFileNode(const FileNode& node);
-
-		void setAssetData(const AssetData& asset)
-		{
-			m_assetData = asset;
-		}
-
-		const AssetData& getAssetData() const
-		{
-			return m_assetData;
-		}
-
-		void setTexture(RHITexture2D* texture);
-
-		void setIcon(Point iconPos, Size iconSize);
+		void setContext(std::unique_ptr<ItemContext> asset);
 
 		void setScale(float scale);
 
@@ -65,8 +33,6 @@ namespace volucris
 		bool isSelected() const { return m_selectable && m_selected; }
 
 		static glm::vec2 getItemSize(float scale = 1.0);
-
-		const FileNode& getFileNode() const { return m_node; }
 
 		void setSelected(bool selected) { m_selected = selected; }
 
@@ -82,13 +48,9 @@ namespace volucris
 
 		bool isDeleteSelected() const { return m_deleteSelected; }
 
-	private:
-		void update();
+		ItemContext* getItemContext() const;
 
 	private:
-		RHITexture2D* m_texture;
-		glm::vec2 m_minUV;
-		glm::vec2 m_maxUV;
 		glm::vec2 m_size;
 		glm::vec2 m_iconSpace;
 		glm::vec2 m_iconDrawSize;
@@ -97,16 +59,13 @@ namespace volucris
 		glm::vec4 m_hoverColor;
 		glm::vec4 m_selectedColor;
 		bool m_selected;
-		FileNode m_node;
-		Point m_iconPos;
-		Size m_iconSize;
 		char m_text[64];
 		Timer m_timer;
 		bool m_clicked;
 		bool m_editing;
-		AssetData m_assetData;
 		bool m_deleteSelected;
 		bool m_selectable;
+		std::unique_ptr<ItemContext> m_asset;
 	};
 }
 

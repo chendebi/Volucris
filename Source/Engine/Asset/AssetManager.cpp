@@ -49,7 +49,7 @@ namespace volucris
 		package->setAssetData(assetData);
 		m_assets[packageName] = object;
 		m_assetDatas[packageName] = assetData;
-		AssetRegistered.invoke(assetData);
+		AssetRegistered.invoke(package);
 
 		return true;
 	}
@@ -64,7 +64,7 @@ namespace volucris
 		auto assetData = it->second;
 		m_assetDatas.erase(it);
 		m_assets.erase(packageName);
-		AssetUnregistered.invoke(assetData);
+		AssetUnregistered.invoke(packageName);
 	}
 
 	std::shared_ptr<GameObject> AssetManager::load(const std::string& packageName, World* world)
@@ -169,7 +169,7 @@ namespace volucris
 				if (currentOnly)
 				{
 					AssetPath path(assetData.path);
-					if (path.packagePath != directory)
+					if (path.path != directory)
 					{
 						continue; // 只获取当前目录下的资源
 					}

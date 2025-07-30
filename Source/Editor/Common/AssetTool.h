@@ -7,8 +7,22 @@
 
 namespace volucris
 {
+	struct AssetInfo
+	{
+		AssetData data;
+		std::shared_ptr<GameObject> object = nullptr;
+		bool dirty = false;
+	};
+
+	DECLARE_EVENT_MUTI_DELEGATE(AssetStateChangeEvent, void, const AssetInfo&)
+	DECLARE_EVENT_MUTI_DELEGATE(AssetDeletedEvent, void, const std::string&)
+
 	class AssetTool
 	{
+	public:
+		AssetStateChangeEvent AssetDirtyStateChanged;
+		AssetDeletedEvent AssetDeleted;
+
 	public:
 		~AssetTool() = default;
 
@@ -24,8 +38,14 @@ namespace volucris
 
 		void renamePackage(const std::shared_ptr<Package>& package, const std::string& packageName);
 
+		std::vector<AssetInfo> getAssetsInfoInFolder(const std::string& folder, bool recursion=false) const;
+
 	private:
 		void removeDirtyAsset(const std::string& packageName);
+
+		void onAssetRegistered(Package* package);
+
+		void onAssetUnregistered(const std::string& packageName);
 
 	private:
 		std::map<std::string, std::shared_ptr<GameObject>> m_dirtyAssets;

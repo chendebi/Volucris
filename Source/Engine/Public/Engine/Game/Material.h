@@ -38,7 +38,7 @@ namespace volucris
 
 		void setParameters(const std::vector<MaterialParameter>& parameters)
 		{
-			m_parameters = std::move(parameters);
+			m_parameters = parameters;
 		}
 
 		const std::vector<MaterialParameter>& getParameters() const { return m_parameters; }

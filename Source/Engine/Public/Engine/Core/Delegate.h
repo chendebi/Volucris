@@ -246,7 +246,7 @@ namespace volucris
 
 		struct ObjectCallable
 		{
-			Object* object;
+			void* object;
 			EventHandle handle;
 			void call(Args&&... args)
 			{

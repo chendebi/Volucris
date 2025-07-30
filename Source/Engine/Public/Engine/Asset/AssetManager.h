@@ -9,7 +9,8 @@
 
 namespace volucris
 {
-	DECLARE_EVENT_MUTI_DELEGATE(AssetRegisterEvent, void, const AssetData&)
+	DECLARE_EVENT_MUTI_DELEGATE(AssetRegisterEvent, void, Package*)
+	DECLARE_EVENT_MUTI_DELEGATE(AssetUnRegisterEvent, void, const std::string&)
 
 	class World;
 	class Package;
@@ -18,7 +19,7 @@ namespace volucris
 	{
 	public:
 		AssetRegisterEvent AssetRegistered;
-		AssetRegisterEvent AssetUnregistered;
+		AssetUnRegisterEvent AssetUnregistered;
 
 	public:
 		~AssetManager() = default;
@@ -48,6 +49,16 @@ namespace volucris
 			if (auto asset = load(packageName, world))
 			{
 				return std::dynamic_pointer_cast<T>(asset);
+			}
+			return nullptr;
+		}
+
+		std::shared_ptr<GameObject> tryLoad(const std::string& packageName, World* world = nullptr)
+		{
+			auto it = m_assets.find(packageName);
+			if (it != m_assets.end() && !it->second.expired())
+			{
+				return it->second.lock();
 			}
 			return nullptr;
 		}
