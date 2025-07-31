@@ -6,44 +6,86 @@ namespace volucris
 	class ItemContext;
 	class AssetContext;
 	class FolderContext;
+	class MaterialContext;
+	class MaterialInstanceContext;
 
-	class MenuContextCommands
+	class MenuContextCommand
 	{
 	public:
-		MenuContextCommands();
+		MenuContextCommand();
 
-		MenuContextCommands(ItemContext* context);
-
-		virtual ~MenuContextCommands() = default;
+		virtual ~MenuContextCommand() = default;
 
 		virtual void execute() = 0;
 
-	protected:
-		ItemContext* m_context;
 	};
 
-	class RenameCommand : public MenuContextCommands
+	class RenameCommand : public MenuContextCommand
 	{
 	public:
 		RenameCommand(ItemContext* context);
 
 		void execute() override;
+
+	private:
+		ItemContext* m_context;
 	};
 
-	class DeleteFolderCommand : public MenuContextCommands
+	class DeleteFolderCommand : public MenuContextCommand
 	{
 	public:
 		DeleteFolderCommand(FolderContext* context);
 
 		void execute() override;
+
+	private:
+		FolderContext* m_context;
 	};
 
-	class DeleteAssetCommand : public MenuContextCommands
+	class SaveAssetCommand : public MenuContextCommand
+	{
+	public:
+		SaveAssetCommand(AssetContext* context);
+
+		void execute() override;
+
+	private:
+		AssetContext* m_context;
+	};
+
+	class DeleteAssetCommand : public MenuContextCommand
 	{
 	public:
 		DeleteAssetCommand(AssetContext* context);
 
 		void execute() override;
+
+	private:
+		AssetContext* m_context;
+	};
+
+	class CreateMaterialInstanceCommand : public MenuContextCommand
+	{
+	public:
+		CreateMaterialInstanceCommand(MaterialContext* context);
+
+		CreateMaterialInstanceCommand(MaterialInstanceContext* context);
+		
+		void execute() override;
+
+	private:
+		AssetContext* m_context;
+	};
+
+	class OpenMaterialInstanceEditorCommand : public MenuContextCommand
+	{
+	public:
+		OpenMaterialInstanceEditorCommand(MaterialInstanceContext* context);
+
+		void execute() override;
+
+	private:
+		MaterialInstanceContext* m_context;
 	};
 }
 

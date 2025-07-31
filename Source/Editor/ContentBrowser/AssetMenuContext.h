@@ -14,7 +14,7 @@ namespace volucris
 	struct MenuContextItem
 	{
 		std::string name;
-		std::unique_ptr<MenuContextCommands> command;
+		std::unique_ptr<MenuContextCommand> command;
 	};
 
 	struct MenuContextGroup
@@ -112,6 +112,11 @@ namespace volucris
 			return nullptr;
 		}
 
+		void clearMenuContextGroups()
+		{
+			m_menuGroups.clear();
+		}
+
 	private:
 		void updateDisplayName()
 		{
@@ -152,18 +157,26 @@ namespace volucris
 			: ItemContext(contentWidget, itemWidget)
 			, m_assetInfo()
 		{
-			addAssetMenuContexts();
 		}
 
 		void setAssetInfo(const AssetInfo& info)
 		{
+			m_assetInfo = info;
 			setAssetPath(m_assetInfo.data.path);
+			setDirty(m_assetInfo.dirty);
+			clearMenuContextGroups();
+			buildMenuCountextGroup();
+		}
+
+		const AssetInfo& getAssetInfo() const
+		{
+			return m_assetInfo;
 		}
 
 		void rename(const std::string& newName) override;
 
-	private:
-		void addAssetMenuContexts();
+	protected:
+		virtual void buildMenuCountextGroup();
 
 	private:
 		AssetInfo m_assetInfo;
@@ -175,11 +188,11 @@ namespace volucris
 		MaterialContext(ContentWidget* contentWidget, ContentItemWidget* itemWidget)
 			: AssetContext(contentWidget, itemWidget)
 		{
-			addMaterialMenuContexts();
+			
 		}
 
-	private:
-		void addMaterialMenuContexts();
+	protected:
+		void buildMenuCountextGroup() override;
 	};
 
 	class MaterialInstanceContext : public AssetContext
@@ -188,11 +201,11 @@ namespace volucris
 		MaterialInstanceContext(ContentWidget* contentWidget, ContentItemWidget* itemWidget)
 			: AssetContext(contentWidget, itemWidget)
 		{
-			addMaterialInstanceMenuContexts();
+			
 		}
 
-	private:
-		void addMaterialInstanceMenuContexts();
+	protected:
+		void buildMenuCountextGroup() override;
 	};
 }
 

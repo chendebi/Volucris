@@ -40,7 +40,7 @@ namespace volucris
 
 		void setClicked(bool clicked) { m_clicked = clicked; }
 
-		void setEditing(bool editing) { m_editing = editing; }
+		void setEditing(bool editing);
 
 		void setDisplayName(const std::string& name);
 

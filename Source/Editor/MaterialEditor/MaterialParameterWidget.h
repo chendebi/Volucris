@@ -28,10 +28,8 @@ namespace volucris
 			UniformProperty property;
 		};
 
-		std::vector<AssetData> m_textureAssets;
 		std::shared_ptr<MaterialInstance> m_material;
 		std::unordered_map<std::string, std::vector<Parameter>> m_parameters;
-		bool m_init;
 	};
 }
 

@@ -76,9 +76,16 @@ namespace volucris
 
 	}
 
-	void AssetContext::addAssetMenuContexts()
+	void AssetContext::buildMenuCountextGroup()
 	{
 		MenuContextGroup group;
+		if (m_assetInfo.dirty)
+		{
+			MenuContextItem item;
+			item.name = "Save";
+			item.command = std::make_unique<SaveAssetCommand>(this);
+			group.items.push_back(std::move(item));
+		}
 		{
 			MenuContextItem item;
 			item.name = "Rename";
@@ -94,14 +101,15 @@ namespace volucris
 		addMenuContextGroup(std::move(group));
 	}
 
-	void MaterialContext::addMaterialMenuContexts()
+	void MaterialContext::buildMenuCountextGroup()
 	{
+		AssetContext::buildMenuCountextGroup();
 		{
 			{
 				auto group = getMenuContextGroup(0);
 				MenuContextItem item;
 				item.name = "Create Instance";
-				item.command = std::make_unique<RenameCommand>(this);
+				item.command = std::make_unique<CreateMaterialInstanceCommand>(this);
 				group->items.insert(group->items.begin(), std::move(item));
 			}
 			MenuContextGroup group;
@@ -115,21 +123,22 @@ namespace volucris
 			addMenuContextGroup(std::move(group));
 		}
 	}
-	void MaterialInstanceContext::addMaterialInstanceMenuContexts()
+	void MaterialInstanceContext::buildMenuCountextGroup()
 	{
+		AssetContext::buildMenuCountextGroup();
 		{
 			auto group = getMenuContextGroup(0);
 			{
 				MenuContextItem item;
 				item.name = "Open Editor";
-				item.command = std::make_unique<RenameCommand>(this);
+				item.command = std::make_unique<OpenMaterialInstanceEditorCommand>(this);
 				group->items.insert(group->items.begin(), std::move(item));
 			}
 
 			{
 				MenuContextItem item;
 				item.name = "Create Instance";
-				item.command = std::make_unique<RenameCommand>(this);
+				item.command = std::make_unique<CreateMaterialInstanceCommand>(this);
 				group->items.insert(group->items.begin(), std::move(item));
 			}
 		}

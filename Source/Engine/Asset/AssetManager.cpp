@@ -100,8 +100,13 @@ namespace volucris
 		return object;
 	}
 
-	AssetData AssetManager::loadAssetData(const std::string& packageName) const
+	AssetData AssetManager::getAssetData(const std::string& packageName) const
 	{
+		auto it = m_assetDatas.find(packageName);
+		if (it != m_assetDatas.end())
+		{
+			return it->second;
+		}
 		AssetReader reader = AssetReader(packageName);
 		return reader.readAssetData();
 	}
@@ -132,7 +137,7 @@ namespace volucris
 		{
 			if (node.type == EFileType::Asset)
 			{
-				const auto assetData = loadAssetData(node.path);
+				const auto assetData = getAssetData(node.path);
 				if (!assetData.className.empty())
 				{
 					m_assetDatas[node.path] = assetData;
@@ -159,14 +164,14 @@ namespace volucris
 		return referenceAssets;
 	}
 
-	std::vector<AssetData> AssetManager::getAssetsInDirectory(const std::string& directory, bool currentOnly) const
+	std::vector<AssetData> AssetManager::getAssetsInDirectory(const std::string& directory, bool recursion) const
 	{
 		std::vector<AssetData> assets;
 		for (const auto& [path, assetData] : m_assetDatas)
 		{
 			if (assetData.path.find(directory) == 0)
 			{
-				if (currentOnly)
+				if (!recursion)
 				{
 					AssetPath path(assetData.path);
 					if (path.path != directory)

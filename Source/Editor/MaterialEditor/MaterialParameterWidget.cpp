@@ -9,6 +9,7 @@ namespace volucris
 	MaterialParameterWidget::MaterialParameterWidget()
 		: Widget()
 		, m_material(nullptr)
+		, m_parameters()
 	{
 	}
 

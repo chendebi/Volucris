@@ -7,6 +7,9 @@
 #include <Engine/Game/MaterialInstance.h>
 #include "AssetObjectHelper.h"
 #include <Engine/FileSystem/FileSystem.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace volucris
 {
@@ -37,7 +40,7 @@ namespace volucris
 			package->setAssetData(assetData);
 		}
 
-		AssetWriter writer = AssetWriter(std::shared_ptr<Package>(package));
+		AssetWriter writer = AssetWriter(package);
 		
 		if (writer.write())
 		{
@@ -68,7 +71,7 @@ namespace volucris
 
 		m_dirtyAssets[packageName] = object;
 		AssetInfo info;
-		info.data = AssetManager::getInstance().loadAssetData(packageName);
+		info.data = AssetManager::getInstance().getAssetData(packageName);
 		info.object = object;
 		info.dirty = true;
 		AssetDirtyStateChanged.invoke(info);
@@ -120,6 +123,26 @@ namespace volucris
 		return infos;
 	}
 
+	std::string AssetTool::getDefaultPackageName(const std::string& folderPath, const std::string& name)
+	{
+		fs::path dirpath(folderPath);
+		std::string packageName = (dirpath / name).generic_u8string();
+		std::string assetName = fmt::format("{}.asset", packageName);
+		if (gFileSystem.fileExists(assetName) || AssetManager::getInstance().isPackageRegistered(packageName))
+		{
+			for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
+			{
+				packageName = (dirpath / fmt::format("{}_{}", name, i)).generic_u8string();
+				assetName = fmt::format("{}.asset", packageName);
+				if (!gFileSystem.fileExists(assetName) && !AssetManager::getInstance().isPackageRegistered(packageName))
+				{
+					break;
+				}
+			}
+		}
+		return packageName;
+	}
+
 	void AssetTool::removeDirtyAsset(const std::string& packageName)
 	{
 		auto it = m_dirtyAssets.find(packageName);
@@ -128,7 +151,7 @@ namespace volucris
 			return;
 		}
 		AssetInfo info;
-		info.data = AssetManager::getInstance().loadAssetData(packageName);
+		info.data = AssetManager::getInstance().getAssetData(packageName);
 		info.object = it->second;
 		info.dirty = false;
 		m_dirtyAssets.erase(it);
@@ -143,7 +166,12 @@ namespace volucris
 			V_LOG_WARN(Editor, "AssetTool: Package {} is already registered as dirty.", packageName);
 			return;
 		}
-		addDirtyAsset(packageName, package->getAssetObject());
+		AssetInfo info;
+		info.data = package->getAssetData();
+		info.dirty = true;
+		info.object = package->getAssetObject();
+		m_dirtyAssets.insert({ packageName, package->getAssetObject() });
+		AssetCreated.invoke(info);
 	}
 
 	void AssetTool::onAssetUnregistered(const std::string& packageName)

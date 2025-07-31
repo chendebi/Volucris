@@ -40,6 +40,10 @@ namespace volucris
 			ar& m_floatParameters;
 			ar& m_vec4Parameters;
 			ar& m_texture2dParameters;
+			if (Archive::is_loading::value)
+			{
+				m_material.tryLoad();
+			}
 		}
 
 		bool setFloatParameter(const std::string& name, float value);

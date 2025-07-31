@@ -24,25 +24,6 @@ namespace fs = std::filesystem;
 
 namespace volucris
 {
-	static std::string getDefaultPackageName(const fs::path& dirpath, const std::string& name)
-	{
-		std::string packageName = (dirpath / name).generic_u8string();
-		std::string assetName = fmt::format("{}.asset", packageName);
-		if (gFileSystem.fileExists(assetName) || AssetManager::getInstance().isPackageRegistered(packageName))
-		{
-			for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
-			{
-				packageName = (dirpath / fmt::format("{}_{}", name, i)).generic_u8string();
-				assetName = fmt::format("{}.asset", packageName);
-				if (!gFileSystem.fileExists(assetName) && !AssetManager::getInstance().isPackageRegistered(packageName))
-				{
-					break;
-				}
-			}
-		}
-		return packageName;
-	}
-
 	static std::string getDefaultFolderName(const fs::path& dirpath, const std::string& name)
 	{
 		std::string folderName = (dirpath / name).generic_u8string();
@@ -69,12 +50,13 @@ namespace volucris
 		, m_folder()
 	{
 		setCurrentFolder(u8"/Engine/Content/Editor");
+
+		gAssetTool.AssetCreated.bindObject(this, &ContentWidget::onAssetCreated);
 	}
 
 	ContentWidget::~ContentWidget()
 	{
-		AssetManager::getInstance().AssetRegistered.unbind(this);
-		AssetManager::getInstance().AssetUnregistered.unbind(this);
+		gAssetTool.AssetCreated.unbind(this);
 	}
 
 	void ContentWidget::setCurrentFolder(const std::string& folder)
@@ -262,7 +244,7 @@ namespace volucris
 				if (loader.load())
 				{
 					const auto name = path.stem().generic_u8string();
-					const auto packageName = getDefaultPackageName(cpath, name);
+					const auto packageName = AssetTool::getDefaultPackageName(m_folder, name);
 					auto package = std::make_shared<Package>(packageName);
 					auto texture = std::make_shared<Texture2D>(loader.getTextureData());
 					package->setObject(texture);
@@ -282,7 +264,7 @@ namespace volucris
 					const auto& resources = loader.getMeshes();
 					for (const auto& res : resources)
 					{
-						const auto packageName = getDefaultPackageName(cpath, res.name);
+						const auto packageName = AssetTool::getDefaultPackageName(m_folder, res.name);
 						auto package = std::make_shared<Package>(packageName);
 						package->setObject(res.mesh);
 						if (AssetManager::getInstance().registry(package.get()))
@@ -337,7 +319,7 @@ namespace volucris
 			if (loader.load())
 			{
 				auto mat = loader.getMaterial();
-				const auto packageName = getDefaultPackageName(cpath, loader.getAssetName());
+				const auto packageName = AssetTool::getDefaultPackageName(m_folder, loader.getAssetName());
 				auto package = std::make_shared<Package>(packageName);
 				package->setObject(mat);
 				if (AssetManager::getInstance().registry(package.get()))
@@ -347,6 +329,24 @@ namespace volucris
 			}
 		}
 		return true;
+	}
+
+	void ContentWidget::onAssetCreated(const AssetInfo& assetInfo)
+	{
+		AssetPath path = AssetPath(assetInfo.data.path);
+		if (path.path != m_folder)
+		{
+			return;
+		}
+		if (auto item = createAssetItem(assetInfo))
+		{
+			item->setDisplayName(path.name);
+			item->setEditing(true);
+			auto proxy = item.get();
+			m_items.push_back(std::move(item));
+			m_multiSelect = false;
+			setSelectedItem(proxy);
+		}
 	}
 
 	std::unique_ptr<ContentItemWidget> ContentWidget::createFolderItem(const std::string& fullpath)
@@ -379,12 +379,12 @@ namespace volucris
 
 		if (assetInfo.data.className == "Material")
 		{
-			thumbnail.pos = { 2, 0 };
+			thumbnail.pos = { 1, 0 };
 			item = createMaterialItem(assetInfo);
 		}
 		else if (assetInfo.data.className == "MaterialInstance")
 		{
-			thumbnail.pos = { 2, 0 };
+			thumbnail.pos = { 1, 0 };
 			item = createMaterialInstanceItem(assetInfo);
 		}
 		else

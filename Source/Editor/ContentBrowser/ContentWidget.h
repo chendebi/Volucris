@@ -31,6 +31,8 @@ namespace volucris
 			m_folderDirty = true;
 		}
 
+		const std::string& getCurrentFolder() const { return m_folder; }
+
 	protected:
 		void onBuild(bool init) override;
 
@@ -40,7 +42,7 @@ namespace volucris
 
 		bool onDrop(DropEvent* event) override;
 
-		void onAssetRegistered(Package* package);
+		void onAssetCreated(const AssetInfo& assetInfo);
 
 		void onAssetUnregistered(const std::string& packageName);
 

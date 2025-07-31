@@ -14,13 +14,14 @@ namespace volucris
 		bool dirty = false;
 	};
 
-	DECLARE_EVENT_MUTI_DELEGATE(AssetStateChangeEvent, void, const AssetInfo&)
+	DECLARE_EVENT_MUTI_DELEGATE(AssetInfoEvent, void, const AssetInfo&)
 	DECLARE_EVENT_MUTI_DELEGATE(AssetDeletedEvent, void, const std::string&)
 
 	class AssetTool
 	{
 	public:
-		AssetStateChangeEvent AssetDirtyStateChanged;
+		AssetInfoEvent AssetCreated;
+		AssetInfoEvent AssetDirtyStateChanged;
 		AssetDeletedEvent AssetDeleted;
 
 	public:
@@ -39,6 +40,8 @@ namespace volucris
 		void renamePackage(const std::shared_ptr<Package>& package, const std::string& packageName);
 
 		std::vector<AssetInfo> getAssetsInfoInFolder(const std::string& folder, bool recursion=false) const;
+
+		static std::string getDefaultPackageName(const std::string& folderPath, const std::string& name);
 
 	private:
 		void removeDirtyAsset(const std::string& packageName);

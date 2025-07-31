@@ -195,6 +195,12 @@ namespace volucris
 		return m_asset.get();
 	}
 
+	void ContentItemWidget::setEditing(bool editing)
+	{
+		m_editing = editing;
+		setDisplayName(m_editing ? m_asset->getAssetName() : m_asset->getDisplayName());
+	}
+
 	void ContentItemWidget::setDisplayName(const std::string& name)
 	{
 		const auto size = name.length() < 64 ? name.length() : 63;

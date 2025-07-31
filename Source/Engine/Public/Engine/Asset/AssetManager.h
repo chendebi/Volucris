@@ -63,7 +63,7 @@ namespace volucris
 			return nullptr;
 		}
 
-		AssetData loadAssetData(const std::string& packageName) const;
+		AssetData getAssetData(const std::string& packageName) const;
 
 		std::vector<AssetData> getAssets(const std::string& className) const;
 
@@ -76,7 +76,7 @@ namespace volucris
 
 		std::vector<std::string> getReferenceAssets(const std::string& packageName) const;
 
-		std::vector<AssetData> getAssetsInDirectory(const std::string& directory, bool currentOnly=true) const;
+		std::vector<AssetData> getAssetsInDirectory(const std::string& directory, bool recursion =false) const;
 
 	private:
 		void scanAssets(const std::string& rootPath);
