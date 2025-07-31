@@ -34,10 +34,16 @@ namespace volucris
 			, m_menuGroups()
 			, m_contentWidget(contentWidget)
 			, m_itemWidget(itemWidget)
+			, m_executionCommand(nullptr)
 		{
 		}
 
 		virtual ~ItemContext() = default;
+
+		const std::string& getAssetPath() const
+		{
+			return m_assetPath.path;
+		}
 
 		const std::string& getAssetName() const
 		{
@@ -55,6 +61,8 @@ namespace volucris
 		{
 			m_dirty = dirty;
 			updateDisplayName();
+			clearMenuContextGroups();
+			buildMenuCountextGroup();
 		}
 
 		virtual void clicked();
@@ -102,6 +110,18 @@ namespace volucris
 			m_menuGroups.push_back(std::move(group));
 		}
 
+		bool isDirty() const
+		{
+			return m_dirty;
+		}
+
+		bool shouldExecuteCommmand() const
+		{
+			return m_executionCommand != nullptr;
+		}
+
+		void execute();
+
 	protected:
 		MenuContextGroup* getMenuContextGroup(size_t index)
 		{
@@ -123,12 +143,15 @@ namespace volucris
 			m_displayName = m_dirty ? fmt::format("*{}", m_assetPath.name) : m_assetPath.name;
 		}
 
+		virtual void buildMenuCountextGroup() {}
+
 	private:
 		bool m_dirty;
 		AssetPath m_assetPath;
 		std::string m_displayName;
 		Thumbnail m_thumbnail;
 		std::vector<MenuContextGroup> m_menuGroups;
+		MenuContextCommand* m_executionCommand;
 
 	protected:
 		ContentWidget* m_contentWidget;
@@ -145,7 +168,7 @@ namespace volucris
 		void doubleClicked() override;
 
 	private:
-		void init();
+		void buildMenuCountextGroup() override;
 	};
 
 	
@@ -176,7 +199,7 @@ namespace volucris
 		void rename(const std::string& newName) override;
 
 	protected:
-		virtual void buildMenuCountextGroup();
+		void buildMenuCountextGroup() override;
 
 	private:
 		AssetInfo m_assetInfo;
@@ -199,6 +222,19 @@ namespace volucris
 	{
 	public:
 		MaterialInstanceContext(ContentWidget* contentWidget, ContentItemWidget* itemWidget)
+			: AssetContext(contentWidget, itemWidget)
+		{
+			
+		}
+
+	protected:
+		void buildMenuCountextGroup() override;
+	};
+
+	class Texture2DContext : public AssetContext
+	{
+	public:
+		Texture2DContext(ContentWidget* contentWidget, ContentItemWidget* itemWidget)
 			: AssetContext(contentWidget, itemWidget)
 		{
 			

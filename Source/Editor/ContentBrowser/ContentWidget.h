@@ -33,6 +33,8 @@ namespace volucris
 
 		const std::string& getCurrentFolder() const { return m_folder; }
 
+		void addNameChangedPackageName(const std::shared_ptr<Package>& package, const std::string& newPackageName);
+
 	protected:
 		void onBuild(bool init) override;
 
@@ -43,6 +45,10 @@ namespace volucris
 		bool onDrop(DropEvent* event) override;
 
 		void onAssetCreated(const AssetInfo& assetInfo);
+
+		void onAssetDirty(const AssetInfo& assetInfo);
+
+		void onAssetLoaded(Package* package);
 
 		void onAssetUnregistered(const std::string& packageName);
 
@@ -55,6 +61,10 @@ namespace volucris
 
 		std::unique_ptr<ContentItemWidget> createMaterialInstanceItem(const AssetInfo& assetInfo);
 
+		std::unique_ptr<ContentItemWidget> createTexture2DItem(const AssetInfo& assetInfo);
+
+		std::unique_ptr<ContentItemWidget> createStaticMeshItem(const AssetInfo& assetInfo);
+
 	private:
 		float m_scale;
 		glm::vec2 m_itemSize;
@@ -62,6 +72,7 @@ namespace volucris
 		bool m_multiSelect;
 		bool m_folderDirty;
 		std::string m_folder;
+		std::vector<std::pair<std::shared_ptr<Package>, std::string>> m_nameChangedPackages;
 	};
 }
 

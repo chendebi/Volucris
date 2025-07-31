@@ -16,7 +16,7 @@ namespace volucris
 	public:
 		MaterialParameterWidget();
 
-		void setMaterial(const std::shared_ptr<MaterialInstance>& material);
+		void setMaterial(const SoftObject<MaterialInstance>& material);
 
 		void onBuild(bool) override;
 
@@ -28,7 +28,7 @@ namespace volucris
 			UniformProperty property;
 		};
 
-		std::shared_ptr<MaterialInstance> m_material;
+		SoftObject<MaterialInstance> m_material;
 		std::unordered_map<std::string, std::vector<Parameter>> m_parameters;
 	};
 }

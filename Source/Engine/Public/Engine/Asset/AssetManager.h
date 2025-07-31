@@ -9,8 +9,9 @@
 
 namespace volucris
 {
-	DECLARE_EVENT_MUTI_DELEGATE(AssetRegisterEvent, void, Package*)
+	DECLARE_EVENT_MUTI_DELEGATE(PackageEvent, void, Package*)
 	DECLARE_EVENT_MUTI_DELEGATE(AssetUnRegisterEvent, void, const std::string&)
+	DECLARE_EVENT_MUTI_DELEGATE(AssetLoaded, void, Package*)
 
 	class World;
 	class Package;
@@ -18,7 +19,8 @@ namespace volucris
 	class AssetManager
 	{
 	public:
-		AssetRegisterEvent AssetRegistered;
+		PackageEvent AssetRegistered;
+		PackageEvent AssetLoaded;
 		AssetUnRegisterEvent AssetUnregistered;
 
 	public:

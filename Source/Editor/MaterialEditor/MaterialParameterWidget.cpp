@@ -3,24 +3,38 @@
 #include "MaterialTemplate.h"
 #include <Engine/Game/MaterialInstance.h>
 #include <Common/AssetItemWidget.h>
+#include <Common/AssetTool.h>
   
 namespace volucris
 {
 	MaterialParameterWidget::MaterialParameterWidget()
 		: Widget()
-		, m_material(nullptr)
+		, m_material()
 		, m_parameters()
 	{
 	}
 
-	void MaterialParameterWidget::setMaterial(const std::shared_ptr<MaterialInstance>& material)
+	void MaterialParameterWidget::setMaterial(const SoftObject<MaterialInstance>& material)
 	{
 		m_material = material;
 		m_parameters.clear();
-		for (const auto& parameter : material->getInstanceParameters())
+
+		if (!m_material.tryLoad())
+		{
+			return;
+		}
+
+		for (const auto& parameter : m_material->getInstanceParameters())
 		{
 			UniformProperty property;
-			std::dynamic_pointer_cast<MaterialTemplate>(material->getMaterial().object())->findProperty(parameter.name, property);
+			if (auto baseMaterial = m_material->getBaseMaterial())
+			{
+				if (auto tempMaterial = dynamic_cast<MaterialTemplate*>(baseMaterial))
+				{
+					tempMaterial->findProperty(parameter.name, property);
+				}
+			}
+			
 			auto it = m_parameters.find(property.group);
 			Parameter param;
 			param.desc = parameter;
@@ -70,12 +84,14 @@ namespace volucris
 						if (ImGui::DragFloat("##", std::get_if<float>(&info.value), 0.1f))
 						{
 							m_material->setFloatParameter(info.name, std::get<float>(info.value));
+							gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 						}
 						break;
 					case volucris::MaterialParamterType::Vector4:
 						if (ImGui::DragFloat4("##", glm::value_ptr(std::get<glm::vec4>(info.value)), 0.1f))
 						{
 							m_material->setVector4Parameter(info.name, std::get<glm::vec4>(info.value));
+							gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 						}
 						break;
 					case volucris::MaterialParamterType::Mat4:
@@ -92,6 +108,7 @@ namespace volucris
 						{
 							paramter.desc.value = assetWidget.getAssetData().path;
 							m_material->setTexture2DParameter(info.name, assetWidget.getAssetData().path);
+							gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 						}
 					}
 						break;
@@ -118,6 +135,7 @@ namespace volucris
 			{
 				m_material->setMaterial(assetWidget.getAssetData().path);
 				setMaterial(m_material);
+				gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 			}
 		}
 

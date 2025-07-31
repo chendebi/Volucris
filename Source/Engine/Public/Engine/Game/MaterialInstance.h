@@ -32,6 +32,8 @@ namespace volucris
 
 		const SoftObject<Material>& getMaterial() const { return m_material;  }
 
+		Material* getBaseMaterial() override;
+
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
@@ -43,6 +45,11 @@ namespace volucris
 			if (Archive::is_loading::value)
 			{
 				m_material.tryLoad();
+
+				for (auto& textureParameter : m_texture2dParameters)
+				{
+					textureParameter.load();
+				}
 			}
 		}
 

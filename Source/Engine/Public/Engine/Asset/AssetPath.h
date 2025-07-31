@@ -21,6 +21,12 @@ namespace volucris
 			path = packagePath.parent_path().generic_u8string();
 			name = packagePath.stem().generic_u8string();
 		}
+
+		AssetPath(const std::string& packagePath, const std::string& assetName)
+			: path(packagePath), name(assetName)
+		{
+			fullpath = (fs::path(path) / name).generic_u8string();
+		}
 	};
 }
 

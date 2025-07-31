@@ -102,6 +102,15 @@ namespace volucris
 		}
 	}
 
+	Material* MaterialInstance::getBaseMaterial()
+	{
+		if (auto inst = dynamic_cast<MaterialInstance*>(m_material.get()))
+		{
+			return inst->getBaseMaterial();
+		}
+		return m_material.get();
+	}
+
 	std::vector<MaterialParameter> MaterialInstance::getInstanceParameters() const
 	{
 		std::vector<MaterialParameter> parameters;
@@ -208,7 +217,7 @@ namespace volucris
 			return nullptr;
 		}
 
-		auto base = m_material->getBaseProxy();
+		auto base = m_material->getBaseMaterial()->getBaseProxy();
 		auto proxy = std::make_shared<MaterialInstanceProxy>();
 		auto updateParameters = getAllUpdateParameterInfos();
 

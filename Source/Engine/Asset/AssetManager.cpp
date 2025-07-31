@@ -85,6 +85,7 @@ namespace volucris
 			{
 				object = package->getAssetObject();
 				m_assets[packageName] = object;
+				AssetLoaded.invoke(package.get());
 			}
 			else
 			{

@@ -24,7 +24,7 @@ namespace volucris
 				{
 					if (ImGui::MenuItem(item.name.c_str()))
 					{
-						item.command->execute();
+						m_executionCommand = item.command.get();
 					}
 				}
 			}
@@ -34,10 +34,16 @@ namespace volucris
 		return false;
 	}
 
+	void ItemContext::execute()
+	{
+		m_executionCommand->execute();
+		m_executionCommand = nullptr;
+	}
+
 	FolderContext::FolderContext(ContentWidget* contentWidget, ContentItemWidget* itemWidget)
 		: ItemContext(contentWidget, itemWidget)
 	{
-		init();
+		
 	}
 
 	void FolderContext::rename(const std::string& newName)
@@ -50,7 +56,7 @@ namespace volucris
 		m_contentWidget->dirtyCurrentFolder(getFullPath());
 	}
 
-	void FolderContext::init()
+	void FolderContext::buildMenuCountextGroup()
 	{
 		{
 			MenuContextGroup group;
@@ -73,13 +79,19 @@ namespace volucris
 
 	void AssetContext::rename(const std::string& newName)
 	{
-
+		if (!newName.empty() && newName != getAssetName())
+		{
+			auto package = std::make_shared<Package>();
+			package->setObject(SoftObject<GameObject>(m_assetInfo.data.path).tryLoad());
+			package->setAssetData(m_assetInfo.data);
+			m_contentWidget->addNameChangedPackageName(package, AssetPath(getAssetPath(), newName).fullpath);
+		}
 	}
 
 	void AssetContext::buildMenuCountextGroup()
 	{
 		MenuContextGroup group;
-		if (m_assetInfo.dirty)
+		if (isDirty())
 		{
 			MenuContextItem item;
 			item.name = "Save";
@@ -142,5 +154,10 @@ namespace volucris
 				group->items.insert(group->items.begin(), std::move(item));
 			}
 		}
+	}
+
+	void Texture2DContext::buildMenuCountextGroup()
+	{
+		AssetContext::buildMenuCountextGroup();
 	}
 }

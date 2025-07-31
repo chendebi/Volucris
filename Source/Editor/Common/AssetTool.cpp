@@ -132,7 +132,7 @@ namespace volucris
 		{
 			for (size_t i = 1; i < std::numeric_limits<size_t>::max(); ++i)
 			{
-				packageName = (dirpath / fmt::format("{}_{}", name, i)).generic_u8string();
+				packageName = (dirpath / fmt::format("{}{}", name, i)).generic_u8string();
 				assetName = fmt::format("{}.asset", packageName);
 				if (!gFileSystem.fileExists(assetName) && !AssetManager::getInstance().isPackageRegistered(packageName))
 				{

@@ -48,6 +48,8 @@ namespace volucris
 
 		bool isDeleteSelected() const { return m_deleteSelected; }
 
+		void setTextColor(const glm::vec4& color) { m_textColor = color; }
+
 		ItemContext* getItemContext() const;
 
 	private:
@@ -66,6 +68,7 @@ namespace volucris
 		bool m_deleteSelected;
 		bool m_selectable;
 		std::unique_ptr<ItemContext> m_asset;
+		glm::vec4 m_textColor;
 	};
 }
 

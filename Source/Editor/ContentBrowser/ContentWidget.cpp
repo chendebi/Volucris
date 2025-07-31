@@ -48,15 +48,20 @@ namespace volucris
 		, m_multiSelect(false)
 		, m_folderDirty(false)
 		, m_folder()
+		, m_nameChangedPackages()
 	{
 		setCurrentFolder(u8"/Engine/Content/Editor");
 
 		gAssetTool.AssetCreated.bindObject(this, &ContentWidget::onAssetCreated);
+		gAssetTool.AssetDirtyStateChanged.bindObject(this, &ContentWidget::onAssetDirty);
+		AssetManager::getInstance().AssetLoaded.bindObject(this, &ContentWidget::onAssetLoaded);
 	}
 
 	ContentWidget::~ContentWidget()
 	{
 		gAssetTool.AssetCreated.unbind(this);
+		gAssetTool.AssetDirtyStateChanged.unbind(this);
+		AssetManager::getInstance().AssetLoaded.unbind(this);
 	}
 
 	void ContentWidget::setCurrentFolder(const std::string& folder)
@@ -105,6 +110,11 @@ namespace volucris
 				}
 			}
 		}
+	}
+
+	void ContentWidget::addNameChangedPackageName(const std::shared_ptr<Package>& package, const std::string& newPackageName)
+	{
+		m_nameChangedPackages.push_back({ package, newPackageName });
 	}
 
 	void ContentWidget::onBuild(bool init)
@@ -205,6 +215,16 @@ namespace volucris
 				}
 			}
 			m_items = std::move(items);
+		}
+
+		if (!m_nameChangedPackages.empty())
+		{
+			for (const auto& [package, newPackageName] : m_nameChangedPackages)
+			{
+				gAssetTool.renamePackage(package, newPackageName);
+			}
+			m_nameChangedPackages.clear();
+			setCurrentFolder(m_folder);
 		}
 	}
 
@@ -349,6 +369,49 @@ namespace volucris
 		}
 	}
 
+	void ContentWidget::onAssetDirty(const AssetInfo& assetInfo)
+	{
+		AssetPath path = AssetPath(assetInfo.data.path);
+		if (path.path != m_folder)
+		{
+			return;
+		}
+
+		for (auto& item : m_items)
+		{
+			if (item->getItemContext()->getAssetName() == path.name)
+			{
+				item->getItemContext()->setDirty(assetInfo.dirty);
+				item->setDisplayName(item->getItemContext()->getDisplayName());
+				return;
+			}
+		}
+	}
+
+	void ContentWidget::onAssetLoaded(Package* package)
+	{
+		AssetPath path = AssetPath(package->getAssetData().path);
+		if (path.path != m_folder)
+		{
+			return;
+		}
+
+		for (auto& item : m_items)
+		{
+			if (item->getItemContext()->getAssetName() == path.name)
+			{
+				if (auto assetContext = dynamic_cast<AssetContext*>(item->getItemContext()))
+				{
+					auto assetInfo = assetContext->getAssetInfo();
+					assetInfo.object = package->getAssetObject();
+					assetContext->setAssetInfo(assetInfo);
+				}
+				item->setTextColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+				return;
+			}
+		}
+	}
+
 	std::unique_ptr<ContentItemWidget> ContentWidget::createFolderItem(const std::string& fullpath)
 	{
 		std::shared_ptr<RHITexture2D> iconTexture = nullptr;
@@ -387,6 +450,16 @@ namespace volucris
 			thumbnail.pos = { 1, 0 };
 			item = createMaterialInstanceItem(assetInfo);
 		}
+		else if (assetInfo.data.className == "Texture2D")
+		{
+			thumbnail.pos = { 1, 0 };
+			item = createTexture2DItem(assetInfo);
+		}
+		else if (assetInfo.data.className == "StaticMesh")
+		{
+			thumbnail.pos = { 2, 0 };
+			item = createStaticMeshItem(assetInfo);
+		}
 		else
 		{
 			return nullptr;
@@ -400,6 +473,15 @@ namespace volucris
 		thumbnail.texture = iconTexture;
 		thumbnail.update();
 		item->getItemContext()->getThumbnail() = thumbnail;
+
+		if (assetInfo.object)
+		{
+			item->setTextColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		else
+		{
+			item->setTextColor(glm::vec4(.6f, .6f, .6f, 1.0f));
+		}
 
 		return item;
 	}
@@ -418,6 +500,24 @@ namespace volucris
 		auto item = std::make_unique<ContentItemWidget>();
 		auto context = std::make_unique<MaterialInstanceContext>(this, item.get());
 		context->setAssetInfo(info);
+		item->setContext(std::move(context));
+		return item;
+	}
+
+	std::unique_ptr<ContentItemWidget> ContentWidget::createTexture2DItem(const AssetInfo& assetInfo)
+	{
+		auto item = std::make_unique<ContentItemWidget>();
+		auto context = std::make_unique<Texture2DContext>(this, item.get());
+		context->setAssetInfo(assetInfo);
+		item->setContext(std::move(context));
+		return item;
+	}
+
+	std::unique_ptr<ContentItemWidget> ContentWidget::createStaticMeshItem(const AssetInfo& assetInfo)
+	{
+		auto item = std::make_unique<ContentItemWidget>();
+		auto context = std::make_unique<AssetContext>(this, item.get());
+		context->setAssetInfo(assetInfo);
 		item->setContext(std::move(context));
 		return item;
 	}

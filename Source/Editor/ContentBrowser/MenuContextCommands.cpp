@@ -119,7 +119,7 @@ namespace volucris
 		auto widget = std::make_shared<MaterialEditorWidget>();
 		window->addChild(widget);
 
-		widget->setMaterial(materialInstance.tryLoad());
+		widget->setMaterial(materialInstance);
 
 		gApp->pushCommand([this, window]() {gApp->addWindow(window); });
 	}

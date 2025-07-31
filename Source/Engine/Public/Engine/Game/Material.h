@@ -49,6 +49,11 @@ namespace volucris
 
 		std::shared_ptr<MaterialInstanceProxy> tryGetMaterialProxy() const;
 
+		virtual Material* getBaseMaterial()
+		{
+			return this;
+		}
+
 	protected:
 		virtual std::shared_ptr<MaterialInstanceProxy> createMaterialProxy();
 

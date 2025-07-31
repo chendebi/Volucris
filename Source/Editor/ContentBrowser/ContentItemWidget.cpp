@@ -57,6 +57,7 @@ namespace volucris
 		, m_deleteSelected(false)
 		, m_selectable(true)
 		, m_asset(nullptr)
+		, m_textColor(1.0,1.0,1.0,1.0)
 	{
 		setScale(1.0);
 	}
@@ -182,9 +183,16 @@ namespace volucris
 		}
 		else
 		{
-			DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, m_text);
+			DrawTextCenteredInRect(fontRectMin, fontRectMax, m_fontSize, m_text, { m_textColor.r, m_textColor.g, m_textColor.b, m_textColor.a});
+		}
+
+		if (m_asset->shouldExecuteCommmand())
+		{
+			m_asset->execute();
 		}
 	}
+
+
 	glm::vec2 ContentItemWidget::getItemSize(float scale)
 	{
 		return ItemSize * scale;
