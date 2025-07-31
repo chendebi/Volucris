@@ -73,6 +73,47 @@ namespace volucris
 		return proxy;
 	}
 
+	std::vector<std::string> Material::collectDependencies() const
+	{
+		std::set<std::string> dependencies;
+		for (auto& parameter : m_parameters)
+		{
+			if (parameter.type == MaterialParamterType::Texture2D)
+			{
+				const auto& texture = std::get<SoftObject<Texture2D>>(parameter.value);
+				if (texture.isValid())
+				{
+					dependencies.insert(texture.getPath());
+				}
+			}
+		}
+		return { dependencies.begin(), dependencies.end() };
+	}
+
+	bool Material::replaceDependency(const std::string& oldPath, const std::string& newPath)
+	{
+		bool res = false;
+		for (auto& parameter : m_parameters)
+		{
+			if (parameter.type == MaterialParamterType::Texture2D)
+			{
+				const auto& texture = std::get<SoftObject<Texture2D>>(parameter.value);
+				if (texture.getPath() == oldPath)
+				{
+					parameter.value = SoftObject<Texture2D>(newPath);
+					res = true;
+				}
+			}
+		}
+		res = res || GameObject::replaceDependency(oldPath, newPath);
+
+		if (res)
+		{
+			markDirty(DirtyFlag_Dependence);
+		}
+		return res;
+	}
+
 	std::shared_ptr<MaterialInstanceProxy> Material::createMaterialProxy()
 	{
 		auto proxy = std::make_shared<MaterialInstanceProxy>();

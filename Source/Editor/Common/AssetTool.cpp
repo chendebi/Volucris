@@ -33,12 +33,7 @@ namespace volucris
 			return false;
 		}
 
-		if (auto helper = AssetObjectHelper::getAssetHelper(package->getAssetObject()))
-		{
-			auto assetData = package->getAssetData();
-			assetData.dependencies = helper->getDependences();
-			package->setAssetData(assetData);
-		}
+		package->updateDependecies();
 
 		AssetWriter writer = AssetWriter(package);
 		
@@ -99,8 +94,7 @@ namespace volucris
 		{
 			if (auto object = inst.load(packageName))
 			{
-				auto helper = AssetObjectHelper::getAssetHelper(object);
-				if (helper->updateDependences({ { package->getAssetData().path, newPackageName } }))
+				if (object->replaceDependency(assetData.path, newPackageName))
 				{
 					addDirtyAsset(packageName, object);
 				}

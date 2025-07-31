@@ -8,6 +8,8 @@ namespace volucris
 {
 	GameObject::GameObject()
 		: Object()
+		, m_displayName()
+		, m_dirtyFlags(0)
 	{
 	}
 

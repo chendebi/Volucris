@@ -16,7 +16,6 @@ namespace volucris
 		, m_floatParameters()
 		, m_vec4Parameters()
 		, m_proxy()
-		, m_dirty(false)
 		, m_material()
 	{
 	}
@@ -92,7 +91,8 @@ namespace volucris
 				}
 			}
 		}
-		m_dirty = true;
+		
+		markDirty(DirtyFlag_Dependence);
 		
 		if (auto proxy = tryGetMaterialProxy())
 		{
@@ -151,6 +151,50 @@ namespace volucris
 			return { proxy, getUpdateParameterInfos() };
 		}
 		return {};
+	}
+
+	std::vector<std::string> MaterialInstance::collectDependencies() const
+	{
+		std::set<std::string> dependecies;
+		if (m_material)
+		{
+			dependecies.insert(m_material.getPath());
+
+			for (const auto & parameter : m_texture2dParameters)
+			{
+				if (parameter.getValue().isValid())
+				{
+					dependecies.insert(parameter.getValue().getPath());
+				}
+			}
+		}
+		return std::vector<std::string>(dependecies.begin(), dependecies.end());
+	}
+
+	bool MaterialInstance::replaceDependency(const std::string& oldPath, const std::string& newPath)
+	{
+		bool res = false;
+		if (m_material && m_material.getPath() == oldPath)
+		{
+			setMaterial(SoftObject<Material>(newPath));
+			res = true;
+		}
+
+		for (const auto& parameter : m_texture2dParameters)
+		{
+			if (parameter.getValue().getPath() == oldPath)
+			{
+				setTexture2DParameter(parameter.getName(), SoftObject<Texture2D>(newPath));
+				res = true;
+			}
+		}
+
+		res = res || Material::replaceDependency(oldPath, newPath);
+		if (res)
+		{
+			markDirty(DirtyFlag_Dependence);
+		}
+		return res;
 	}
 
 	std::vector<MaterialParameterUpdateInfo> MaterialInstance::getUpdateParameterInfos()
@@ -237,7 +281,7 @@ namespace volucris
 			if (param.getName() == name)
 			{
 				param.setValue(value);
-				m_dirty = true;
+				markDirty(DirtyFlag_RenderState);
 				return true;
 			}
 		}
@@ -251,7 +295,7 @@ namespace volucris
 			if (param.getName() == name)
 			{
 				param.setValue(value);
-				m_dirty = true;
+				markDirty(DirtyFlag_RenderState);
 				return true;
 			}
 		}
@@ -270,7 +314,7 @@ namespace volucris
 					V_LOG_WARN(Engine, "Failed to load texture for material instance parameter: " + name);
 				}
 				param.setValue(texture);
-				m_dirty = true;
+				markDirty(DirtyFlag_Normal | DirtyFlag_RenderState | DirtyFlag_Dependence);
 				return true;
 			}
 		}

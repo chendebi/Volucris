@@ -14,6 +14,10 @@ namespace volucris
 		std::string path;
 		std::string name;
 
+		AssetPath()
+			: fullpath(), path(), name()
+		{ }
+
 		AssetPath(const std::string& packageName)
 			: fullpath(packageName)
 		{
@@ -25,6 +29,12 @@ namespace volucris
 		AssetPath(const std::string& packagePath, const std::string& assetName)
 			: path(packagePath), name(assetName)
 		{
+			fullpath = (fs::path(path) / name).generic_u8string();
+		}
+
+		void setName(const std::string& newName)
+		{
+			name = newName;
 			fullpath = (fs::path(path) / name).generic_u8string();
 		}
 	};

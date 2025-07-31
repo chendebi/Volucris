@@ -71,11 +71,11 @@ namespace volucris
 
 		std::vector<MaterialParameter> getInstanceParameters() const;
 
-		void markDirty(bool dirty) { m_dirty = dirty; }
-
-		bool isDirty() const { return m_dirty; }
-
 		MaterialUpdateData getUpdateData();
+
+		std::vector<std::string> collectDependencies() const override;
+
+		bool replaceDependency(const std::string& oldPath, const std::string& newPath) override;
 
 	protected:
 		std::vector<MaterialParameterUpdateInfo> getUpdateParameterInfos();
@@ -90,7 +90,6 @@ namespace volucris
 		std::vector<MaterialVector4Parameter> m_vec4Parameters;
 		std::vector<MaterialTexture2DParameter> m_texture2dParameters;
 		std::weak_ptr<MaterialProxy> m_proxy;
-		bool m_dirty;
 	};
 }
 

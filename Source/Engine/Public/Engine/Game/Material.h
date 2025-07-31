@@ -32,6 +32,18 @@ namespace volucris
 			ar& m_vss;
 			ar& m_fss;
 			ar& m_parameters;
+
+			if (Archive::is_loading::value)
+			{
+				for (auto& param : m_parameters)
+				{
+					if (param.type == MaterialParamterType::Texture2D)
+					{
+						auto& texture = std::get<SoftObject<Texture2D>>(param.value);
+						texture.tryLoad();
+					}
+				}
+			}
 		}
 
 		std::string getClassName() const { return "Material"; }
@@ -39,6 +51,7 @@ namespace volucris
 		void setParameters(const std::vector<MaterialParameter>& parameters)
 		{
 			m_parameters = parameters;
+			markDirty(DirtyFlag_All);
 		}
 
 		const std::vector<MaterialParameter>& getParameters() const { return m_parameters; }
@@ -53,6 +66,10 @@ namespace volucris
 		{
 			return this;
 		}
+
+		std::vector<std::string> collectDependencies() const override;
+
+		bool replaceDependency(const std::string& oldPath, const std::string& newPath) override;
 
 	protected:
 		virtual std::shared_ptr<MaterialInstanceProxy> createMaterialProxy();
