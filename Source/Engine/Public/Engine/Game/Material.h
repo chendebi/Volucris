@@ -51,7 +51,7 @@ namespace volucris
 		void setParameters(const std::vector<MaterialParameter>& parameters)
 		{
 			m_parameters = parameters;
-			markDirty(DirtyFlag_All);
+			markDirty(true);
 		}
 
 		const std::vector<MaterialParameter>& getParameters() const { return m_parameters; }
@@ -68,8 +68,6 @@ namespace volucris
 		}
 
 		std::vector<std::string> collectDependencies() const override;
-
-		bool replaceDependency(const std::string& oldPath, const std::string& newPath) override;
 
 	protected:
 		virtual std::shared_ptr<MaterialInstanceProxy> createMaterialProxy();

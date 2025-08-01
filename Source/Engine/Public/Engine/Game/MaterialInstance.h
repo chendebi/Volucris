@@ -75,8 +75,6 @@ namespace volucris
 
 		std::vector<std::string> collectDependencies() const override;
 
-		bool replaceDependency(const std::string& oldPath, const std::string& newPath) override;
-
 	protected:
 		std::vector<MaterialParameterUpdateInfo> getUpdateParameterInfos();
 

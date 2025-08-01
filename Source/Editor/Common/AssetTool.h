@@ -46,9 +46,13 @@ namespace volucris
 	private:
 		void removeDirtyAsset(const std::string& packageName);
 
+		void onAssetLoaded(Package* package);
+
 		void onAssetRegistered(Package* package);
 
 		void onAssetUnregistered(const std::string& packageName);
+
+		void onAssetDirtyStateChanged(GameObject* object);
 
 	private:
 		std::map<std::string, std::shared_ptr<GameObject>> m_dirtyAssets;

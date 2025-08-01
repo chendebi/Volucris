@@ -84,14 +84,12 @@ namespace volucris
 						if (ImGui::DragFloat("##", std::get_if<float>(&info.value), 0.1f))
 						{
 							m_material->setFloatParameter(info.name, std::get<float>(info.value));
-							gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 						}
 						break;
 					case volucris::MaterialParamterType::Vector4:
 						if (ImGui::DragFloat4("##", glm::value_ptr(std::get<glm::vec4>(info.value)), 0.1f))
 						{
 							m_material->setVector4Parameter(info.name, std::get<glm::vec4>(info.value));
-							gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 						}
 						break;
 					case volucris::MaterialParamterType::Mat4:
@@ -108,7 +106,6 @@ namespace volucris
 						{
 							paramter.desc.value = assetWidget.getAssetData().path;
 							m_material->setTexture2DParameter(info.name, assetWidget.getAssetData().path);
-							gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 						}
 					}
 						break;
@@ -135,7 +132,6 @@ namespace volucris
 			{
 				m_material->setMaterial(assetWidget.getAssetData().path);
 				setMaterial(m_material);
-				gAssetTool.addDirtyAsset(m_material.getPath(), m_material.object());
 			}
 		}
 

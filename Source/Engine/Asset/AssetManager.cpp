@@ -101,6 +101,39 @@ namespace volucris
 		return object;
 	}
 
+	void AssetManager::updateAssetDependence(GameObject* object)
+	{
+		if (!isPackageRegistered(object->getPathName().fullpath))
+		{
+			return;
+		}
+		m_assetDatas[object->getPathName().fullpath].dependencies = object->collectDependencies();
+	}
+
+	bool AssetManager::save(const std::shared_ptr<Package>& package)
+	{
+		if (!isPackageRegistered(package->getAssetData().path))
+		{
+			V_LOG_WARN(Engine, "Failed to save package : {}, package not registered", package->getAssetData().path);
+			return false;
+		}
+		package->updateDependecies();
+
+		AssetWriter writer = AssetWriter(package);
+
+		if (writer.write())
+		{
+			m_assetDatas[package->getAssetData().path] = package->getAssetData();
+			V_LOG_INFO(Engine, "Package saved successfully: {}", package->getAssetData().path);
+			return true;
+		}
+		else
+		{
+			V_LOG_ERROR(Engine, "AssetTool::save: Failed to save package: {}", package->getAssetData().path);
+		}
+		return false;
+	}
+
 	AssetData AssetManager::getAssetData(const std::string& packageName) const
 	{
 		auto it = m_assetDatas.find(packageName);

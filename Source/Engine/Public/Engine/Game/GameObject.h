@@ -7,10 +7,12 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/export.hpp>
+#include <boost/serialization/unordered_map.hpp>
 #include <rttr/registration.h>
 #include <rttr/rttr_enable.h>
 #include <Engine/Core/Delegate.h>
 #include <Engine/Core/TypesHelp.h>
+#include <Engine/Asset/AssetPath.h>
 
 namespace volucris
 {
@@ -27,15 +29,6 @@ namespace volucris
 	public:
 		ObjectDirtyEvent DirtyStateChanged;
 
-		enum DirtyFlags
-		{
-			DirtyFlag_None = 0,
-			DirtyFlag_Normal = 1 << 1,
-			DirtyFlag_Dependence = 1 << 2,
-			DirtyFlag_RenderState = 1 << 3,
-			DirtyFlag_Transform = 1 << 4,
-			DirtyFlag_All = DirtyFlag_Normal | DirtyFlag_Dependence | DirtyFlag_RenderState | DirtyFlag_Transform
-		};
 
 	public:
 		GameObject();
@@ -45,16 +38,27 @@ namespace volucris
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version) 
 		{
+			ar& m_pathName;
+		}
+
+		void setPathName(AssetPath pathName)
+		{
+			m_pathName = std::move(pathName);
 		}
 
 		void setDisplayName(const std::string& name)
 		{
-			m_displayName = name;
+			m_pathName.setName(name);
+		}
+
+		const AssetPath& getPathName() const
+		{
+			return m_pathName;
 		}
 
 		const std::string& getDisplayName() const
 		{
-			return m_displayName;
+			return m_pathName.name;
 		}
 
 		virtual std::vector<std::string> collectDependencies() const
@@ -62,43 +66,39 @@ namespace volucris
 			return {};
 		}
 
-		virtual bool replaceDependency(const std::string& oldPath, const std::string& newPath) { return false; }
+		void replaceDependency(const std::string& oldPath, const std::string& newPath);
 
 		virtual std::string getClassName() const { return ""; }
 
-		void markDirty(uint32 flags = DirtyFlag_Normal)
+		void markDirty(bool dirty)
 		{
-			bool stateChanged = false;
-			if (flags == 0 && m_dirtyFlags != 0)
+			if (m_dirty != dirty)
 			{
-				m_dirtyFlags = 0;
-				stateChanged = true;
-			}
-			else
-			{
-				if (m_dirtyFlags == 0)
-				{
-					stateChanged = true;
-				}
-				m_dirtyFlags = m_dirtyFlags | flags;
-			}
-
-			if (stateChanged)
-			{
+				m_dirty = dirty;
 				DirtyStateChanged.invoke(this);
 			}
 		}
 
-		uint32 getDirtyFlags() const { return m_dirtyFlags; }
-
-		void removeDirtyFlags(uint32 flags)
+		bool isDirty() const
 		{
-			m_dirtyFlags = m_dirtyFlags & (~flags);
+			return m_dirty;
 		}
 
+		bool isDependentOn(const std::string& packageName) const
+		{
+			return m_dependences.find(packageName) != m_dependences.end();
+		}
+
+	protected:
+		friend class DependentObject;
+		void removeDependence(DependentObject* dependence);
+
+		void addDependence(DependentObject* dependence);
+
 	private:
-		std::string m_displayName;
-		uint32 m_dirtyFlags;
+		bool m_dirty;
+		AssetPath m_pathName;
+		std::unordered_map<std::string, DependentObject*> m_dependences;
 	};
 }
 

@@ -92,7 +92,7 @@ namespace volucris
 			}
 		}
 		
-		markDirty(DirtyFlag_Dependence);
+		markDirty(true);
 		
 		if (auto proxy = tryGetMaterialProxy())
 		{
@@ -169,32 +169,6 @@ namespace volucris
 			}
 		}
 		return std::vector<std::string>(dependecies.begin(), dependecies.end());
-	}
-
-	bool MaterialInstance::replaceDependency(const std::string& oldPath, const std::string& newPath)
-	{
-		bool res = false;
-		if (m_material && m_material.getPath() == oldPath)
-		{
-			setMaterial(SoftObject<Material>(newPath));
-			res = true;
-		}
-
-		for (const auto& parameter : m_texture2dParameters)
-		{
-			if (parameter.getValue().getPath() == oldPath)
-			{
-				setTexture2DParameter(parameter.getName(), SoftObject<Texture2D>(newPath));
-				res = true;
-			}
-		}
-
-		res = res || Material::replaceDependency(oldPath, newPath);
-		if (res)
-		{
-			markDirty(DirtyFlag_Dependence);
-		}
-		return res;
 	}
 
 	std::vector<MaterialParameterUpdateInfo> MaterialInstance::getUpdateParameterInfos()
@@ -281,7 +255,7 @@ namespace volucris
 			if (param.getName() == name)
 			{
 				param.setValue(value);
-				markDirty(DirtyFlag_RenderState);
+				markDirty(true);
 				return true;
 			}
 		}
@@ -295,7 +269,7 @@ namespace volucris
 			if (param.getName() == name)
 			{
 				param.setValue(value);
-				markDirty(DirtyFlag_RenderState);
+				markDirty(true);
 				return true;
 			}
 		}
@@ -314,7 +288,7 @@ namespace volucris
 					V_LOG_WARN(Engine, "Failed to load texture for material instance parameter: " + name);
 				}
 				param.setValue(texture);
-				markDirty(DirtyFlag_Normal | DirtyFlag_RenderState | DirtyFlag_Dependence);
+				markDirty(true);
 				return true;
 			}
 		}

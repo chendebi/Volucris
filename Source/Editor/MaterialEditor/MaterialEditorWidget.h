@@ -3,6 +3,7 @@
 
 #include <Engine/Application/Widget.h>
 #include <Engine/Game/SoftObject.h>
+#include <Engine/Game/MaterialInstance.h>
 
 namespace volucris
 {

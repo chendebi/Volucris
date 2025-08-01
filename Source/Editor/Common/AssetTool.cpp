@@ -18,6 +18,7 @@ namespace volucris
 	{
 		AssetManager::getInstance().AssetRegistered.bindObject(this, &AssetTool::onAssetRegistered);
 		AssetManager::getInstance().AssetUnregistered.bindObject(this, &AssetTool::onAssetUnregistered);
+		AssetManager::getInstance().AssetLoaded.bindObject(this, &AssetTool::onAssetLoaded);
 	}
 
 	bool AssetTool::save(const std::shared_ptr<Package>& package)
@@ -33,19 +34,10 @@ namespace volucris
 			return false;
 		}
 
-		package->updateDependecies();
-
-		AssetWriter writer = AssetWriter(package);
-		
-		if (writer.write())
+		if (AssetManager::getInstance().save(package))
 		{
-			V_LOG_INFO(Editor, "AssetTool::save: Package saved successfully: {}", package->getAssetData().path);
 			removeDirtyAsset(package->getAssetData().path);
 			return true;
-		}
-		else
-		{
-			V_LOG_ERROR(Editor, "AssetTool::save: Failed to save package: {}", package->getAssetData().path);
 		}
 		return false;
 	}
@@ -85,6 +77,7 @@ namespace volucris
 
 		inst.unregister(package->getAssetData().path);
 		
+		package->getAssetObject()->setPathName(newPackageName);
 		assetData.path = newPackageName;
 		package->setAssetData(assetData);
 		inst.registry(package.get());
@@ -94,10 +87,7 @@ namespace volucris
 		{
 			if (auto object = inst.load(packageName))
 			{
-				if (object->replaceDependency(assetData.path, newPackageName))
-				{
-					addDirtyAsset(packageName, object);
-				}
+				object->replaceDependency(assetData.path, newPackageName);
 			}
 		}
 	}
@@ -152,6 +142,11 @@ namespace volucris
 		AssetDirtyStateChanged.invoke(info);
 	}
 
+	void AssetTool::onAssetLoaded(Package* package)
+	{
+		package->getAssetObject()->DirtyStateChanged.bindObject(this, &AssetTool::onAssetDirtyStateChanged);
+	}
+
 	void AssetTool::onAssetRegistered(Package* package)
 	{
 		const auto& packageName = package->getAssetData().path;
@@ -188,5 +183,10 @@ namespace volucris
 		gFileSystem.deleteAsset(packageName);
 
 		AssetDeleted.invoke(packageName);
+	}
+
+	void AssetTool::onAssetDirtyStateChanged(GameObject* object)
+	{
+		addDirtyAsset(object->getPathName().fullpath, object->getShared<GameObject>());
 	}
 }

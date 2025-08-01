@@ -37,6 +37,14 @@ namespace volucris
 			name = newName;
 			fullpath = (fs::path(path) / name).generic_u8string();
 		}
+
+		template <class Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar& fullpath;
+			ar& path;
+			ar& name;
+		}
 	};
 }
 

@@ -1,7 +1,6 @@
 #ifndef __volucris_asset_manager_h__
 #define __volucris_asset_manager_h__
 
-#include <Engine/Game/GameObject.h>
 #include <map>
 #include "AssetData.h"
 #include <Engine/Core/Delegate.h>
@@ -15,6 +14,7 @@ namespace volucris
 
 	class World;
 	class Package;
+	class GameObject;
 
 	class AssetManager
 	{
@@ -54,6 +54,10 @@ namespace volucris
 			}
 			return nullptr;
 		}
+
+		void updateAssetDependence(GameObject* object);
+
+		bool save(const std::shared_ptr<Package>& package);
 
 		std::shared_ptr<GameObject> tryLoad(const std::string& packageName, World* world = nullptr)
 		{

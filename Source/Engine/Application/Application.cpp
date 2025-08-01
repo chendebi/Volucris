@@ -207,7 +207,7 @@ namespace volucris
 			updateDatas.reserve(std::max(m_materialReferences.size() / 3, (size_t)8));
 			if (auto material = mat.lock())
 			{
-				if (material->getDirtyFlags())
+				if (material->isDirty())
 				{
 					auto data = material->getUpdateData();
 					if (data.isValid())

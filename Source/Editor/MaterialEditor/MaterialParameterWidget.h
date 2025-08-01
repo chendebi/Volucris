@@ -3,6 +3,7 @@
 
 #include <Engine/Application/Widget.h>
 #include <unordered_map>
+#include <Engine/Game/MaterialInstance.h>
 #include <Engine/Game/MaterialParameter.h>
 #include "GLSLParser.h"
 

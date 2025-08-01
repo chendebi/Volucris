@@ -8,14 +8,29 @@ namespace volucris
 {
 	GameObject::GameObject()
 		: Object()
-		, m_displayName()
-		, m_dirtyFlags(0)
+		, m_dirty(false)
+		, m_pathName()
+		, m_dependences()
 	{
 	}
 
 	GameObject::~GameObject()
 	{
 		
+	}
+
+	void GameObject::replaceDependency(const std::string& oldPath, const std::string& newPath)
+	{
+	}
+
+	void GameObject::removeDependence(DependentObject* dependence)
+	{
+
+	}
+
+	void GameObject::addDependence(DependentObject* dependence)
+	{
+
 	}
 
 	RTTR_REGISTRATION
