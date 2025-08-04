@@ -173,6 +173,8 @@ namespace volucris
 
 		const T& getValue() const { return m_value; }
 
+		T& getValue() { return m_value; }
+
 		const std::string getName() const { return m_name; }
 
 		template <class Archive>
