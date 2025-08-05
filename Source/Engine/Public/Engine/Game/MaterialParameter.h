@@ -86,7 +86,7 @@ namespace volucris
 	{
 		std::string name;
 		MaterialParamterType type = MaterialParamterType::Float;
-		std::variant<float, glm::vec4, glm::mat4, SoftObject<Texture2D>> value;
+		std::variant<uint32, float, glm::vec4, glm::mat4, SoftObject<Texture2D>> value;
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int version)
@@ -124,6 +124,9 @@ namespace volucris
 					info.value = std::shared_ptr<Texture2DProxy>(nullptr);
 				}
 			}
+				break;
+			case volucris::MaterialParamterType::UniformBlock:
+				info.value = std::get<uint32>(value);
 				break;
 			default:
 				break;
